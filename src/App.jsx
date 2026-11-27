@@ -404,7 +404,7 @@ export default function App() {
           onAbrir={setBurbuja}
         >
           <section className="tarjeta-sticker turno" aria-label="Turno">
-            <div className="dados">{partida.dados.map((v, k) => <Dado3D key={k} valor={v} giros={partida.giros} girando={tirando} tam={partida.dados.length > 1 ? 66 : 84} />)}</div>
+            <div className={`dados${tirando ? ' tirando' : ''}`}>{partida.dados.map((v, k) => <Dado3D key={k} valor={v} giros={partida.giros} girando={tirando} tam={partida.dados.length > 1 ? 66 : 84} />)}</div>
             {textoAccion && <button type="button" className={`btn-tirar${etapa === 'retroceder' ? ' trampa' : ''}`} onClick={alTirar} disabled={etapa === 'moviendo' || ocupado}>{textoAccion}</button>}
             {(etapa === 'listo') && <button type="button" className="btn-tirar" onClick={pasarTurno}>Siguiente turno</button>}
             {etapa === 'fin' && <button type="button" className="btn-tirar" onClick={nuevaPartida}>Jugar otra</button>}
@@ -533,7 +533,7 @@ export default function App() {
           <div className={`modal${modalReto.desdeComodin ? ' recorte' : ''}`}>
             {modalReto.desdeComodin && <svg className="ojo" aria-hidden="true"><use href="#i-ojo" /></svg>}
             {modalReto.girando ? (
-              <div className="invocando"><Dado3D valor={1} giros={3} tam={72} /><p>Invocando el caos…</p></div>
+              <div className="invocando"><Dado3D valor={1} giros={3} tam={72} conResultado={false} /><p>Invocando el caos…</p></div>
             ) : (
               <>
                 <span className="pill">{modalReto.desdeComodin ? 'Tu destino' : 'Reto manual'}</span>
