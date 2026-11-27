@@ -395,6 +395,7 @@ export default function App() {
         <Burbuja
           color={colorDe(turno).c}
           inicial={(actual.nombre || '?')[0].toUpperCase()}
+          ficha={actual.ficha}
           aviso={etapa === 'fin' ? 'Se acabó la partida' : `Turno de ${actual.nombre}`}
           alerta={etapa === 'tirar' || etapa === 'otraVez' || etapa === 'retroceder' || etapa === 'comodin'}
           abierta={burbuja}

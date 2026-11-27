@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import FichaDibujo from './FichaDibujo.jsx';
 
 // Burbuja flotante tipo Messenger: se arrastra a donde no estorbe y al tocarla
 // se despliega con el turno, los dados, las posiciones y la bitacora.
@@ -15,7 +16,7 @@ const leerPos = () => {
 
 const topar = (v, max) => Math.min(Math.max(v, MARGEN), Math.max(MARGEN, max));
 
-export default function Burbuja({ color, inicial, aviso, alerta, abierta, onAbrir, children }) {
+export default function Burbuja({ color, inicial, ficha, aviso, alerta, abierta, onAbrir, children }) {
   const setAbierta = (v) => onAbrir(typeof v === 'function' ? v(abierta) : v);
   const [pos, setPos] = useState(leerPos);
   const bolaRef = useRef(null);
@@ -94,7 +95,7 @@ export default function Burbuja({ color, inicial, aviso, alerta, abierta, onAbri
         aria-label={abierta ? 'Cerrar el panel de la partida' : `Abrir el panel de la partida. ${aviso}`}
         title="Tócala para abrir · arrástrala para moverla"
       >
-        <span className="burbuja-inicial">{inicial}</span>
+        <svg className="burbuja-ficha" viewBox="0 0 40 56" aria-hidden="true"><FichaDibujo tipo={ficha} inicial={inicial} /></svg>
       </button>
 
       {abierta && (
@@ -107,7 +108,7 @@ export default function Burbuja({ color, inicial, aviso, alerta, abierta, onAbri
           aria-label="Panel de la partida"
         >
           <div className="burbuja-tope">
-            <span className="chip" style={{ '--c': color }} />
+            <svg className="tope-ficha" viewBox="0 0 40 56" aria-hidden="true"><FichaDibujo tipo={ficha} inicial={inicial} /></svg>
             <strong>{aviso}</strong>
             <button type="button" className="cerrar" onClick={() => setAbierta(false)} aria-label="Cerrar">×</button>
           </div>

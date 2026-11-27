@@ -1,0 +1,57 @@
+/* ============================================================
+   BARRIO MÁGICO · sistema de tokens
+   Todo lo ajustable vive aquí. Los colores viejos siguen en App.css;
+   esto añade la paleta nueva, las texturas y las medidas del "juice".
+   ============================================================ */
+:root {
+  /* ---- Paleta ---- */
+  --chicle: #ff2e93;        /* rosa principal */
+  --neon: #39ff14;          /* verde de avanzar */
+  --rotulo-am: #ffd400;     /* amarillo de letrero pintado */
+  --cielo: #6fd3ff;         /* azul Y2K */
+  --laberinto: #e0002b;     /* rojo del barrio final */
+  --naranja-metro: #f77f1b; /* señalética del metro */
+
+  /* Cromo: tres franjas planas, nunca un degradado suave. */
+  --cromo: linear-gradient(176deg, #f3f4f8 0 30%, #9aa1b3 30% 48%, #fbfbfe 48% 64%, #5a6072 64% 100%);
+
+  /* ---- Tipografía ---- */
+  --rotulo: Bungee, Anton, Impact, sans-serif;        /* letrero de puesto */
+  --marcador: "Permanent Marker", Anton, cursive;     /* notas a mano */
+
+  /* ---- Sombras duras (cero blur, siempre desplazadas) ---- */
+  --dura: 4px 4px 0 #000;
+  --dura-xl: 7px 8px 0 #000;
+  --dura-chica: 2px 2px 0 #000;
+  /* Troquel de sticker: filo blanco alrededor + sombra dura. Se usa con filter. */
+  --troquel: drop-shadow(1.6px 0 0 var(--papel)) drop-shadow(-1.6px 0 0 var(--papel))
+             drop-shadow(0 1.6px 0 var(--papel)) drop-shadow(0 -1.6px 0 var(--papel))
+             drop-shadow(3px 4px 0 #000);
+
+  /* ---- Medidas del "juice" (súbelas o bájalas para calibrar) ---- */
+  --t-salto: 220ms;         /* lo que tarda la ficha en brincar una casilla */
+  --t-dado: 1s;             /* giro del dado */
+  --t-carta: 320ms;         /* entrada de la carta de regla */
+  --fuerza-fx: 1;           /* 0 = sin onomatopeyas ni sacudidas, 1 = normal */
+  --ficha-tam: 74%;         /* ancho de la ficha respecto a la casilla */
+
+  /* ---- Texturas ---- */
+  /* Código de barras: barras negras de anchos distintos, sin imagen externa. */
+  --barras: repeating-linear-gradient(90deg,
+    #000 0 2px, transparent 2px 4px, #000 4px 5px, transparent 5px 9px,
+    #000 9px 12px, transparent 12px 13px, #000 13px 14px, transparent 14px 18px);
+  /* Azulejo del metro. */
+  --azulejo: repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 15px),
+             repeating-linear-gradient(90deg, rgba(0,0,0,.22) 0 1px, transparent 1px 15px);
+  /* Cinta canela: tono papel translúcido con fibras. */
+  --cinta: repeating-linear-gradient(90deg, rgba(214,189,138,.86) 0 3px, rgba(198,172,120,.86) 3px 6px);
+  /* Papel picado colgado (guirnalda). */
+  --guirnalda: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='26'%3E%3Cpath d='M0 0 H48 V3 H0 Z' fill='%23000'/%3E%3Cpath d='M6 3 H22 L14 22 Z' fill='%23ff2e93'/%3E%3Cpath d='M26 3 H42 L34 22 Z' fill='%23ffd400'/%3E%3C/svg%3E");
+  /* Mariposa de recorte, motivo del barrio Laberinto. */
+  --mariposa: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='30'%3E%3Cpath d='M17 6 L6 1 L2 11 L9 15 L2 19 L7 28 L17 22 L27 28 L32 19 L25 15 L32 11 L28 1 Z' fill='%230b0b0b'/%3E%3Cpath d='M17 5 V24' stroke='%23e0002b' stroke-width='2'/%3E%3C/svg%3E");
+}
+
+/* Quien pida menos movimiento no recibe sacudidas ni onomatopeyas. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --fuerza-fx: 0; --t-salto: 60ms; --t-dado: 150ms; --t-carta: 0ms; }
+}

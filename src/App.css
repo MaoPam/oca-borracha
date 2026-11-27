@@ -229,23 +229,36 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   touch-action: none; transition: transform .1s, box-shadow .1s; }
 .burbuja:active { cursor: grabbing; transform: scale(.94); box-shadow: 2px 2px 0 #000; }
 .burbuja.activa { background: var(--papel); }
-.burbuja-inicial { font: 400 30px/1 var(--cartel); text-transform: uppercase; pointer-events: none; }
+.burbuja { width: 70px; height: 70px; }
+.burbuja-ficha { width: 42px; height: 58px; pointer-events: none; filter: var(--troquel); }
+.burbuja.activa .burbuja-ficha { filter: drop-shadow(2px 2px 0 #000); }
 .burbuja.alerta { animation: tocame 1.15s ease-in-out infinite; }
 @keyframes tocame { 50% { transform: scale(1.11); } }
 
+/* El panel es un flyer: hoja de papel con grano, pegada chueca y con cinta canela arriba. */
 .burbuja-panel { position: fixed; z-index: 44;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
-  width: min(94vw, 390px); max-height: min(76vh, 740px);
-  display: flex; flex-direction: column;
-  background: var(--grano), #161616; border: 3px solid #000;
-  box-shadow: 7px 8px 0 #000, 0 0 0 3px var(--fluor); animation: aparece .18s ease-out; }
-.burbuja-tope { flex: none; display: flex; align-items: center; gap: 9px; padding: 11px 13px; background: #000; }
-.burbuja-tope strong { flex: 1; min-width: 0; font: 400 20px/1 var(--cartel); text-transform: uppercase;
-  color: var(--papel); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 92px);
+  width: min(94vw, 390px); max-height: min(74vh, 740px);
+  display: flex; flex-direction: column; transform: rotate(-.7deg);
+  background: var(--grano), #15110f; border: 3px solid #000;
+  box-shadow: var(--dura-xl), 0 0 0 3px var(--chicle); animation: aparece .18s ease-out; }
+/* La cinta canela que lo sostiene. */
+.burbuja-panel::before { content: ''; position: absolute; top: -13px; left: 16%; width: 104px; height: 26px;
+  z-index: 3; background: var(--cinta); border-left: 1px solid rgba(0,0,0,.35); border-right: 1px solid rgba(0,0,0,.35);
+  transform: rotate(-4deg); }
+.burbuja-tope { flex: none; display: flex; align-items: center; gap: 11px; padding: 10px 12px; background: #000;
+  border-bottom: 3px solid var(--chicle); }
+.burbuja-tope .tope-ficha { flex: none; width: 40px; height: 56px; filter: var(--troquel); }
+.burbuja-tope strong { flex: 1; min-width: 0; font: 400 clamp(15px, 4.2vw, 21px)/1.05 var(--rotulo);
+  color: var(--rotulo-am); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-shadow: 2px 2px 0 var(--chicle); }
 .burbuja-tope .cerrar { flex: none; width: 32px; height: 32px; padding: 0; background: var(--papel);
   color: #000; border: 2px solid var(--papel); font: 400 22px/1 var(--cartel); cursor: pointer; }
 .burbuja-cuerpo { flex: 1; min-height: 0; overflow: auto; display: grid; gap: 18px; padding: 14px; align-content: start; }
+.burbuja-cuerpo > .tarjeta-sticker { border-radius: 0; box-shadow: var(--dura); }
 .burbuja-cuerpo > .tarjeta-sticker:nth-child(odd) { transform: rotate(-.5deg); }
+.burbuja-cuerpo h2 { font-family: var(--rotulo); font-size: 22px; }
+.burbuja-cuerpo .btn-tirar { font-family: var(--rotulo); font-size: 20px; }
 .burbuja-cuerpo > .tarjeta-sticker:nth-child(even) { transform: rotate(.4deg); }
 .burbuja-cuerpo > .tarjeta-sticker:nth-child(even)::before { left: 22%; transform: rotate(4deg); }
 
@@ -290,14 +303,17 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 /* El numero siempre es chapita en la esquina y el titulo siempre se queda abajo:
    una sola manera de armar la casilla, sin escalones por ancho. La letra crece con cqi
    (porcentaje del ancho del tablero), que es lo unico que sigue el tamaño real de la casilla. */
-.casilla b { position: absolute; top: 1.5%; left: 3%; z-index: 2; font: 400 clamp(9px, 1.95cqi, 26px)/.86 var(--gotica); }
-.casilla .lab { margin-top: auto; font: 400 clamp(6.5px, 1.32cqi, 15px)/1 var(--cartel);
+.casilla b { position: absolute; top: 2%; left: 3%; z-index: 3; padding: 0 .22em .1em;
+  background: var(--rotulo-am); color: #000; border: 2px solid #000; box-shadow: var(--dura-chica);
+  font: 400 clamp(8px, 1.6cqi, 21px)/1.15 var(--rotulo); transform: rotate(-2deg); text-shadow: none; }
+.casilla .lab { margin-top: auto; position: relative; z-index: 2; font: 400 clamp(6.5px, 1.32cqi, 15px)/1 var(--cartel);
   text-transform: uppercase; letter-spacing: 0; display: -webkit-box; -webkit-line-clamp: 4;
   -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; hyphens: auto; }
 .sello { position: absolute; top: 2%; right: 3%; padding: 1px 5px 2px; background: #000; color: var(--papel); font: 400 clamp(7px, 1.15cqi, 13px)/1.1 var(--cartel); text-transform: uppercase; transform: rotate(4deg); }
 .casilla.trampa .sello { background: var(--papel); color: #000; }
 .bruja { position: absolute; top: -4%; right: -4%; width: 34%; height: 40%; transform: rotate(13deg); filter: drop-shadow(1.5px 1.5px 0 var(--papel)); z-index: 3; }
-.tablero > .meta { position: relative; border: 2px solid #000; border-radius: 4px; overflow: hidden; display: grid; place-items: center; padding: 0 4%; background: var(--leopardo) 0 0 / 140px 120px, var(--grano), #e9a43c; transform: rotate(-.6deg); }
+.tablero > .meta { position: relative; border: 3px solid var(--cromo-borde, #f3f4f8);
+  animation: aura-jefe 5s steps(6, end) infinite; box-shadow: var(--dura); border-radius: 4px; overflow: hidden; display: grid; place-items: center; padding: 0 4%; background: var(--leopardo) 0 0 / 140px 120px, var(--grano), #e9a43c; transform: rotate(-.6deg); }
 .meta-letrero { display: inline-flex; align-items: baseline; gap: .4em; padding: .15em .55em .25em; background: #000; color: var(--papel); border: 3px solid var(--papel); box-shadow: 0 0 0 2px #000; font: 400 clamp(18px, 3.4cqi, 40px)/1 var(--gotica); transform: rotate(-2deg); white-space: nowrap; }
 .meta-letrero small { font: 400 .62em/1 var(--cartel); color: var(--amarillo); }
 
@@ -348,18 +364,38 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   object-fit: cover; z-index: 0; user-select: none; filter: contrast(1.12) saturate(1.14); }
 .casilla > :not(.meme), .meta > :not(.meme) { position: relative; z-index: 1; }
 /* Sobre foto, el texto necesita contorno negro para leerse, igual que en la lona impresa. */
-.casilla b, .casilla .lab { color: #fff; --filo: clamp(.75px, .17cqi, 1.8px);
+.casilla .lab { color: #fff; --filo: clamp(.8px, .19cqi, 2px);
   text-shadow: var(--filo) 0 0 #000, calc(var(--filo) * -1) 0 0 #000, 0 var(--filo) 0 #000, 0 calc(var(--filo) * -1) 0 #000,
                var(--filo) var(--filo) 0 #000, calc(var(--filo) * -1) var(--filo) 0 #000,
                var(--filo) calc(var(--filo) * -1) 0 #000, calc(var(--filo) * -1) calc(var(--filo) * -1) 0 #000; }
 .casilla.trampa { color: #fff; }
 /* El tipo de casilla ya no se marca con el fondo (lo tapa la foto) sino con un filo de color. */
-.casilla.comodin { --marca: var(--fluor); }
-.casilla.bonus { --marca: var(--amarillo); }
-.casilla.trampa { --marca: var(--rojo); }
-.casilla.inicio { --marca: var(--papel); }
+/* ---------- Los cuatro barrios ---------- */
+/* Como el recorrido es espiral, los barrios quedan en anillos: Tianguis afuera,
+   El Laberinto en el centro. La intensidad sube hacia adentro. */
+.casilla.b-tianguis { --barrio: var(--chicle); --textura: var(--guirnalda) 0 0 / 34px 18px repeat-x; }
+.casilla.b-metro    { --barrio: var(--naranja-metro); --textura: var(--azulejo); }
+.casilla.b-perreo   { --barrio: var(--cielo); --textura: none; }
+.casilla.b-laberinto{ --barrio: var(--laberinto); --textura: var(--mariposa) 100% 100% / 17px 15px no-repeat; }
+/* El filo dice el barrio; al pasar el dedo encima --marca lo pisa con amarillo. */
 .casilla::before { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
-  border: 3px solid var(--marca, transparent); transition: border-color .12s; }
+  border: 3px solid var(--marca, var(--barrio, transparent)); transition: border-color .12s; }
+/* Una pizca de la textura del barrio en el borde de abajo, sin tapar el meme. */
+.casilla::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 17%;
+  z-index: 1; pointer-events: none; opacity: .5; background: var(--textura, none); }
+.casilla.b-perreo::after { height: 100%; opacity: .34;
+  background: var(--leopardo) 0 0 / 74px 64px; mix-blend-mode: hard-light; }
+
+/* ---------- La chapa que dice de qué va la casilla ---------- */
+.marco { position: absolute; left: -5%; bottom: -5%; z-index: 3;
+  width: 32%; height: 24%; filter: drop-shadow(1.6px 1.6px 0 var(--papel)); }
+.marco.m-meta { animation: brilla-cromo 2.6s steps(4, end) infinite; }
+@keyframes brilla-cromo { 50% { filter: drop-shadow(1.6px 1.6px 0 var(--papel)) brightness(1.5); } }
+@keyframes aura-jefe {
+  0%, 100% { box-shadow: var(--dura), 0 0 0 4px var(--chicle); }
+  33% { box-shadow: var(--dura), 0 0 0 4px var(--rotulo-am); }
+  66% { box-shadow: var(--dura), 0 0 0 4px var(--laberinto); }
+}
 /* Recortes de tijera: cuatro siluetas que se van alternando para que ninguna casilla
    tenga exactamente el mismo borde que su vecina. */
 .casilla:nth-child(4n+1) { clip-path: polygon(1% 2%, 46% 0, 99% 1%, 100% 44%, 98% 99%, 53% 100%, 2% 98%, 0 47%); }
@@ -407,16 +443,23 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .btn-tirar { min-height: 60px; font-size: 26px; }
 .btn-tirar.trampa { background: var(--rojo); color: var(--papel); }
 .turno > .tarjeta, .turno > .vista, .turno > .reto-actual, .turno > .ganador { grid-column: 1 / -1; }
-.tarjeta { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; padding: 12px; background: #fff; border: 2px solid #000; border-radius: 3px; }
-.tarjeta .num { display: grid; place-items: center; width: 58px; height: 58px; border: 2px solid #000; background: var(--papel); font: 400 34px var(--gotica); color: #000; transform: rotate(-3deg); }
+.tarjeta { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start;
+  padding: 12px; background: var(--grano-suave), var(--papel); border: 3px solid #000; border-radius: 0;
+  box-shadow: var(--dura); animation: llega-carta var(--t-carta) cubic-bezier(.2, .9, .25, 1); }
+/* Entra girando, como carta lanzada a la mesa. */
+@keyframes llega-carta { from { opacity: 0; transform: translateY(16px) rotate(4deg) scale(.94); } }
+/* Numero gigante en etiqueta de precio de tianguis. */
+.tarjeta .num { display: grid; place-items: center; width: 68px; height: 68px; border: 3px solid #000;
+  background: var(--rotulo-am); font: 400 40px/1 var(--rotulo); color: #000; transform: rotate(-3deg);
+  box-shadow: var(--dura-chica); }
 .tarjeta .num.bonus { background: var(--amarillo); }
 .tarjeta .num.trampa { background: var(--rojo); color: var(--papel); }
 .tarjeta .num.meta { background: #e9a43c; }
-.tarjeta strong { display: block; font: 400 24px/1.05 var(--cartel); text-transform: uppercase; color: #000; }
+.tarjeta strong { display: block; font: 400 clamp(18px, 4.6vw, 23px)/1.06 var(--rotulo); text-transform: uppercase; color: #000; }
 .tarjeta p { margin: 4px 0 0; font-size: 16px; line-height: 1.35; }
 .tarjeta small { display: block; margin-top: 6px; font-size: 14px; color: #4a4336; }
-.aclara, .reto-actual { margin-top: 10px; padding: 9px 11px; background: #000; color: var(--papel); font-size: 15px; line-height: 1.38; }
-.aclara i, .reto-actual i { display: block; font: 400 14px/1.1 var(--cartel); font-style: normal; text-transform: uppercase; letter-spacing: .04em; color: var(--fluor); margin-bottom: 3px; }
+.aclara, .reto-actual { margin-top: 10px; padding: 10px 12px; background: #000; color: var(--papel); font-size: 15px; line-height: 1.4; box-shadow: var(--dura-chica); }
+.aclara i, .reto-actual i { display: block; font: 400 13px/1.1 var(--rotulo); font-style: normal; text-transform: uppercase; letter-spacing: .02em; color: var(--neon); margin-bottom: 4px; }
 .reto-actual strong { display: block; font: 400 20px var(--cartel); text-transform: uppercase; color: var(--amarillo); }
 .aviso-comodin { display: flex; gap: 8px; align-items: center; margin-top: 10px; font: 400 15px/1.15 var(--cartel); text-transform: uppercase; color: #000; }
 .aviso-comodin svg { flex: none; width: 28px; height: 28px; }
@@ -541,6 +584,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   .ficha .pierna, .ficha .brazo, .ficha .cabeza { animation: none !important; }
   .modal-fondo.barrera { animation: none !important; }
   .app.rodando .tablero, .app.fiesta .tablero, .casilla.resaltada::before { animation: none !important; }
+  .marco.m-meta, .tablero > .meta { animation: none !important; }
   .app.fiesta .tablero-caja::after, .ficha::after { display: none; }
   .burbuja.alerta, .burbuja-panel, .letrero, .dado-caja.girando { animation: none !important; }
   .ficha .menea, .ficha .ala, .ficha .llama { animation: none !important; }

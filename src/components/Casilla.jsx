@@ -2,6 +2,8 @@ import { CASILLAS, COMODINES } from '../data/casillas.js';
 import { colorDe } from './colores.js';
 import { chueco, memeDe } from './lona.js';
 import FichaDibujo from './FichaDibujo.jsx';
+import Marco from './Marco.jsx';
+import { barrioDe, tipoDe } from '../game/barrios.js';
 
 // Una ficha en el tablero. El dibujo depende de lo que haya escogido el jugador.
 function Ficha({ jugador, indice, activa }) {
@@ -34,11 +36,13 @@ export function Fichas({ jugadores, turno, n }) {
 export default function Casilla({ n, jugadores, turno, resaltada, onVer, estilo }) {
   const cas = CASILLAS[n];
   const comodin = COMODINES.includes(n);
+  const barrio = barrioDe(n);
+  const tipo = tipoDe(cas, comodin);
   return (
     <button
       type="button"
       data-n={n}
-      className={`casilla ${cas.tipo || ''}${comodin ? ' comodin' : ''}${n === resaltada ? ' resaltada' : ''}`}
+      className={`casilla b-${barrio} t-${tipo} ${cas.tipo || ''}${comodin ? ' comodin' : ''}${n === resaltada ? ' resaltada' : ''}`}
       style={{ ...estilo, '--r': `${chueco(n)}deg` }}
       aria-label={`${n}. ${cas.mensaje}${comodin ? ' (comodín)' : ''}`}
       onClick={() => onVer(n)}
@@ -46,7 +50,7 @@ export default function Casilla({ n, jugadores, turno, resaltada, onVer, estilo 
       <img className="meme" src={memeDe(n)} alt="" loading="lazy" draggable="false" />
       <b>{n}</b>
       {cas.sello && <span className="sello">{cas.sello}</span>}
-      {comodin && <svg className="bruja" aria-hidden="true"><use href="#i-sello" /></svg>}
+      <Marco tipo={tipo} />
       <span className="lab">{cas.corto}</span>
       <Fichas jugadores={jugadores} turno={turno} n={n} />
     </button>
