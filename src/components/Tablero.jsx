@@ -25,10 +25,25 @@ const FLECHAS = PUNTOS.slice(1, -1).flatMap((b, k) => {
   return [{ x: (b[0] + c[0]) / 2, y: (b[1] + c[1]) / 2, ang }];
 });
 
-export default function Tablero({ jugadores, turno, resaltada, onVer }) {
+// Cámara que sigue a la ficha: el tablero se agranda ZOOM veces y se recorre para que la
+// casilla quede al centro. Los porcentajes de translate son del propio tablero, así que
+// sirve igual en cualquier tamaño de pantalla.
+const ZOOM = 1.9;
+const centroPct = (n) => {
+  const [f, c] = n >= META ? [meta.filas[0], (meta.cols[0] + meta.cols[1]) / 2] : camino[n - 1];
+  // 1.5% y 2.3%: el relleno del tablero, en horizontal y en vertical.
+  return [1.5 + ((c + 0.5) / 9) * 97, 2.3 + ((f + 0.5) / 7) * 95.4];
+};
+const tope = (v) => Math.min(0, Math.max(100 - 100 * ZOOM, v));   // que nunca se vea fuera del tablero
+const encuadre = (n) => {
+  const [x, y] = centroPct(n);
+  return `translate(${tope(50 - x * ZOOM)}%, ${tope(50 - y * ZOOM)}%) scale(${ZOOM})`;
+};
+
+export default function Tablero({ jugadores, turno, resaltada, camara, onVer }) {
   return (
     <div className="tablero-caja">
-      <div className="tablero" aria-label="Tablero de 60 casillas">
+      <div className={`tablero${camara ? ' siguiendo' : ''}`} style={camara ? { transform: encuadre(camara) } : undefined} aria-label="Tablero de 60 casillas">
         <span className="cinta-esq e1" aria-hidden="true" /><span className="cinta-esq e2" aria-hidden="true" />
         <span className="cinta-esq e3" aria-hidden="true" /><span className="cinta-esq e4" aria-hidden="true" />
 

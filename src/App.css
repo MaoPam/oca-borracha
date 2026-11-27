@@ -281,7 +281,8 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 /* Regla: la foto de cada casilla es la protagonista. Las normales son todas iguales
    (borde blanco, derechas); solo las especiales llevan color, con significado fijo.
    La personalidad vive en el marco, la Ruleta, las fichas y las animaciones. */
-.tablero-caja { position: relative; container-type: inline-size; padding: clamp(14px, 2vw, 28px); }
+/* overflow: hidden recorta el tablero cuando la cámara se acerca. */
+.tablero-caja { position: relative; container-type: inline-size; padding: clamp(14px, 2vw, 28px); overflow: hidden; }
 
 /* El marco: rosa grueso con filo papel y negro, y cinta canela en las esquinas. */
 .tablero { position: relative; width: 100%; aspect-ratio: 1.55; display: grid;
@@ -289,14 +290,15 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   gap: clamp(6px, 1.15cqi, 12px); padding: clamp(8px, 1.4cqi, 16px);
   background: var(--grano), #121212;
   border: clamp(5px, .8cqi, 9px) solid var(--chicle); border-radius: 6px;
-  box-shadow: 0 0 0 3px var(--papel), 0 0 0 6px #000, var(--dura-xl); }
+  box-shadow: 0 0 0 3px var(--papel), 0 0 0 6px #000, var(--dura-xl);
+  transform-origin: 0 0; transition: transform .45s cubic-bezier(.3, .8, .3, 1); }
 .cinta-esq { position: absolute; z-index: 6; pointer-events: none;
   width: clamp(44px, 7cqi, 92px); height: clamp(15px, 2.2cqi, 28px);
   background: var(--cinta); box-shadow: 1px 1px 0 rgba(0, 0, 0, .35); }
-.cinta-esq.e1 { top: -9px; left: -20px; transform: rotate(-38deg); }
-.cinta-esq.e2 { top: -9px; right: -20px; transform: rotate(38deg); }
-.cinta-esq.e3 { bottom: -9px; left: -20px; transform: rotate(38deg); }
-.cinta-esq.e4 { bottom: -9px; right: -20px; transform: rotate(-38deg); }
+.cinta-esq.e1 { top: -9px; left: -12px; transform: rotate(-38deg); }
+.cinta-esq.e2 { top: -9px; right: -12px; transform: rotate(38deg); }
+.cinta-esq.e3 { bottom: -9px; left: -12px; transform: rotate(38deg); }
+.cinta-esq.e4 { bottom: -9px; right: -12px; transform: rotate(-38deg); }
 
 /* El camino: linea punteada por DETRAS de las casillas; se ve en los huecos entre una y otra.
    Las flechas van ENCIMA, en el hueco despues de cada vuelta. Los dos lienzos ocupan

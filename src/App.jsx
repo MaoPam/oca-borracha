@@ -23,6 +23,7 @@ const T_PASO = sinMovimiento ? 60 : 220;
 const T_VER_DADO = sinMovimiento ? 100 : 560;
 const T_CIERRE = sinMovimiento ? 0 : 340;
 const T_LETRERO = sinMovimiento ? 700 : 3200;
+const T_CAMARA = 450;   // lo que tarda la cámara en acercarse o alejarse del tablero
 const esperar = (ms) => new Promise(r => setTimeout(r, ms));
 
 const partidaVacia = () => ({
@@ -75,6 +76,7 @@ export default function App() {
   const [burbuja, setBurbuja] = useState(false);
   const [letrero, setLetrero] = useState(null);
   const [tirando, setTirando] = useState(false);
+  const [siguiendo, setSiguiendo] = useState(false);   // la cámara del tablero sigue a la ficha
   const [ficha, setFicha] = useState(FICHAS[0].id);
   const [telon, setTelon] = useState(false);
   const esCelular = useEsCelular();
@@ -143,10 +145,14 @@ export default function App() {
     await esperar(T_VER_DADO);
     setBurbuja(false);
     await esperar(T_CIERRE);
+    // La cámara se acerca a la ficha antes de que empiece a caminar.
+    if (!sinMovimiento) { setSiguiendo(true); await esperar(T_CAMARA); }
   };
 
   // Al terminar el recorrido: letrero con la casilla donde cayo y de vuelta a la burbuja.
   const anunciar = async () => {
+    // Primero se aleja la cámara para que el letrero salga sobre el tablero completo.
+    if (!sinMovimiento) { setSiguiendo(false); await esperar(T_CAMARA); }
     setLetrero(pRef.current.jugadores[pRef.current.turno].pos);
     await esperar(T_LETRERO);
     setLetrero(null);
@@ -391,7 +397,7 @@ export default function App() {
           )}
           {esCelular && !verLona
             ? <Carril jugadores={jugadores} turno={turno} resaltada={enVista} onVer={(n) => setVista(n === vista ? null : n)} />
-            : <Tablero jugadores={jugadores} turno={turno} resaltada={enVista} onVer={(n) => setVista(n === vista ? null : n)} />}
+            : <Tablero jugadores={jugadores} turno={turno} resaltada={enVista} camara={siguiendo ? actual.pos : null} onVer={(n) => setVista(n === vista ? null : n)} />}
         </div>
 
         <Burbuja
