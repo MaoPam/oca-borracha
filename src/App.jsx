@@ -118,8 +118,8 @@ export default function App() {
   const comenzar = () => {
     if (partida.jugadores.length < 2) return;
     setTelon(true);
-    setTimeout(() => setTelon(false), sinMovimiento ? 300 : 2250);
-    setTimeout(() => anunciaTurno(0), sinMovimiento ? 320 : 2300);
+    setTimeout(() => setTelon(false), sinMovimiento ? 300 : 2850);
+    setTimeout(() => anunciaTurno(0), sinMovimiento ? 320 : 2900);
     actualizar(p => ({
       ...partidaVacia(), fase: 'jugando',
       jugadores: p.jugadores.map(j => ({ ...j, pos: 1, pierde: 0, gano: 0, tiros: 0 })),
@@ -398,10 +398,11 @@ export default function App() {
       <Simbolos />
       {telon && (
         <div className="telon-abre" aria-hidden="true">
-          <i className="hoja izq" /><i className="hoja der" />
-          <span className="volante" />
-          <svg className="ojo-telon" viewBox="0 0 40 40"><use href="#i-ojo" /></svg>
-          <b>¡Que empiece la peda!</b>
+          <span className="cajon-t" />
+          <div className="marco-t">
+            <div className="persiana-t"><span className="grafiti-t">Oca<br />Borracha</span><span className="tag-t">Hazifest vol. 1 · ¡que empiece la peda!</span></div>
+          </div>
+          <span className="candado-t"><i className="arco-t" /><i className="cuerpo-t" /></span>
         </div>
       )}
       {encabezado}
