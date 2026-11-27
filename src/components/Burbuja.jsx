@@ -8,7 +8,23 @@ import FichaDibujo from './FichaDibujo.jsx';
 const CLAVE = 'oca-borracha:burbuja';
 const MARGEN = 10;
 const ANCHO = 112, ALTO = 118;   // tamaño del aparato, el mismo que en el CSS
-const PESTANAS = [['turno', 'Turno'], ['lugares', 'Lugares'], ['lista', 'Lo que pasa'], ['comodines', 'Comodines'], ['extras', 'Extras']];
+// Pestañas del panel: id, nombre (sin acentos, la letra de pixeles no los trae) e ícono de 7x7 pixeles.
+// Cada ícono es una lista de filas; '#' es un pixel prendido.
+const PESTANAS = [
+  ['turno', 'TURNO', ['#######', '#.....#', '#.#.#.#', '#.....#', '#.#.#.#', '#.....#', '#######']],
+  ['lugares', 'LUGARES', ['.#####.', '#######', '.#####.', '..###..', '...#...', '..###..', '.#####.']],
+  ['lista', 'PASA', ['.......', '#.#####', '.......', '#.####.', '.......', '#.#####', '.......']],
+  ['comodines', 'COMODIN', ['...#...', '...#...', '#######', '.#####.', '..###..', '.##.##.', '##...##']],
+  ['extras', 'EXTRAS', ['..###..', '.#...#.', '.....#.', '....#..', '...#...', '.......', '...#...']],
+];
+
+function IconoPixel({ filas }) {
+  return (
+    <svg viewBox="0 0 7 7" shapeRendering="crispEdges" aria-hidden="true">
+      {filas.flatMap((fila, y) => [...fila].map((p, x) => (p === '#' ? <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" /> : null)))}
+    </svg>
+  );
+}
 
 const leerPos = () => {
   try {
@@ -130,23 +146,33 @@ export default function Burbuja({ color, ficha, nombre, aviso, pista, alerta, gi
       {abierta && (
         <div
           className="burbuja-panel"
-          style={aLaDerecha
-            ? { right: 'max(10px, env(safe-area-inset-right, 0px))' }
-            : { left: 'max(10px, env(safe-area-inset-left, 0px))' }}
+          style={{
+            '--c': color,
+            ...(aLaDerecha
+              ? { right: 'max(10px, env(safe-area-inset-right, 0px))' }
+              : { left: 'max(10px, env(safe-area-inset-left, 0px))' }),
+          }}
           role="dialog"
           aria-label="Panel de la partida"
         >
-          <div className="burbuja-tope">
-            <svg className="tope-ficha" viewBox="0 0 40 56" style={{ '--c': color }} aria-hidden="true"><FichaDibujo tipo={ficha} inicial={(nombre || '?')[0].toUpperCase()} /></svg>
-            <strong>{aviso}</strong>
-            <button type="button" className="cerrar" onClick={() => onAbrir(false)} aria-label="Cerrar">×</button>
+          {/* El panel es el mismo aparato en grande: cuerpo del color del jugador y una pantalla LCD. */}
+          <div className="panel-lcd">
+            <div className="burbuja-tope">
+              <svg className="tope-ficha" viewBox="0 0 40 56" aria-hidden="true"><FichaDibujo tipo={ficha} inicial="" /></svg>
+              <strong>{aviso}</strong>
+              <button type="button" className="cerrar" onClick={() => onAbrir(false)} aria-label="Cerrar">×</button>
+            </div>
+            <div className="pestanas" role="tablist">
+              {PESTANAS.map(([id, txt, filas]) => (
+                <button key={id} type="button" role="tab" aria-selected={seccion === id} className={`pestana${seccion === id ? ' puesta' : ''}`} onClick={() => onSeccion(id)}>
+                  <IconoPixel filas={filas} />{txt}
+                </button>
+              ))}
+            </div>
+            {/* key: al cambiar de pestaña la pantalla se vuelve a montar y repite su animación de entrada. */}
+            <div className="burbuja-cuerpo" key={seccion}>{secciones[seccion]}</div>
           </div>
-          <div className="pestanas" role="tablist">
-            {PESTANAS.map(([id, txt]) => (
-              <button key={id} type="button" role="tab" aria-selected={seccion === id} className={`pestana${seccion === id ? ' puesta' : ''}`} onClick={() => onSeccion(id)}>{txt}</button>
-            ))}
-          </div>
-          <div className="burbuja-cuerpo">{secciones[seccion]}</div>
+          <span className="panel-teclas" aria-hidden="true"><i>A</i><i>B</i></span>
         </div>
       )}
     </>

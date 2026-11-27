@@ -538,11 +538,12 @@ export default function App() {
           accion={accion}
           secciones={{
             turno: (
-          <section className="tarjeta-sticker turno" aria-label="Turno">
-            <div className="dados quietos">{partida.dados.map((v, k) => <Dado3D key={k} valor={v} giros={partida.giros} tam={partida.dados.length > 1 ? 66 : 84} conResultado={false} />)}</div>
-            {textoAccion && <button type="button" className={`btn-tirar${etapa === 'retroceder' ? ' trampa' : ''}`} onClick={alTirar} disabled={etapa === 'moviendo' || ocupado}>{textoAccion}</button>}
-            {(etapa === 'listo') && <button type="button" className="btn-tirar" onClick={pasarTurno}>Siguiente turno</button>}
-            {etapa === 'fin' && <button type="button" className="btn-tirar" onClick={nuevaPartida}>Jugar otra</button>}
+          <section className="lcd-sec turno" aria-label="Turno">
+            {/* Tu ficha caminando de lado a lado de la pantalla, en pixeles. */}
+            <div className="pasarela" aria-hidden="true">
+              <svg className="pasa-ficha" viewBox="0 0 40 56"><FichaDibujo tipo={actual.ficha} inicial="" /></svg>
+            </div>
+            {partida.giros > 0 && <p className="lcd-dado">Ultimo tiro: {partida.dados.join(' + ')}</p>}
 
             {vista && vista !== partida.casilla ? (
               <div className="vista">
@@ -564,6 +565,9 @@ export default function App() {
             {partida.reto && etapa === 'listo' && (
               <div className="reto-actual"><i>Reto misterioso</i><strong>{partida.reto.titulo}</strong>{partida.reto.desc}</div>
             )}
+            {textoAccion && <button type="button" className={`btn-tirar${etapa === 'retroceder' ? ' trampa' : ''}`} onClick={alTirar} disabled={etapa === 'moviendo' || ocupado}>{textoAccion}</button>}
+            {(etapa === 'listo') && <button type="button" className="btn-tirar" onClick={pasarTurno}>Siguiente turno</button>}
+            {etapa === 'fin' && <button type="button" className="btn-tirar" onClick={nuevaPartida}>Jugar otra</button>}
             {ganadorActual && (
               <div className="ganador">
                 <strong>¡{ganadorActual.nombre} llegó a la 60!</strong>
@@ -577,34 +581,41 @@ export default function App() {
           </section>
             ),
             lugares: (
-          <section className="tarjeta-sticker">
-            <h2>Posiciones</h2>
-            <ul className="jugadores">
-              {jugadores.map((j, i) => ({ j, i })).sort((a, b) => (a.j.gano || 99) - (b.j.gano || 99) || b.j.pos - a.j.pos).map(({ j, i }) => (
-                <li key={i} className={i === turno && etapa !== 'fin' ? 'ahora' : ''} style={{ '--c': colorDe(i).c }}>
-                  <span className="chip" />
+          <section className="lcd-sec">
+            <h2>Lugares</h2>
+            {/* Las barras crecen a saltos, como en una pantallita de pixeles (--k escalona cada fila). */}
+            <ul className="lcd-lugares">
+              {jugadores.map((j, i) => ({ j, i })).sort((a, b) => (a.j.gano || 99) - (b.j.gano || 99) || b.j.pos - a.j.pos).map(({ j, i }, k) => (
+                <li key={i} className={i === turno && etapa !== 'fin' ? 'ahora' : ''} style={{ '--c': colorDe(i).c, '--k': k }}>
+                  <span className="lcd-n">{k + 1}</span>
+                  <span className="chip mini" />
                   <strong>{j.nombre}</strong>
                   <em>{j.gano ? `Lugar ${j.gano}` : j.pos === 1 ? 'Inicio' : `Casilla ${j.pos}`}</em>
-                  {j.pierde > 0 && <span className="etiqueta">Pierde su turno</span>}
-                  <span className="barra"><i style={{ width: `${((j.pos - 1) / (META - 1)) * 100}%` }} /></span>
+                  <span className="lcd-barra"><i style={{ width: `${((j.pos - 1) / (META - 1)) * 100}%` }} /></span>
+                  {(j.pierde > 0 || (j.comodines || []).length > 0) && (
+                    <small>{j.pierde > 0 && 'Pierde su turno'}{j.pierde > 0 && (j.comodines || []).length > 0 && ' · '}{(j.comodines || []).length > 0 && `★ ${j.comodines.length} comodín${j.comodines.length > 1 ? 'es' : ''}`}</small>
+                  )}
                 </li>
               ))}
             </ul>
           </section>
             ),
             lista: (
-          <section className="tarjeta-sticker">
-            <details open><summary>Lo que va pasando</summary>
-              <ul className="bitacora">
-                {partida.bitacora.slice(0, 60).map((b, k) => (
-                  <li key={`${b.t}-${k}`}><span className="chip mini" style={{ '--c': b.color != null ? colorDe(b.color).c : '#999' }} />{b.texto}</li>
-                ))}
-              </ul>
-            </details>
+          <section className="lcd-sec">
+            <h2>Lo que pasa</h2>
+            {/* Las 5 más nuevas se escriben letra por letra. La key cuenta desde la más vieja,
+                así una jugada nueva no hace que todas las demás se vuelvan a escribir. */}
+            <ul className="lcd-log">
+              {partida.bitacora.slice(0, 60).map((b, k) => (
+                <li key={`${b.t}-${partida.bitacora.length - k}`} className={k < 5 ? 'tipea' : ''} style={{ '--k': k }}>
+                  <span className="chip mini" style={{ '--c': b.color != null ? colorDe(b.color).c : '#999' }} />{b.texto}
+                </li>
+              ))}
+            </ul>
           </section>
             ),
             comodines: (
-          <section className="tarjeta-sticker comodines">
+          <section className="lcd-sec comodines">
             <h2>Comodines</h2>
             <p className="ayuda">Se usan cuando quieras, aunque no sea tu turno. Toca dos veces para gastarlo.</p>
             <ul className="mano">
@@ -629,7 +640,7 @@ export default function App() {
           </section>
             ),
             extras: (
-          <section className="tarjeta-sticker extras">
+          <section className="lcd-sec extras">
             <h2>Extras</h2>
             <button type="button" className="btn-cromo extra" onClick={() => abrirReto(false)}>
               <strong>Reto manual</strong><span>¿Alguien rompió una regla?</span>
