@@ -19,6 +19,7 @@
   /* ---- Tipografía ---- */
   --rotulo: Bungee, Anton, Impact, sans-serif;        /* letrero de puesto */
   --marcador: "Permanent Marker", Anton, cursive;     /* notas a mano */
+  --pixel: "Press Start 2P", "Courier New", monospace; /* pantallitas LCD */
 
   /* ---- Sombras duras (cero blur, siempre desplazadas) ---- */
   --dura: 4px 4px 0 #000;

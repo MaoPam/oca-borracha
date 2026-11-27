@@ -515,10 +515,35 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 /* ---------- Ruleta ---------- */
 .ruleta { display: grid; gap: 22px 36px; grid-template-columns: minmax(0, 1fr); align-items: center; margin-top: 14px; }
 @media (min-width: 700px) { .ruleta { grid-template-columns: minmax(240px, 380px) minmax(0, 1fr); } }
-.rueda-caja { position: relative; width: min(100%, 380px); aspect-ratio: 1; margin: 0 auto; padding-top: 12px; }
-.puntero { position: absolute; left: 50%; top: -6px; width: 34px; height: 38px; transform: translateX(-50%); z-index: 2; filter: drop-shadow(2px 2px 0 #000); }
-.rueda { width: 100%; height: 100%; transition: transform 4.2s cubic-bezier(.12, .7, .15, 1); }
+/* ---------- Ruleta: tornamesa sonidera ----------
+   Todo se mide en cqi (porcentaje del ancho de la tornamesa) para que el brazo
+   caiga siempre en el mismo punto del disco, sin importar el tamaño. */
+.tornamesa { position: relative; width: min(100%, 400px); aspect-ratio: 282 / 262; margin: 0 auto; container-type: inline-size;
+  background: var(--grano), #1b1b1b; border: 3px solid #000; box-shadow: 5px 5px 0 #000, inset 0 0 0 3px #2c2c2c; }
+.tornamesa .tornillo { position: absolute; width: 3.2cqi; height: 3.2cqi; border-radius: 50%; background: var(--cromo); border: 1.5px solid #000; }
+.tornamesa .t1 { left: 2.5cqi; top: 2.5cqi; } .tornamesa .t2 { right: 2.5cqi; top: 2.5cqi; }
+.tornamesa .t3 { left: 2.5cqi; bottom: 2.5cqi; } .tornamesa .t4 { right: 2.5cqi; bottom: 2.5cqi; }
+.vinil { position: absolute; left: 6.4cqi; top: 6.4cqi; width: 70.9cqi; height: 70.9cqi; border-radius: 50%;
+  transition: transform 4s cubic-bezier(.45, .05, .15, 1); }
+.vinil svg { width: 100%; height: 100%; display: block; }
+/* Los surcos del disco: anillos finos encima de las pistas. */
+.vinil::after { content: ''; position: absolute; inset: 4%; border-radius: 50%; pointer-events: none;
+  background: repeating-radial-gradient(circle, rgba(255, 255, 255, .07) 0 1px, transparent 1px 4px); }
+.vinil-etq { font: 400 13px var(--rotulo); fill: #000; }
 .rueda-txt { font: 400 12px var(--cartel); text-transform: uppercase; }
+/* El brazo gira sobre su base: 22° fuera del disco, 62.7° con la aguja justo en el punto de lectura. */
+.brazo-td { position: absolute; z-index: 2; left: 91.5cqi; top: 9.9cqi; width: 2.8cqi; height: 37.9cqi; transform-origin: 50% 0; transform: rotate(22deg);
+  background: var(--cromo); border: 2px solid #000; transition: transform .65s cubic-bezier(.3, .9, .3, 1); }
+.brazo-td.puesta { transform: rotate(62.7deg); }
+.brazo-td::before { content: ''; position: absolute; left: 50%; top: -3.5cqi; width: 7cqi; height: 7cqi; margin-left: -3.5cqi;
+  border-radius: 50%; background: #2c2c2c; border: 3px solid #000; }
+.brazo-td::after { content: ''; position: absolute; left: 50%; bottom: -4.3cqi; width: 5cqi; height: 5.7cqi; margin-left: -2.5cqi; background: var(--chicle); border: 2px solid #000; }
+.lcd-strip { position: absolute; left: 6.4cqi; right: 6.4cqi; bottom: 4.6cqi; height: 9.6cqi; display: grid; place-items: center; padding: 0 2cqi; overflow: hidden;
+  background: #a9c27d; color: #22341a; border: 3px solid #000; text-align: center; font: 400 clamp(7px, 2.6cqi, 10px)/1.2 var(--pixel); }
+/* La pista que tocó se prende de rosa y parpadea. */
+.pista-ganadora { fill: var(--chicle); animation: parpadea-pista .32s steps(1, end) 5; }
+.txt-ganador { fill: #000; }
+@keyframes parpadea-pista { 0% { opacity: 1; } 50% { opacity: .3; } }
 .ruleta-lado { display: grid; gap: 12px; }
 .ruleta-res { margin: 0; font: 400 24px/1.15 var(--cartel); text-transform: uppercase; color: #000; }
 .ruleta-res strong { font-weight: 400; background: var(--amarillo); padding: 0 6px; }
@@ -622,7 +647,8 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   .quien { font-size: 30px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .dado, .rueda, .barra i, .casilla { transition: none !important; }
+  .dado, .vinil, .brazo-td, .barra i, .casilla { transition: none !important; }
+  .pista-ganadora { animation: none !important; }
   .ficha, .ficha.activa, .invocando .dado, .modal { animation: none !important; }
   .fd .pierna, .fd .brazo, .fd .cabeza { animation: none !important; }
   .modal-fondo.barrera { animation: none !important; }

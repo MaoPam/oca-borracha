@@ -1,7 +1,12 @@
 import { useState } from 'react';
 
-const RELLENOS = ['#ff3d9a', '#0b0b0b', '#f4efe4', '#ffe500', '#e0001b', '#19c3ff'];
-const TINTA = ['#000', '#f4efe4', '#000', '#000', '#fff', '#000'];
+// Ruleta de la Victoria como tornamesa sonidera: los premios son las pistas de un
+// disco. Baja la aguja, el disco gira y frena, y la pantallita dice qué pista tocó.
+const RELLENOS = ['#161616', '#262626', '#303030'];
+const TINTA = ['#ff2e93', '#ffd400'];
+const LECTURA = 50;      // la aguja lee a 50° de las 12, en el sentido del reloj
+const T_AGUJA = 650;     // lo que tarda en bajar el brazo
+const T_GIRO = 4000;     // lo que gira el disco (igual que la transición en el CSS)
 const corta = (t, n = 16) => (t.length > n ? t.slice(0, n - 1) + '…' : t);
 
 function rebanada(i, n, r) {
@@ -10,50 +15,68 @@ function rebanada(i, n, r) {
   return `M0 0 L${x0} ${y0} A${r} ${r} 0 ${ang > 180 ? 1 : 0} 1 ${x1} ${y1} Z`;
 }
 
+// Con un número impar de pistas, la última quedaría del mismo tono que la primera; esa va en un tercer gris.
+const relleno = (i, n) => (n % 2 === 1 && i === n - 1 ? RELLENOS[2] : RELLENOS[i % 2]);
+
 export default function Ruleta({ premios, onQuitar, onAgregar }) {
   const [rot, setRot] = useState(0);
-  const [girando, setGirando] = useState(false);
-  const [ganador, setGanador] = useState(null);
+  const [fase, setFase] = useState('quieto');   // quieto · aguja · girando
+  const [pista, setPista] = useState(null);     // índice del premio que tocó
   const [nuevo, setNuevo] = useState('');
   const n = premios.length;
+  const girando = fase !== 'quieto';
+  const ganador = pista != null ? premios[pista] : null;
 
   const girar = () => {
     if (n < 2 || girando) return;
     const k = Math.floor(Math.random() * n), ang = 360 / n;
-    const destino = ((-k * ang - rot) % 360 + 360) % 360;
-    setGanador(null);
-    setGirando(true);
-    setRot(rot + 360 * 6 + destino);
-    setTimeout(() => { setGirando(false); setGanador(premios[k]); }, 4300);
+    // Cuánto falta para que el centro de la pista k quede bajo la aguja.
+    const destino = ((LECTURA - k * ang - rot) % 360 + 360) % 360;
+    setPista(null);
+    setFase('aguja');
+    setTimeout(() => { setFase('girando'); setRot(rot + 360 * 5 + destino); }, T_AGUJA);
+    setTimeout(() => { setFase('quieto'); setPista(k); }, T_AGUJA + T_GIRO);
   };
 
   const agregar = (e) => {
     e.preventDefault();
-    if (nuevo.trim()) { onAgregar(nuevo.trim()); setNuevo(''); }
+    // Cambiar la lista reacomoda el disco: la pista ganadora anterior ya no aplica.
+    if (nuevo.trim()) { setPista(null); onAgregar(nuevo.trim()); setNuevo(''); }
   };
+
+  const pantalla = n < 2 ? 'AGREGA AL MENOS 2 PREMIOS'
+    : fase === 'aguja' ? '▶ BAJANDO AGUJA'
+    : fase === 'girando' ? '▶ GIRANDO…'
+    : ganador ? `PISTA ${String(pista + 1).padStart(2, '0')} · ${corta(ganador, 18).toUpperCase()}`
+    : `LISTO · ${n} PISTAS`;
 
   return (
     <div className="ruleta">
-      <div className="rueda-caja">
-        <svg className="puntero" viewBox="0 0 30 34" aria-hidden="true"><path d="M15 33L2 6a13 13 0 0 1 26 0z" fill="#ffe500" stroke="#000" strokeWidth="2.5" strokeLinejoin="round" /><circle cx="15" cy="9" r="4" fill="#fff" /></svg>
-        <svg className="rueda" viewBox="-110 -110 220 220" style={{ transform: `rotate(${rot}deg)` }} aria-label="Ruleta de premios">
-          <circle r="108" fill="#000" />
-          {n === 0 && <circle r="100" fill="#2a0f20" />}
-          {n === 1 && <circle r="100" fill={RELLENOS[0]} />}
-          {n > 1 && premios.map((p, i) => (
-            <g key={i}>
-              <path d={rebanada(i, n, 100)} fill={RELLENOS[i % RELLENOS.length]} stroke="#000" strokeWidth="1.5" />
-              <text transform={`rotate(${i * (360 / n)}) translate(0 -60) rotate(-90)`} fill={TINTA[i % TINTA.length]} className="rueda-txt" textAnchor="middle" dominantBaseline="middle">{corta(p, n > 8 ? 10 : 16)}</text>
-            </g>
-          ))}
-          {n === 1 && <text y="-40" textAnchor="middle" fill="#fff" className="rueda-txt">{corta(premios[0])}</text>}
-          {Array.from({ length: 24 }, (_, i) => <circle key={i} cx={104 * Math.cos(i * Math.PI / 12)} cy={104 * Math.sin(i * Math.PI / 12)} r="2.4" fill={i % 2 ? '#f4efe4' : '#ff3d9a'} />)}
-          <use href="#i-gema" x="-17" y="-17" width="34" height="34" />
-        </svg>
+      <div className="tornamesa">
+        <span className="tornillo t1" /><span className="tornillo t2" /><span className="tornillo t3" /><span className="tornillo t4" />
+        <div className="vinil" style={{ transform: `rotate(${rot}deg)` }}>
+          <svg viewBox="-110 -110 220 220" aria-label="Disco de premios">
+            <circle r="108" fill="#000" />
+            {n === 0 && <circle r="100" fill={RELLENOS[0]} />}
+            {n === 1 && <circle r="100" fill={RELLENOS[0]} />}
+            {n > 1 && premios.map((p, i) => (
+              <g key={i}>
+                <path d={rebanada(i, n, 100)} fill={relleno(i, n)} stroke="#000" strokeWidth="1.5" className={pista === i ? 'pista-ganadora' : ''} />
+                <text transform={`rotate(${i * (360 / n)}) translate(0 -64) rotate(-90)`} fill={TINTA[i % 2]} className={`rueda-txt${pista === i ? ' txt-ganador' : ''}`} textAnchor="middle" dominantBaseline="middle">{corta(p, n > 8 ? 9 : 13)}</text>
+              </g>
+            ))}
+            {n === 1 && <text y="-62" textAnchor="middle" fill={TINTA[0]} className="rueda-txt">{corta(premios[0])}</text>}
+            <circle r="34" fill="#ff2e93" stroke="#000" strokeWidth="3" />
+            <text className="vinil-etq" y="5" textAnchor="middle">OCA</text>
+            <circle r="3.5" fill="#000" />
+          </svg>
+        </div>
+        <span className={`brazo-td${girando || ganador ? ' puesta' : ''}`} />
+        <div className="lcd-strip" aria-live="polite">{pantalla}</div>
       </div>
 
       <div className="ruleta-lado">
-        <p className="ruleta-res" aria-live="polite">
+        <p className="ruleta-res">
           {ganador ? <>¡Te toca: <strong>{ganador}</strong>!</> : girando ? 'Girando…' : n < 2 ? 'Agrega al menos 2 premios para girar.' : 'Quien llegue a la 60 gira y cobra.'}
         </p>
         <button type="button" className="btn-rosa" onClick={girar} disabled={n < 2 || girando}>{girando ? 'Girando…' : 'Girar la ruleta'}</button>
@@ -64,7 +87,7 @@ export default function Ruleta({ premios, onQuitar, onAgregar }) {
         {n > 0 && (
           <ul className="premios">
             {premios.map((p, i) => (
-              <li key={i}><span>{p}</span>{!girando && <button type="button" onClick={() => onQuitar(i)} aria-label={`Quitar ${p}`}>×</button>}</li>
+              <li key={i}><span>{p}</span>{!girando && <button type="button" onClick={() => { setPista(null); onQuitar(i); }} aria-label={`Quitar ${p}`}>×</button>}</li>
             ))}
           </ul>
         )}
