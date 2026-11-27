@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-const RELLENOS = ['#ff2e93', '#1a0a13', '#ffc6e2', '#9b5cff', '#f6c25a', '#3fa9f5'];
-const TINTA = ['#fff', '#ffe0ef', '#2b0a1c', '#fff', '#2b0a1c', '#fff'];
+const RELLENOS = ['#ff3d9a', '#0b0b0b', '#f4efe4', '#ffe500', '#e0001b', '#19c3ff'];
+const TINTA = ['#000', '#f4efe4', '#000', '#000', '#fff', '#000'];
 const corta = (t, n = 16) => (t.length > n ? t.slice(0, n - 1) + '…' : t);
 
 function rebanada(i, n, r) {
@@ -35,7 +35,7 @@ export default function Ruleta({ premios, onQuitar, onAgregar }) {
   return (
     <div className="ruleta">
       <div className="rueda-caja">
-        <svg className="puntero" viewBox="0 0 30 34" aria-hidden="true"><path d="M15 33L2 6a13 13 0 0 1 26 0z" fill="#ff2e93" stroke="#000" strokeWidth="2.5" strokeLinejoin="round" /><circle cx="15" cy="9" r="4" fill="#fff" /></svg>
+        <svg className="puntero" viewBox="0 0 30 34" aria-hidden="true"><path d="M15 33L2 6a13 13 0 0 1 26 0z" fill="#ffe500" stroke="#000" strokeWidth="2.5" strokeLinejoin="round" /><circle cx="15" cy="9" r="4" fill="#fff" /></svg>
         <svg className="rueda" viewBox="-110 -110 220 220" style={{ transform: `rotate(${rot}deg)` }} aria-label="Ruleta de premios">
           <circle r="108" fill="#000" />
           {n === 0 && <circle r="100" fill="#2a0f20" />}
@@ -47,9 +47,8 @@ export default function Ruleta({ premios, onQuitar, onAgregar }) {
             </g>
           ))}
           {n === 1 && <text y="-40" textAnchor="middle" fill="#fff" className="rueda-txt">{corta(premios[0])}</text>}
-          {Array.from({ length: 24 }, (_, i) => <circle key={i} cx={104 * Math.cos(i * Math.PI / 12)} cy={104 * Math.sin(i * Math.PI / 12)} r="2.2" fill={i % 2 ? '#fff' : '#ff7ac0'} />)}
-          <circle r="18" fill="url(#cromo)" stroke="#000" strokeWidth="2" />
-          <defs><linearGradient id="cromo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" /><stop offset=".5" stopColor="#9c9cb0" /><stop offset="1" stopColor="#f1f1f7" /></linearGradient></defs>
+          {Array.from({ length: 24 }, (_, i) => <circle key={i} cx={104 * Math.cos(i * Math.PI / 12)} cy={104 * Math.sin(i * Math.PI / 12)} r="2.4" fill={i % 2 ? '#f4efe4' : '#ff3d9a'} />)}
+          <use href="#i-gema" x="-17" y="-17" width="34" height="34" />
         </svg>
       </div>
 

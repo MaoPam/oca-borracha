@@ -4,6 +4,10 @@ import { colorDe } from './colores.js';
 
 const { camino, meta } = trazarEspiral();
 
+// Cada casilla va pegada un poquito chueca, como sticker puesto a mano.
+// Es determinista: la misma casilla siempre queda igual.
+const chueco = (n) => (((n * 37) % 7) - 3) * 0.42;
+
 function Ficha({ jugador, indice, activa }) {
   const col = colorDe(indice);
   return (
@@ -26,23 +30,26 @@ function Fichas({ jugadores, turno, n }) {
   );
 }
 
+const Gema = ({ className }) => <svg className={`gema ${className}`} aria-hidden="true"><use href="#i-gema" /></svg>;
+
 export default function Tablero({ jugadores, turno, resaltada, onVer }) {
   return (
     <div className="tablero-caja">
       <div className="tablero" aria-label="Tablero de 60 casillas">
+        <Gema className="g1" /><Gema className="g2" /><Gema className="g3" /><Gema className="g4" />
         {camino.map(([fila, col], k) => {
           const n = k + 1, cas = CASILLAS[n], comodin = COMODINES.includes(n);
           return (
             <button
               key={n}
               type="button"
-              className={`casilla ${cas.tipo || ''}${n === resaltada ? ' resaltada' : ''}`}
-              style={{ gridRow: fila + 1, gridColumn: col + 1 }}
+              className={`casilla ${cas.tipo || ''}${comodin ? ' comodin' : ''}${n === resaltada ? ' resaltada' : ''}`}
+              style={{ gridRow: fila + 1, gridColumn: col + 1, '--r': `${chueco(n)}deg` }}
               aria-label={`${n}. ${cas.mensaje}${comodin ? ' (comodín)' : ''}`}
               onClick={() => onVer(n)}
             >
-              <b>{n === 1 ? 'Inicio' : n}</b>
-              <svg className="icono" aria-hidden="true"><use href={`#i-${cas.icono}`} /></svg>
+              <b>{n === 1 ? 'Salida' : n}</b>
+              {cas.sello && <span className="sello">{cas.sello}</span>}
               {comodin && <svg className="estrella" aria-hidden="true"><use href="#i-estrella" /></svg>}
               <span className="lab">{n === 1 ? '' : cas.corto}</span>
               <Fichas jugadores={jugadores} turno={turno} n={n} />
@@ -56,9 +63,7 @@ export default function Tablero({ jugadores, turno, resaltada, onVer }) {
           aria-label="60. Ruleta de la victoria"
           onClick={() => onVer(META)}
         >
-          <svg aria-hidden="true"><use href="#i-trofeo" /></svg>
-          <span>Ruleta de la victoria</span>
-          <svg aria-hidden="true"><use href="#i-trofeo" /></svg>
+          <span className="meta-letrero"><small>60</small>Ruleta de la Victoria</span>
           <Fichas jugadores={jugadores} turno={turno} n={META} />
         </button>
       </div>

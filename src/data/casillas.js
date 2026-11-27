@@ -1,7 +1,8 @@
 // Las 60 casillas de la lona de la Oca Borracha.
 // corto: lo que se lee en el tablero · mensaje: el texto de la lona
 // aclara: "cómo se juega" para las casillas que no son tan obvias
-// icono: símbolo de src/components/Simbolos.jsx · tipo: bonus (azul), trampa (rojo), inicio, meta
+// icono: símbolo de src/components/Simbolos.jsx · sello: etiqueta corta de las casillas que mueven fichas
+// tipo: bonus (amarillo), trampa (rojo), inicio, meta
 export const META = 60;
 
 // Si es true hay que llegar a la 60 con la cuenta exacta; si te pasas, rebotas.
@@ -17,11 +18,11 @@ const c = (corto, mensaje, icono, extra = {}) => ({ corto, mensaje, icono, ...ex
 export const CASILLAS = {
   1: c('Inicio', 'Todas las fichas salen de aquí.', 'salida', { tipo: 'inicio' }),
   2: c('Todos beben', 'Todos beben.', 'tarro'),
-  3: c('Reparte tragos', 'Tira el dado y reparte el número de tragos que salga.', 'dado', { aclara: 'Se tira otro dado: el número que salga son los tragos que repartes entre quien tú quieras.' }),
+  3: c('Reparte tragos', 'Tira el dado y reparte el número de tragos que salga.', 'dado', { sello: 'Tragos', aclara: 'Se tira otro dado: el número que salga son los tragos que repartes entre quien tú quieras.' }),
   4: c('Alguien de aquí…', 'Alguien de aquí…', 'globo', { aclara: 'Termina la frase "Alguien de aquí…" con algo que sepas del grupo (ya besó a alguien de la mesa, le debe dinero a otro…). Quien sea, bebe.' }),
   5: c('Toma sin manos', 'Toma sin manos.', 'reto', { aclara: 'Tómate tu trago sin usar las manos.' }),
   6: c('Dato curioso', 'Tírate un dato curioso.', 'globo', { aclara: 'Cuenta un dato curioso que nadie de la mesa sepa.' }),
-  7: c('Tira de nuevo y bebe', 'Tira de nuevo y bebe.', 'dado', { tipo: 'bonus', aclara: 'Bebes y vuelves a tirar.' }),
+  7: c('Tira de nuevo y bebe', 'Tira de nuevo y bebe.', 'dado', { sello: 'Otra vez', tipo: 'bonus', aclara: 'Bebes y vuelves a tirar.' }),
   8: c('Julio a diciembre', 'Toman los nacidos entre julio y diciembre.', 'tarro'),
   9: c('Los hombres beben', 'Los hombres beben.', 'tarro'),
   10: c('Tu migajeada', 'Cuenta tu migajeada. Hmmmm, migajas.', 'globo', { aclara: 'Cuenta la vez que más te conformaste con migajas de amor.' }),
@@ -45,7 +46,7 @@ export const CASILLAS = {
   28: c('Muerde', 'Muerde al de enfrente.', 'labios', { aclara: 'Muerde (suavecito) a quien está enfrente de ti.' }),
   29: c('Yo nunca nunca', 'Yo nunca nunca.', 'globo', { aclara: 'Di algo que nunca hayas hecho. Quien sí lo haya hecho, bebe.' }),
   30: c('Fondéate', 'Fondéate lo que estés tomando.', 'tarro', { aclara: 'Termínate de un trago lo que tengas en tu vaso.' }),
-  31: c('Avanza 3', 'Avanza 3 casillas.', 'adelante', { tipo: 'bonus', aclara: 'Avanzas 3 casillas y cumples lo que diga la nueva.' }),
+  31: c('Avanza 3', 'Avanza 3 casillas.', 'adelante', { sello: '+3', tipo: 'bonus', aclara: 'Avanzas 3 casillas y cumples lo que diga la nueva.' }),
   32: c('Menos seguidores', 'Quien tenga menos seguidores en IG bebe, pero no lo hace sol@.', 'cel', { aclara: 'Quien tenga menos seguidores en IG bebe, y escoge a alguien que beba con él o ella.' }),
   33: c('Intercambia prenda', 'Intercambia prenda con el de la derecha.', 'reto'),
   34: c('¿Qué probabilidad?', '¿Qué probabilidad? Con quien quieras.', 'globo', { aclara: 'Retas a alguien: "¿qué probabilidad hay de que…?". Elige un número del 1 al 10, cuentan a 3 y dicen un número a la vez. Si coinciden, cumple el reto.' }),
@@ -59,11 +60,11 @@ export const CASILLAS = {
   42: c('Haz el 4', 'En 4: haz el 4.', 'reto', { aclara: 'Haz el 4: cruza una pierna y aguanta en un pie. Si no puedes, bebes.' }),
   43: c('El + sobrio', 'Bebe el más sobrio.', 'tarro', { aclara: 'Bebe quien se vea más sobrio de la mesa.' }),
   44: c('Tus vecinos beben', 'Beben los que están a tu lado.', 'tarro', { aclara: 'Beben las personas a tu izquierda y a tu derecha.' }),
-  45: c("Pa' atrás 4", "Vas pa' atrás 4 casillas.", 'atras', { tipo: 'trampa', aclara: 'Retrocedes 4 casillas y cumples la casilla donde caigas.' }),
+  45: c("Pa' atrás 4", "Vas pa' atrás 4 casillas.", 'atras', { sello: '−4', tipo: 'trampa', aclara: 'Retrocedes 4 casillas y cumples la casilla donde caigas.' }),
   46: c('El + joven', 'Bebe el más joven.', 'tarro'),
   47: c('Body shot', 'Body shot.', 'shot', { aclara: 'Tómate un shot del cuerpo de alguien que acepte.' }),
   48: c('Volado', 'Volado con el de la izquierda.', 'globo', { aclara: 'Echas un volado con quien está a tu izquierda. Quien pierda, bebe.' }),
-  49: c('Detente jochis', 'Detente, jochis: no tiras por un turno.', 'alto', { tipo: 'trampa', aclara: 'Pierdes tu siguiente turno.' }),
+  49: c('Detente jochis', 'Detente, jochis: no tiras por un turno.', 'alto', { sello: 'Alto', tipo: 'trampa', aclara: 'Pierdes tu siguiente turno.' }),
   50: c('Semana inglesa', 'Semana inglesa.', 'globo', { aclara: 'Elige a alguien y, a la cuenta de 3, los dos dicen un día de la semana. Si coinciden, se besan; si no, no pasa nada.' }),
   51: c('Quien no se mueva', 'Quien se quede en su lugar bebe.', 'tarro', { aclara: 'Todos se cambian de lugar. Quien se quede en el mismo, bebe.' }),
   52: c('Beso de tres', 'Beso de tres.', 'labios', { aclara: 'Tres personas se dan un beso al mismo tiempo.' }),
@@ -72,7 +73,7 @@ export const CASILLAS = {
   55: c('Tú preparas', 'Tú preparas, otro bebe.', 'shot', { aclara: 'Tú preparas un trago y alguien más se lo toma.' }),
   56: c('Compartidos TikTok', 'Explica tus compartidos en TikTok.', 'cel', { aclara: 'Explica qué es lo último que compartiste en TikTok.' }),
   57: c('Más seguidores', 'Bebe quien tenga más seguidores en IG. OMG, sí, beba.', 'cel'),
-  58: c('Retrocede el dado', 'Retrocede lo que te salga en el dado.', 'atras', { tipo: 'trampa', aclara: 'Tiras el dado y retrocedes lo que salga.' }),
+  58: c('Retrocede el dado', 'Retrocede lo que te salga en el dado.', 'atras', { sello: '−Dado', tipo: 'trampa', aclara: 'Tiras el dado y retrocedes lo que salga.' }),
   59: c('Shot por cada ex', 'Un shot por cada ex.', 'shot', { aclara: 'Tómate un shot por cada ex que tengas.' }),
   60: c('Ruleta de la victoria', 'Llegaste: gira la ruleta y cobra tu premio.', 'trofeo', { tipo: 'meta' }),
 };

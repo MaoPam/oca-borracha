@@ -223,8 +223,8 @@ export default function App() {
   const encabezado = (
     <header className="top">
       <div>
-        <h1><svg aria-hidden="true"><use href="#i-oca" /></svg><span>Oca Borracha</span></h1>
-        <p className="lema">Hazifest Vol. 1. El juego más culero del momento.</p>
+        <h1>Oca Borracha</h1>
+        <p className="lema"><span className="cinta">Hazifest Vol. 1</span>El juego más culero del momento</p>
       </div>
       {partida.fase === 'jugando' && (
         <div className="ctl">
@@ -364,10 +364,10 @@ export default function App() {
 
           <section className="herramientas">
             <button type="button" className="tarjeta-sticker herramienta" onClick={() => abrirReto(false)}>
-              <svg aria-hidden="true"><use href="#i-reto" /></svg><strong>Reto manual</strong><span>¿Alguien rompió una regla?</span>
+              <strong>Reto manual</strong><span>¿Alguien rompió una regla?</span>
             </button>
             <button type="button" className="tarjeta-sticker herramienta" onClick={() => setModalDados({ cuantos: 1, vals: [1], giros: 0, girando: false, res: null })}>
-              <svg aria-hidden="true"><use href="#i-dado" /></svg><strong>Dados extra</strong><span>Para retos con dados</span>
+              <strong>Dados extra</strong><span>Para retos con dados</span>
             </button>
           </section>
 
@@ -396,9 +396,9 @@ export default function App() {
             <h2>Casillas que mueven fichas</h2>
             <ul className="lista-reglas">
               {MOVIMIENTOS.map(([n, txt]) => (
-                <li key={n}><svg className={CASILLAS[n].tipo || ''} aria-hidden="true"><use href={`#i-${CASILLAS[n].icono}`} /></svg><span><strong>{n}. {CASILLAS[n].corto}.</strong> {txt}</span></li>
+                <li key={n}><span className={`sello-mini ${CASILLAS[n].tipo || ''}`}>{CASILLAS[n].sello || n}</span><span><strong>{n}. {CASILLAS[n].corto}.</strong> {txt}</span></li>
               ))}
-              <li><svg aria-hidden="true"><use href="#i-estrella" /></svg><span><strong>Comodines ({COMODINES.join(', ')}).</strong> Puedes hacer lo de la lona o cambiarlo por un reto misterioso.</span></li>
+              <li><svg className="estrella-mini" aria-hidden="true"><use href="#i-estrella" /></svg><span><strong>Comodines ({COMODINES.join(', ')}).</strong> Puedes hacer lo de la lona o cambiarlo por un reto misterioso.</span></li>
             </ul>
           </div>
           <div>
