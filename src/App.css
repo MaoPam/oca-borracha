@@ -13,7 +13,12 @@
   --amarillo: #ffe500;
   --rojo: #e0001b;
   --tinta: #111;
+  --verdin: #2f6b63;
+  --verdin2: #16332f;
+  --lunares: radial-gradient(circle at 50% 50%, rgba(0,0,0,.55) 1.7px, transparent 1.8px);
+  --tela: repeating-linear-gradient(90deg, #6d0715 0 7px, #a50f22 7px 15px, #e0001b 15px 22px, #a50f22 22px 29px);
   --grano: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .3 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E");
+  --picado: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46'%3E%3Crect x='4' y='3' width='7' height='9' fill='%23ff3d9a' transform='rotate(18 7 7)'/%3E%3Crect x='26' y='8' width='6' height='8' fill='%23ffe500' transform='rotate(-24 29 12)'/%3E%3Crect x='15' y='26' width='8' height='6' fill='%23e0001b' transform='rotate(35 19 29)'/%3E%3Crect x='35' y='30' width='6' height='7' fill='%23f4efe4' transform='rotate(-12 38 33)'/%3E%3C/svg%3E");
   --grano-suave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E");
   --leopardo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='120'%3E%3Cg fill='%232a1405'%3E%3Cpath d='M13.9 28.5 L12.0 27.2 L10.8 25.3 L12.4 23.3 L13.1 21.6 L13.0 19.5 L14.3 18.1 L15.1 16.2 L18.7 20.3 L17.4 20.5 L16.3 21.2 L16.3 22.4 L16.2 23.6 L17.1 24.6 L16.5 25.8 L17.7 26.4Z'/%3E%3Cpath d='M22.5 14.6 L24.6 14.2 L26.6 14.7 L28.5 15.8 L30.0 17.3 L31.4 18.9 L30.9 21.3 L32.4 23.1 L27.1 23.5 L26.8 22.6 L27.3 21.1 L26.4 20.3 L25.6 19.4 L24.5 18.9 L23.5 18.5 L22.3 17.9Z'/%3E%3Cpath d='M30.1 29.8 L28.6 31.0 L27.1 32.0 L26.1 34.2 L23.8 33.1 L22.0 33.8 L20.1 34.1 L18.4 33.2 L20.0 29.2 L20.9 29.7 L22.0 29.0 L23.1 29.6 L23.9 28.7 L24.9 28.6 L26.4 28.6 L26.5 27.2Z'/%3E%3Cpath d='M82.3 4.5 L85.0 4.5 L86.8 6.2 L88.4 8.1 L89.4 10.4 L91.4 12.3 L92.2 14.9 L90.7 17.4 L85.4 16.8 L84.1 15.5 L85.2 14.0 L84.6 12.8 L84.4 11.1 L83.2 10.3 L81.4 10.3 L80.4 9.6Z'/%3E%3Cpath d='M86.0 25.9 L83.1 26.7 L80.6 27.4 L77.9 27.5 L74.9 29.3 L72.8 26.5 L70.4 25.4 L68.1 23.7 L71.8 20.8 L74.1 20.8 L74.9 22.2 L76.4 23.0 L78.0 23.9 L79.7 23.5 L81.4 23.0 L82.1 21.2Z'/%3E%3Cpath d='M64.3 18.8 L63.7 15.9 L66.5 13.4 L67.2 11.0 L68.4 8.8 L70.1 6.9 L71.9 4.8 L74.3 3.4 L76.1 9.7 L75.1 10.7 L73.5 10.8 L72.6 11.9 L71.5 13.0 L70.2 14.2 L70.5 15.9 L71.0 17.4Z'/%3E%3Cpath d='M106.0 47.4 L106.7 45.3 L107.8 43.4 L108.8 41.6 L110.0 39.8 L111.8 38.7 L113.9 38.2 L115.3 35.5 L116.7 41.9 L115.8 42.8 L114.4 42.6 L114.1 44.0 L112.7 44.3 L112.2 45.4 L111.1 46.3 L111.5 47.7Z'/%3E%3Cpath d='M122.5 37.8 L125.0 38.4 L127.6 39.6 L128.3 42.3 L128.9 44.8 L128.4 47.3 L129.3 49.8 L129.9 52.7 L123.8 50.3 L123.9 48.9 L123.6 47.6 L124.5 46.1 L123.9 44.8 L122.7 43.9 L121.9 42.6 L120.5 42.2Z'/%3E%3Cpath d='M124.3 57.1 L122.9 58.9 L120.9 60.3 L118.6 60.2 L116.5 58.8 L114.2 59.2 L112.9 57.0 L110.0 57.5 L113.9 52.9 L114.5 54.2 L116.1 53.7 L117.2 53.7 L118.3 54.4 L119.5 54.1 L120.7 54.0 L121.7 53.3Z'/%3E%3Cpath d='M55.0 57.1 L57.2 58.0 L58.2 60.2 L58.2 62.6 L58.7 64.7 L59.5 66.8 L59.0 69.0 L59.4 71.7 L54.8 69.4 L54.3 67.7 L55.5 66.5 L55.6 65.1 L55.2 63.6 L53.6 62.8 L52.7 62.0 L51.8 61.2Z'/%3E%3Cpath d='M54.1 76.9 L51.8 78.8 L48.9 79.1 L46.2 78.0 L43.5 77.8 L40.8 76.9 L40.1 73.6 L37.2 72.6 L41.6 69.9 L42.8 71.0 L44.0 72.0 L45.6 72.2 L47.1 72.0 L48.5 73.2 L49.8 72.1 L51.5 72.3Z'/%3E%3Cpath d='M36.3 64.0 L35.5 61.0 L37.4 58.9 L40.2 58.0 L42.1 56.6 L44.2 55.5 L46.2 52.8 L48.9 53.0 L48.4 60.0 L47.0 58.8 L45.4 58.8 L44.3 60.1 L43.5 61.4 L42.4 62.2 L42.5 63.8 L42.3 65.0Z'/%3E%3Cpath d='M87.7 89.2 L89.5 86.9 L92.7 86.5 L94.8 85.0 L97.2 84.1 L99.7 83.9 L102.4 83.1 L104.7 84.8 L102.7 89.6 L101.2 89.8 L99.8 88.1 L98.4 89.4 L97.0 89.7 L95.6 90.2 L94.0 90.8 L93.9 92.7Z'/%3E%3Cpath d='M111.1 89.2 L112.2 91.6 L111.3 94.4 L112.7 96.9 L111.5 99.2 L110.1 101.3 L110.7 104.8 L107.4 105.2 L104.4 101.5 L105.8 100.8 L106.4 99.3 L106.5 97.8 L107.1 96.5 L107.1 95.0 L107.2 93.4 L105.4 92.7Z'/%3E%3Cpath d='M101.2 108.1 L98.4 109.6 L95.7 108.2 L93.1 107.1 L90.5 105.8 L88.2 103.8 L88.1 100.6 L86.9 98.0 L93.0 97.1 L93.4 98.6 L93.8 100.1 L95.1 101.0 L96.2 102.1 L97.7 102.6 L99.1 103.9 L100.7 103.5Z'/%3E%3Cpath d='M28.2 96.0 L28.3 97.8 L28.1 99.6 L27.5 101.2 L27.9 103.3 L26.4 104.5 L24.9 105.5 L23.9 106.9 L20.0 102.6 L21.7 102.8 L22.6 102.1 L22.6 100.9 L22.4 99.8 L22.3 98.8 L22.2 97.9 L22.7 96.9Z'/%3E%3Cpath d='M18.6 111.4 L16.5 109.5 L14.6 110.9 L13.0 109.3 L10.8 110.1 L8.6 109.9 L8.1 107.3 L6.8 106.1 L11.0 102.3 L12.1 102.6 L12.5 103.6 L13.4 104.0 L14.3 104.6 L15.2 105.2 L16.3 104.6 L17.3 104.8Z'/%3E%3Cpath d='M5.1 101.1 L2.4 100.3 L4.3 98.7 L2.4 97.3 L4.9 96.1 L4.6 94.8 L3.3 92.8 L5.9 92.5 L9.5 94.4 L9.0 95.1 L8.7 95.9 L8.9 96.8 L8.2 97.6 L9.3 98.4 L9.1 99.2 L9.4 99.9Z'/%3E%3Cpath d='M13.2 86.5 L14.6 84.7 L16.4 86.5 L18.4 84.5 L19.6 86.8 L20.8 88.1 L22.3 88.6 L23.9 89.2 L20.7 92.7 L19.5 92.8 L18.8 92.2 L17.9 92.2 L17.0 92.2 L16.3 90.1 L15.3 91.3 L14.2 90.5Z'/%3E%3Cpath d='M60.1 108.2 L61.5 106.3 L62.7 104.3 L64.4 102.6 L66.6 101.6 L68.9 99.8 L71.4 101.2 L74.0 101.2 L72.0 106.6 L70.8 106.0 L69.5 106.6 L68.2 106.4 L67.2 107.3 L65.4 107.1 L64.7 108.4 L64.6 109.9Z'/%3E%3Cpath d='M78.4 105.8 L81.1 106.6 L80.9 109.1 L81.4 111.2 L82.3 113.4 L80.7 115.3 L80.2 117.4 L79.4 119.5 L75.6 116.5 L75.3 114.8 L76.6 114.1 L76.7 112.8 L76.6 111.5 L75.9 110.4 L75.4 109.4 L74.4 108.7Z'/%3E%3Cpath d='M72.2 123.9 L69.5 122.8 L67.2 122.2 L65.1 121.1 L61.8 121.4 L59.9 119.4 L59.0 116.7 L59.3 114.0 L64.3 113.1 L64.5 114.3 L65.0 115.7 L66.3 116.3 L67.1 117.5 L68.4 117.7 L69.7 119.2 L71.3 119.1Z'/%3E%3Cpath d='M76.6 29.3m-2.4 0a2.4 2 39 1 0 4.8 0a2.4 2 0 1 0-4.8 0'/%3E%3Cpath d='M30.5 22.0m-2.4 0a2.4 2 42 1 0 4.8 0a2.4 2 0 1 0-4.8 0'/%3E%3Cpath d='M53.4 57.0m-2.4 0a2.4 2 64 1 0 4.8 0a2.4 2 0 1 0-4.8 0'/%3E%3Cpath d='M91.8 29.8m-2.4 0a2.4 2 0 1 0 4.8 0a2.4 2 0 1 0-4.8 0'/%3E%3Cpath d='M12.7 98.0m-2.4 0a2.4 2 18 1 0 4.8 0a2.4 2 0 1 0-4.8 0'/%3E%3Cpath d='M55.9 5.0m-2.4 0a2.4 2 2 1 0 4.8 0a2.4 2 0 1 0-4.8 0'/%3E%3Cpath d='M42.0 75.6m-2.4 0a2.4 2 10 1 0 4.8 0a2.4 2 0 1 0-4.8 0'/%3E%3Cpath d='M82.0 63.5m-2.4 0a2.4 2 19 1 0 4.8 0a2.4 2 0 1 0-4.8 0'/%3E%3Cpath d='M92.1 85.9m-2.4 0a2.4 2 76 1 0 4.8 0a2.4 2 0 1 0-4.8 0'/%3E%3C/g%3E%3C/svg%3E");
   --gotica: "UnifrakturMaguntia", "Old English Text MT", serif;
@@ -22,7 +27,8 @@
 }
 * { box-sizing: border-box; min-width: 0; }
 html { background: var(--negro); }
-body { margin: 0; min-height: 100vh; color: var(--papel); font: 16px/1.5 var(--texto); overflow-x: clip; background: var(--negro); }
+body { margin: 0; min-height: 100vh; color: var(--papel); font: 16px/1.5 var(--texto); overflow-x: clip;
+  background: var(--lunares) 0 0 / 19px 19px, repeating-linear-gradient(118deg, #15052b 0 52px, #220a33 52px 104px, #2d0a24 104px 150px); }
 body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1; background: var(--grano); filter: invert(1); opacity: .1; }
 body::after { content: ""; position: fixed; right: -10vw; top: -10vh; width: 60vw; height: 70vh; pointer-events: none; z-index: -1; background: radial-gradient(circle, var(--fluor) 1.3px, transparent 1.8px) 0 0 / 9px 9px; -webkit-mask: radial-gradient(closest-side, #000, transparent); mask: radial-gradient(closest-side, #000, transparent); opacity: .5; }
 button, input { font: inherit; }
@@ -44,6 +50,12 @@ button:disabled { cursor: default; }
 .btn-cromo, .btn-rosa, .btn-dorado, .btn-tirar { min-height: 44px; padding: 0 16px; border: 3px solid #000; border-radius: 6px; font: 400 18px/1 var(--cartel); text-transform: uppercase; letter-spacing: .02em; color: #000; box-shadow: 4px 4px 0 #000; transition: transform .06s, box-shadow .06s; }
 .btn-cromo { background: var(--papel); }
 .top .btn-cromo { box-shadow: 3px 3px 0 var(--fluor); }
+/* Jugando, el encabezado se encoge: el titulo gigante se come ~100px de tablero. */
+.top.compacto { max-width: 1760px; padding: 7px max(10px, 1.4vw); align-items: center; }
+.top.compacto > div { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.top.compacto h1 { font-size: clamp(24px, 3.1vw, 40px); text-shadow: 2px 2px 0 var(--fluor); }
+.top.compacto .lema { margin: 0; font-size: 13px; }
+.top.compacto .cinta { padding: 2px 8px 3px; }
 .btn-cromo[aria-pressed="true"] { background: var(--amarillo); }
 .btn-rosa, .btn-tirar { background: var(--fluor); }
 .btn-dorado { background: var(--amarillo); }
@@ -56,9 +68,7 @@ button:disabled { cursor: default; }
 /* ---------- Papeles pegados con cinta ---------- */
 .tarjeta-sticker { position: relative; background: var(--grano-suave), var(--papel); color: var(--tinta); border: 2px solid #000; border-radius: 3px; padding: 20px 16px 16px; }
 .tarjeta-sticker::before { content: ""; position: absolute; top: -11px; left: 50%; width: 96px; height: 22px; transform: translateX(-50%) rotate(-3deg); background: rgba(232, 214, 168, .82); box-shadow: 0 1px 0 rgba(0, 0, 0, .25); }
-.lado > .tarjeta-sticker:nth-child(odd), .setup > .tarjeta-sticker:nth-child(odd) { transform: rotate(-.5deg); }
-.lado > .tarjeta-sticker:nth-child(even) { transform: rotate(.4deg); }
-.lado > .tarjeta-sticker:nth-child(even)::before { left: 22%; transform: rotate(4deg); }
+.setup > .tarjeta-sticker:nth-child(odd) { transform: rotate(-.5deg); }
 .tarjeta-sticker h2, details summary { margin: 0 0 10px; font: 400 32px/1 var(--gotica); color: #000; }
 .tarjeta-sticker h2 { display: inline; background: linear-gradient(transparent 58%, var(--fluor) 58% 90%, transparent 90%); }
 .tarjeta-sticker h2 + * { margin-top: 12px; }
@@ -81,59 +91,307 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 @media (max-width: 600px) { .registro { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- Juego ---------- */
-.app { max-width: 1320px; margin: 0 auto; padding: 0 max(16px, 3vw) 48px; display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); }
-.lado { display: grid; gap: 26px; align-content: start; align-items: start; grid-template-columns: minmax(0, 1fr); }
+/* El tablero manda: crece hasta donde la ALTURA de la pantalla se lo permita.
+   Como su proporcion es 1.55, de la altura disponible sale el ancho maximo util.
+   --fuera es lo que ocupan el encabezado y los margenes; subelo o bajalo si queda corto. */
+.app { --fuera: 92px; max-width: 1760px; margin: 0 auto; padding: 0 max(10px, 1.4vw) 48px; display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); }
+.col-tablero { display: grid; justify-items: center; }
+/* 1.78 y no 1.55 (su proporcion exacta) a proposito: deja que el tablero se pase
+   un poco del alto de la ventana a cambio de casillas visiblemente mas grandes.
+   Con 1.55 cabia entero pero las casillas quedaban de 74px e ilegibles. */
+.col-tablero .tablero-caja { width: 100%; max-width: min(100%, calc((100dvh - var(--fuera)) * 2.2)); }
+@media (max-width: 760px) { .app { --fuera: 96px; padding-bottom: 96px; } }
 .ancho { grid-column: 1 / -1; }
-@media (min-width: 760px) and (max-width: 1099px) { .lado { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1100px) { .app { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; } }
+/* Ya no hay columna lateral: el panel vive en la burbuja flotante. */
+
+/* ---------- Fichas de cada jugador ---------- */
+/* .pieza es la parte grande que lleva el color del jugador: asi dos personas
+   con la misma ficha se siguen distinguiendo de lejos. */
+.ficha .pieza { fill: var(--c); stroke: #000; stroke-linejoin: miter; }
+.f-corcholata .pieza, .f-cheeto .pieza { stroke-linejoin: round; }
+/* Cada ficha se mueve a su manera cuando le toca caminar. */
+.app.rodando .ficha.activa .menea { animation: menea .4s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 85%; }
+.app.rodando .ficha.activa .vuela .ala { animation: aletea .22s ease-in-out infinite alternate; transform-box: fill-box; }
+.app.rodando .ficha.activa .vuela .ala.i { transform-origin: 100% 40%; }
+.app.rodando .ficha.activa .vuela .ala.d { transform-origin: 0% 40%; animation-delay: -.11s; }
+.app.rodando .ficha.activa .prende .llama { animation: tiembla .17s steps(2, end) infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes menea { from { transform: rotate(-13deg); } to { transform: rotate(13deg); } }
+@keyframes aletea { from { transform: rotate(-26deg); } to { transform: rotate(22deg); } }
+@keyframes tiembla { 50% { transform: scale(1.18, .88) translateX(1px); } }
+/* El encendedor solo prende cuando camina; quieto es solo el cuerpo. */
+.ficha .llama { opacity: 0; }
+.app.rodando .ficha.activa .llama { opacity: 1; }
+.ficha-mini { flex: none; width: 26px; height: 36px; filter: drop-shadow(1.5px 1.5px 0 #000); }
+
+/* ---------- Escoger ficha ---------- */
+.pick-ficha { grid-column: 1 / -1; margin: 4px 0 0; padding: 10px 12px 12px; border: 2px dashed #000;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px; }
+.pick-ficha legend { padding: 0 6px; font: 400 14px/1 var(--cartel); text-transform: uppercase; letter-spacing: .04em; }
+.pick { display: grid; justify-items: center; gap: 4px; padding: 8px 4px 6px; background: var(--papel);
+  border: 2px solid #000; cursor: pointer; transform: rotate(var(--r, 0deg));
+  transition: transform .1s, box-shadow .1s; }
+.pick svg { width: 34px; height: 48px; filter: drop-shadow(2px 2px 0 #000); }
+.pick span { font: 400 12px/1 var(--cartel); text-transform: uppercase; color: #000; }
+.pick:hover { transform: rotate(0deg) translateY(-2px); box-shadow: 3px 3px 0 #000; }
+.pick.puesta { background: var(--amarillo); transform: rotate(0deg); box-shadow: 4px 4px 0 #000, 0 0 0 3px var(--fluor); }
+
+/* ---------- Telon de apertura ---------- */
+/* Una cortina de verdad: pliegues verticales, borde interior ondulado, cenefa
+   colgando arriba, y al abrirse la tela SE RECOGE (scaleX) en vez de solo correrse. */
+.telon-abre { position: fixed; inset: 0; z-index: 60; pointer-events: none;
+  display: grid; place-items: center; overflow: hidden; }
+.telon-abre .hoja { position: absolute; top: 0; bottom: 0; width: 52%;
+  background: repeating-linear-gradient(90deg, #5e0612 0 15px, #9c0e20 15px 33px, #e0001b 33px 49px, #9c0e20 49px 64px); }
+.telon-abre .izq { left: 0; transform-origin: left center;
+  clip-path: polygon(0 0, 100% 0, 93% 7%, 100% 14%, 92% 21%, 100% 28%, 93% 35%, 100% 42%, 91% 49%, 100% 56%, 93% 63%, 100% 70%, 92% 77%, 100% 84%, 93% 91%, 100% 97%, 0 100%);
+  animation: abre-izq 2.25s cubic-bezier(.55, 0, .25, 1) forwards; }
+.telon-abre .der { right: 0; transform-origin: right center;
+  clip-path: polygon(100% 0, 0 0, 7% 7%, 0 14%, 8% 21%, 0 28%, 7% 35%, 0 42%, 9% 49%, 0 56%, 7% 63%, 0 70%, 8% 77%, 0 84%, 7% 91%, 0 97%, 100% 100%);
+  animation: abre-der 2.25s cubic-bezier(.55, 0, .25, 1) forwards; }
+/* 0-26%: quieta. Luego se recoge hacia su lado mientras se va. */
+@keyframes abre-izq {
+  0%, 26% { transform: translateX(0) scaleX(1); }
+  62% { transform: translateX(-32%) scaleX(.76); }
+  100% { transform: translateX(-102%) scaleX(.58); }
+}
+@keyframes abre-der {
+  0%, 26% { transform: translateX(0) scaleX(1); }
+  62% { transform: translateX(32%) scaleX(.76); }
+  100% { transform: translateX(102%) scaleX(.58); }
+}
+/* La cenefa cae primero y se queda: es de donde cuelgan las hojas. */
+.telon-abre .volante { position: absolute; top: 0; left: 0; right: 0; z-index: 2;
+  height: clamp(44px, 10vh, 104px); border-bottom: 4px solid #000;
+  background: repeating-linear-gradient(90deg, #5e0612 0 15px, #9c0e20 15px 33px, #e0001b 33px 49px, #9c0e20 49px 64px);
+  clip-path: polygon(0 0,100% 0,100% 58%,96% 95%,92% 56%,88% 97%,84% 58%,80% 93%,76% 56%,72% 96%,68% 59%,64% 92%,60% 56%,56% 97%,52% 58%,48% 93%,44% 56%,40% 96%,36% 59%,32% 92%,28% 56%,24% 97%,20% 58%,16% 93%,12% 56%,8% 96%,4% 59%,0 91%);
+  animation: cae-volante .46s cubic-bezier(.2, .9, .3, 1); }
+@keyframes cae-volante { from { transform: translateY(-100%); } }
+.telon-abre .ojo-telon { position: absolute; z-index: 3; top: clamp(30px, 7.4vh, 78px);
+  width: clamp(40px, 7vh, 72px); height: clamp(40px, 7vh, 72px);
+  filter: drop-shadow(3px 4px 0 #000); animation: baja-ojo 2.25s cubic-bezier(.3, .9, .3, 1) forwards; }
+@keyframes baja-ojo { 0% { transform: translateY(-80px) rotate(-18deg); } 22%, 58% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-120px) rotate(14deg); } }
+/* El titulo se estampa a golpes (steps), no aparece suave: es un cartel fotocopiado. */
+.telon-abre b { position: relative; z-index: 4; padding: 10px 22px 15px; background: #000; color: var(--amarillo);
+  border: 4px solid var(--papel); box-shadow: 0 0 0 3px #000, 7px 8px 0 #000;
+  font: 400 clamp(26px, 6.4vw, 60px)/1 var(--gotica); text-align: center; transform: rotate(-2deg);
+  animation: estampa 2.25s steps(1, end) forwards; }
+@keyframes estampa {
+  0% { opacity: 0; transform: rotate(-2deg) scale(1.55); }
+  7% { opacity: 1; transform: rotate(-2deg) scale(1); }
+  11% { transform: rotate(-2deg) scale(1.07); }
+  15% { transform: rotate(-2deg) scale(1); }
+  58% { opacity: 1; }
+  66%, 100% { opacity: 0; }
+}
+
+/* ---------- Letrero de la casilla ---------- */
+/* Aparece cuando el muñeco termina de caminar, antes de que vuelva la burbuja. */
+.letrero { position: fixed; z-index: 46; left: 50%; bottom: 7vh; transform: translateX(-50%) rotate(-1.1deg);
+  width: min(92vw, 540px); padding: 0; display: flex; gap: 0; text-align: left; cursor: pointer;
+  background: var(--papel); color: #000; border: 0;
+  clip-path: polygon(1% 3%, 46% 0, 99% 2%, 98% 46%, 100% 97%, 51% 100%, 2% 98%, 0 48%);
+  filter: drop-shadow(8px 9px 0 #000); animation: entra-letrero .26s cubic-bezier(.2, .9, .25, 1); }
+@keyframes entra-letrero { from { opacity: 0; transform: translateX(-50%) translateY(22px) rotate(-1.1deg); } }
+.letrero-meme { flex: none; width: 34%; align-self: stretch; object-fit: cover; filter: contrast(1.12) saturate(1.14); }
+.letrero-caja { flex: 1; min-width: 0; display: grid; gap: 4px; padding: 14px 16px 15px; }
+.letrero-num { font: 400 clamp(26px, 5vw, 38px)/1 var(--gotica); }
+.letrero strong { font: 400 clamp(19px, 3.6vw, 27px)/1.02 var(--cartel); text-transform: uppercase; }
+.letrero-txt { font: 400 15px/1.3 var(--texto); }
+.letrero small { margin-top: 4px; padding: 7px 9px; background: #000; color: var(--papel); font-size: 13px; line-height: 1.35; }
+
+/* ---------- Carril de celular ---------- */
+/* Las 60 casillas en una tira que se desliza sola hasta centrar al muñeco del turno. */
+.cambia-vista { justify-self: center; margin-bottom: 12px; }
+.carril-caja { width: 100%; padding: 12px 0; background: var(--grano), #161616;
+  border: 4px solid var(--fluor); border-radius: 8px;
+  box-shadow: 0 0 0 3px var(--papel), 0 0 0 6px #000; overflow: hidden; }
+.carril { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scrollbar-width: none;
+  /* El relleno lateral de media caja menos media casilla es lo que permite
+     que la primera y la ultima tambien puedan quedar centradas. */
+  padding: 14px calc(50% - 68px); }
+.carril::-webkit-scrollbar { display: none; }
+.carril .casilla { flex: none; width: 136px; aspect-ratio: .82; scroll-snap-align: center; }
+/* En el carril la casilla es grande de verdad, asi que la letra se fija en px:
+   el cqi de aqui mide la tira completa, no la casilla. */
+.carril .casilla b { font-size: 27px; }
+.carril .casilla .lab { font-size: 15px; -webkit-line-clamp: 3; }
+.carril .casilla { --filo: 1.9px; }
+.carril .fichas { top: 24%; }
+.carril .ficha { width: 30px; }
+.carril .fichas.muchas .ficha { width: 21px; }
+
+/* ---------- Burbuja flotante ---------- */
+.burbuja { position: fixed; z-index: 45; width: 62px; height: 62px; padding: 0;
+  display: grid; place-items: center; border: 3px solid #000; border-radius: 50%;
+  background: var(--c); color: #000; cursor: grab; box-shadow: 4px 5px 0 #000;
+  /* touch-action: none es lo que deja arrastrarla con el dedo sin que la pagina se mueva. */
+  touch-action: none; transition: transform .1s, box-shadow .1s; }
+.burbuja:active { cursor: grabbing; transform: scale(.94); box-shadow: 2px 2px 0 #000; }
+.burbuja.activa { background: var(--papel); }
+.burbuja-inicial { font: 400 30px/1 var(--cartel); text-transform: uppercase; pointer-events: none; }
+.burbuja.alerta { animation: tocame 1.15s ease-in-out infinite; }
+@keyframes tocame { 50% { transform: scale(1.11); } }
+
+.burbuja-panel { position: fixed; z-index: 44;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
+  width: min(94vw, 390px); max-height: min(76vh, 740px);
+  display: flex; flex-direction: column;
+  background: var(--grano), #161616; border: 3px solid #000;
+  box-shadow: 7px 8px 0 #000, 0 0 0 3px var(--fluor); animation: aparece .18s ease-out; }
+.burbuja-tope { flex: none; display: flex; align-items: center; gap: 9px; padding: 11px 13px; background: #000; }
+.burbuja-tope strong { flex: 1; min-width: 0; font: 400 20px/1 var(--cartel); text-transform: uppercase;
+  color: var(--papel); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.burbuja-tope .cerrar { flex: none; width: 32px; height: 32px; padding: 0; background: var(--papel);
+  color: #000; border: 2px solid var(--papel); font: 400 22px/1 var(--cartel); cursor: pointer; }
+.burbuja-cuerpo { flex: 1; min-height: 0; overflow: auto; display: grid; gap: 18px; padding: 14px; align-content: start; }
+.burbuja-cuerpo > .tarjeta-sticker:nth-child(odd) { transform: rotate(-.5deg); }
+.burbuja-cuerpo > .tarjeta-sticker:nth-child(even) { transform: rotate(.4deg); }
+.burbuja-cuerpo > .tarjeta-sticker:nth-child(even)::before { left: 22%; transform: rotate(4deg); }
 
 /* ---------- Tablero: stickers sobre lámina negra ---------- */
-.tablero-caja { container-type: inline-size; padding: 12px; }
-.tablero { position: relative; width: 100%; aspect-ratio: 1.55; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); grid-template-rows: repeat(7, minmax(0, 1fr)); gap: .9%; padding: 2.6%; background: var(--grano), #161616; border: 5px solid var(--fluor); border-radius: 8px; box-shadow: 0 0 0 4px var(--papel), 0 0 0 7px #000; }
+/* Teatro de papel: el tablero es el escenario. Telon recortado arriba, candilejas abajo.
+   Las candilejas son un solo radial-gradient repetido, no 13 elementos en el HTML. */
+.tablero-caja { position: relative; container-type: inline-size;
+  padding: clamp(20px, 3.2vw, 40px) clamp(22px, 4.6vw, 82px) clamp(11px, 1.7vw, 18px);
+  background: radial-gradient(circle at 50% 50%, var(--amarillo) 0 3.4px, #000 3.4px 5.4px, transparent 5.5px) 50% 100% / 32px 13px repeat-x; }
+/* Cenefa: la tela que cuelga arriba, con sus pliegues y su borde festoneado. */
+.cenefa { position: absolute; inset: 0 0 auto; z-index: 5; pointer-events: none;
+  height: clamp(18px, 3vw, 34px); background: var(--tela);
+  border-bottom: 2px solid #000;
+  clip-path: polygon(0 0,100% 0,100% 56%,96% 94%,92% 54%,88% 96%,84% 56%,80% 92%,76% 54%,72% 95%,68% 57%,64% 91%,60% 54%,56% 96%,52% 56%,48% 92%,44% 54%,40% 95%,36% 57%,32% 91%,28% 54%,24% 96%,20% 56%,16% 92%,12% 54%,8% 95%,4% 57%,0 90%); }
+/* Cortinas laterales: mismos pliegues, borde interior ondulado, recogidas hacia afuera. */
+.cortina { position: absolute; top: 0; bottom: 0; z-index: 4; pointer-events: none;
+  width: clamp(22px, 4.6vw, 82px); background: var(--tela); }
+.cortina.izq { left: 0;
+  clip-path: polygon(0 0, 100% 0, 83% 8%, 100% 16%, 81% 24%, 100% 32%, 83% 40%, 100% 48%, 80% 56%, 100% 64%, 84% 72%, 100% 80%, 81% 88%, 100% 95%, 86% 100%, 0 100%); }
+.cortina.der { right: 0; transform: scaleX(-1);
+  clip-path: polygon(0 0, 100% 0, 83% 8%, 100% 16%, 81% 24%, 100% 32%, 83% 40%, 100% 48%, 80% 56%, 100% 64%, 84% 72%, 100% 80%, 81% 88%, 100% 95%, 86% 100%, 0 100%); }
+/* Un ojo colgado del centro de la cenefa: el motivo que mas repite Inu Curry. */
+.ojo-teatro { position: absolute; z-index: 6; top: clamp(6px, 1.2vw, 14px); left: 50%;
+  width: clamp(22px, 3.4vw, 40px); height: clamp(22px, 3.4vw, 40px); margin-left: clamp(-20px, -1.7vw, -11px);
+  pointer-events: none; filter: drop-shadow(2px 2px 0 #000); }
+.tablero { position: relative; width: 100%; aspect-ratio: 1.55; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); grid-template-rows: repeat(7, minmax(0, 1fr)); gap: .8%; padding: 1.5%; background: var(--lunares) 0 0 / 15px 15px, var(--grano), var(--verdin2); border: 5px solid var(--fluor); border-radius: 8px; box-shadow: 0 0 0 4px var(--papel), 0 0 0 7px #000; }
 .gema { position: absolute; width: 30px; height: 30px; z-index: 4; pointer-events: none; }
 .gema.g1 { top: -19px; left: -19px; } .gema.g2 { top: -19px; right: -19px; transform: rotate(20deg); }
 .gema.g3 { bottom: -19px; left: -19px; transform: rotate(-15deg); } .gema.g4 { bottom: -19px; right: -19px; transform: rotate(8deg); }
-.casilla { position: relative; margin: 0; padding: 5px 6px; border: 2px solid #000; border-radius: 4px; background: var(--grano-suave), var(--papel); color: #000; text-align: left; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; transform: rotate(var(--r, 0deg)); transition: transform .12s; }
+.casilla { position: relative; margin: 0; padding: 2.5% 3.5% 3.5%; border: 2px solid #000; border-radius: 4px; background: var(--grano-suave), var(--papel); color: #000; text-align: left; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; transform: rotate(var(--r, 0deg)); transition: transform .12s, filter .12s; filter: drop-shadow(2px 3px 0 #000); }
 .casilla:nth-child(3n) { background: var(--grano-suave), var(--papel2); }
 .casilla.comodin { background: var(--grano-suave), var(--fluor); }
 .casilla.bonus { background: var(--grano-suave), var(--amarillo); }
 .casilla.trampa { background: var(--grano-suave), var(--rojo); color: var(--papel); }
 .casilla.inicio { background: var(--grano), repeating-conic-gradient(#000 0 25%, var(--papel) 0 50%) 0 0 / 12px 12px; }
 .casilla.inicio b { background: var(--papel); padding: 0 4px 2px; align-self: flex-start; border: 2px solid #000; }
-.casilla:hover { transform: rotate(0deg) translateY(-2px); }
-.casilla.resaltada { transform: rotate(0deg) scale(1.06); z-index: 3; box-shadow: 0 0 0 3px var(--amarillo), 4px 4px 0 3px #000; }
-.casilla b { font: 400 22px/.9 var(--gotica); }
-.casilla .lab { font: 400 13px/1.02 var(--cartel); text-transform: uppercase; letter-spacing: .01em; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.sello { position: absolute; top: 4px; right: 4px; padding: 1px 5px 2px; background: #000; color: var(--papel); font: 400 13px/1.1 var(--cartel); text-transform: uppercase; transform: rotate(4deg); }
+.casilla.resaltada { transform: rotate(0deg) scale(1.06); z-index: 3; --marca: var(--amarillo); filter: drop-shadow(4px 5px 0 #000); }
+/* Al pasar el dedo encima: la casilla se endereza, se levanta y suelta el titulo completo. */
+.casilla:hover, .casilla:focus-visible { transform: rotate(0deg) translateY(-3px) scale(1.05); z-index: 4; --marca: var(--amarillo); filter: drop-shadow(6px 7px 0 #000); outline: none; }
+.casilla:hover .lab, .casilla:focus-visible .lab { -webkit-line-clamp: 7; }
+.casilla:active { transform: rotate(0deg) translateY(1px) scale(.97); filter: drop-shadow(1px 1px 0 #000); }
+/* El numero siempre es chapita en la esquina y el titulo siempre se queda abajo:
+   una sola manera de armar la casilla, sin escalones por ancho. La letra crece con cqi
+   (porcentaje del ancho del tablero), que es lo unico que sigue el tamaño real de la casilla. */
+.casilla b { position: absolute; top: 1.5%; left: 3%; z-index: 2; font: 400 clamp(9px, 1.95cqi, 26px)/.86 var(--gotica); }
+.casilla .lab { margin-top: auto; font: 400 clamp(6.5px, 1.32cqi, 15px)/1 var(--cartel);
+  text-transform: uppercase; letter-spacing: 0; display: -webkit-box; -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; hyphens: auto; }
+.sello { position: absolute; top: 2%; right: 3%; padding: 1px 5px 2px; background: #000; color: var(--papel); font: 400 clamp(7px, 1.15cqi, 13px)/1.1 var(--cartel); text-transform: uppercase; transform: rotate(4deg); }
 .casilla.trampa .sello { background: var(--papel); color: #000; }
-.estrella { position: absolute; top: 2px; right: 2px; width: 30%; height: 40%; transform: rotate(14deg); }
+.bruja { position: absolute; top: -4%; right: -4%; width: 34%; height: 40%; transform: rotate(13deg); filter: drop-shadow(1.5px 1.5px 0 var(--papel)); z-index: 3; }
 .tablero > .meta { position: relative; border: 2px solid #000; border-radius: 4px; overflow: hidden; display: grid; place-items: center; padding: 0 4%; background: var(--leopardo) 0 0 / 140px 120px, var(--grano), #e9a43c; transform: rotate(-.6deg); }
 .meta-letrero { display: inline-flex; align-items: baseline; gap: .4em; padding: .15em .55em .25em; background: #000; color: var(--papel); border: 3px solid var(--papel); box-shadow: 0 0 0 2px #000; font: 400 clamp(18px, 3.4cqi, 40px)/1 var(--gotica); transform: rotate(-2deg); white-space: nowrap; }
 .meta-letrero small { font: 400 .62em/1 var(--cartel); color: var(--amarillo); }
 
 /* Fichas de corazón */
-.fichas { position: absolute; left: 30%; right: 18%; top: 3px; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 1px; pointer-events: none; z-index: 2; }
+.fichas { position: absolute; left: 0; right: 0; top: 17%; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 1px; pointer-events: none; z-index: 2; }
 .meta .fichas { top: auto; bottom: 5%; left: auto; right: 2%; width: 22%; }
-.ficha { width: clamp(16px, 3.4cqi, 36px); aspect-ratio: 40 / 37; filter: drop-shadow(2px 2px 0 #000); animation: salto .22s ease-out; }
-.fichas.muchas .ficha { width: clamp(12px, 2.3cqi, 26px); }
+.ficha { position: relative; width: clamp(11px, 2.3cqi, 24px); aspect-ratio: 40 / 56; filter: drop-shadow(2px 2px 0 #000); animation: salto .22s cubic-bezier(.2, .9, .25, 1); }
+.fichas.muchas .ficha { width: clamp(8px, 1.6cqi, 17px); }
+/* Las piezas de la marioneta: papel recortado con borde negro, el color del jugador en el torso. */
+.ficha .torso { fill: var(--c); }
+.ficha .craneo { fill: var(--papel); }
+.ficha .brazo path { fill: var(--papel); }
+.ficha .pierna path { fill: var(--c); }
+.ficha .pierna.d path { fill: var(--papel); }
+.ficha path { stroke: #000; stroke-width: 2.2; stroke-linejoin: miter; }
+/* transform-box: fill-box hace que el origen se mida dentro de la pieza, no del dibujo entero:
+   asi cada pieza gira sobre SU articulacion (la cadera, el hombro, el cuello). */
+.ficha .pierna, .ficha .brazo, .ficha .cabeza { transform-box: fill-box; }
+.ficha .pierna { transform-origin: 50% 6%; }
+.ficha .brazo { transform-origin: 50% 8%; }
+.ficha .cabeza { transform-origin: 50% 96%; }
 .ficha svg { width: 100%; height: 100%; overflow: visible; }
-.ficha text { font: 400 16px var(--cartel); fill: var(--tc); text-anchor: middle; }
-.ficha.activa { animation: salto .22s ease-out, latido 1s ease-in-out .3s infinite; }
-@keyframes salto { 0% { transform: translateY(-45%) scale(.85); } 60% { transform: translateY(6%) scale(1.06); } 100% { transform: none; } }
+.ficha text { font: 400 13px var(--cartel); fill: #000; text-anchor: middle; }
+.ficha.activa { animation: salto .22s cubic-bezier(.2, .9, .25, 1), latido 1s ease-in-out .3s infinite; }
+/* Camina solo mientras le toca y el tablero esta en movimiento. Quieta el resto del tiempo. */
+.app.rodando .ficha.activa .pierna { animation: zancada .42s ease-in-out infinite alternate; }
+.app.rodando .ficha.activa .pierna.d { animation-delay: -.21s; }
+.app.rodando .ficha.activa .brazo { animation: zancada .42s ease-in-out infinite alternate-reverse; }
+.app.rodando .ficha.activa .brazo.d { animation-delay: -.21s; }
+.app.rodando .ficha.activa .cabeza { animation: cabecea .84s ease-in-out infinite; }
+@keyframes zancada { from { transform: rotate(-23deg); } to { transform: rotate(23deg); } }
+@keyframes cabecea { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+
+/* Aro duro que se abre donde aterriza la ficha, como sello de tinta. */
+.ficha::after { content: ''; position: absolute; inset: -24%; border: 2px solid var(--c); border-radius: 50%; pointer-events: none; animation: golpe .26s steps(3, end) forwards; }
+@keyframes salto {
+  0% { transform: translate(-30%, -75%) rotate(-18deg) scale(.78); }
+  55% { transform: translateY(9%) rotate(6deg) scale(1.14, .88); }
+  80% { transform: translateY(0) rotate(-3deg) scale(.95, 1.07); }
+  100% { transform: none; }
+}
+@keyframes golpe { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.3); opacity: 0; } }
 @keyframes latido { 50% { transform: scale(1.14); } }
 
+/* ---------- El meme de la lona vive dentro de la casilla ---------- */
+/* La foto va hasta el fondo; todo lo demas se monta encima. */
+.casilla .meme, .meta .meme { position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 0; user-select: none; filter: contrast(1.12) saturate(1.14); }
+.casilla > :not(.meme), .meta > :not(.meme) { position: relative; z-index: 1; }
+/* Sobre foto, el texto necesita contorno negro para leerse, igual que en la lona impresa. */
+.casilla b, .casilla .lab { color: #fff; --filo: clamp(.75px, .17cqi, 1.8px);
+  text-shadow: var(--filo) 0 0 #000, calc(var(--filo) * -1) 0 0 #000, 0 var(--filo) 0 #000, 0 calc(var(--filo) * -1) 0 #000,
+               var(--filo) var(--filo) 0 #000, calc(var(--filo) * -1) var(--filo) 0 #000,
+               var(--filo) calc(var(--filo) * -1) 0 #000, calc(var(--filo) * -1) calc(var(--filo) * -1) 0 #000; }
+.casilla.trampa { color: #fff; }
+/* El tipo de casilla ya no se marca con el fondo (lo tapa la foto) sino con un filo de color. */
+.casilla.comodin { --marca: var(--fluor); }
+.casilla.bonus { --marca: var(--amarillo); }
+.casilla.trampa { --marca: var(--rojo); }
+.casilla.inicio { --marca: var(--papel); }
+.casilla::before { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  border: 3px solid var(--marca, transparent); transition: border-color .12s; }
+/* Recortes de tijera: cuatro siluetas que se van alternando para que ninguna casilla
+   tenga exactamente el mismo borde que su vecina. */
+.casilla:nth-child(4n+1) { clip-path: polygon(1% 2%, 46% 0, 99% 1%, 100% 44%, 98% 99%, 53% 100%, 2% 98%, 0 47%); }
+.casilla:nth-child(4n+2) { clip-path: polygon(2% 0, 51% 2%, 98% 0, 100% 52%, 99% 98%, 44% 100%, 1% 99%, 1% 46%); }
+.casilla:nth-child(4n+3) { clip-path: polygon(0 1%, 42% 1%, 100% 0, 98% 48%, 100% 100%, 49% 98%, 2% 100%, 2% 51%); }
+.casilla:nth-child(4n+4) { clip-path: polygon(1% 1%, 55% 0, 98% 2%, 99% 50%, 97% 98%, 46% 99%, 0 100%, 2% 43%); }
+
+/* ---------- Ambiente: el tablero se prende solo cuando pasa algo ---------- */
+/* Mientras una ficha camina: el tablero se cimbra y el marco cambia de color a golpes. */
+/* Sin cimbra: el tambaleo mareaba. Solo cambian las luces del marco. */
+.app.rodando .tablero { animation: luces .36s steps(1, end) infinite; }
+/* Cuando alguien gana: marco en fiesta y papel picado cayendo encima del tablero. */
+.app.fiesta .tablero { animation: luces .18s steps(1, end) infinite; }
+.app.fiesta .tablero-caja::after {
+  content: ''; position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  background: var(--picado) 0 0 / 46px 46px; animation: cae 1.1s linear infinite;
+}
+/* Destello en la casilla donde acabas de caer: tres golpes y se queda marcada. */
+.casilla.resaltada::before { animation: destello .34s steps(1, end) 3; }
+
+@keyframes luces { 0% { border-color: var(--fluor); } 33% { border-color: var(--amarillo); } 66% { border-color: var(--rojo); } }
+@keyframes cae { to { background-position: 0 46px; } }
+@keyframes destello { 50% { border-color: var(--fluor); } }
+
 @container (max-width: 760px) {
-  .casilla .lab { display: none; }
-  .casilla { padding: 3px 4px; }
-  .casilla b { font-size: 18px; }
-  .sello { font-size: 11px; top: auto; bottom: 3px; right: 3px; }
-  .estrella { top: auto; bottom: 2px; width: 40%; height: 46%; }
-  .fichas { left: 0; right: 0; top: 34%; }
+  .bruja { top: -3%; right: -3%; width: 30%; height: 36%; }
+  .casilla .lab { -webkit-line-clamp: 3; }
 }
 @container (max-width: 470px) {
   .sello { display: none; }
-  .casilla b { font-size: 14px; }
-  .casilla.inicio b { display: none; }
+  .casilla .lab { -webkit-line-clamp: 2; }
+  .casilla.inicio b { padding: 0 2px 1px; border-width: 1px; }
   .tablero { border-width: 3px; padding: 2.4%; }
   .gema { width: 20px; height: 20px; }
   .gema.g1, .gema.g2 { top: -13px; } .gema.g3, .gema.g4 { bottom: -13px; }
@@ -198,7 +456,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .sello-mini.bonus { background: var(--amarillo); }
 .sello-mini.trampa { background: var(--rojo); color: var(--papel); }
 .sello-mini.meta { background: #e9a43c; }
-.estrella-mini { width: 34px; height: 34px; }
+.bruja-mini { width: 34px; height: 34px; }
 .todas { margin: 14px 0 0; padding: 0; list-style: none; columns: 3 17em; column-gap: 28px; font-size: 14px; }
 .todas li { break-inside: avoid; padding: 5px 0; display: grid; grid-template-columns: 2.4em minmax(0, 1fr); border-bottom: 1px dashed #c9bda4; }
 .todas b { font: 400 20px/1 var(--gotica); text-align: right; padding-right: 10px; }
@@ -221,7 +479,18 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 
 /* ---------- Dado de peluche ---------- */
 .dado-caja { position: relative; perspective: 420px; flex: none; pointer-events: none; }
-.dado { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 1s cubic-bezier(.15, .8, .25, 1); }
+.dado { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 1s cubic-bezier(.17, .85, .22, 1); }
+/* El giro 3D lo hace .dado; el brinco y el aplaston al caer los hace la caja,
+   asi las dos animaciones no se pisan entre si. */
+.dado-caja.girando { animation: brinca-dado 1s cubic-bezier(.3, .8, .3, 1); }
+@keyframes brinca-dado {
+  0%   { transform: translateY(0) scale(1); }
+  22%  { transform: translateY(-42%) scale(1.07, .93); }
+  52%  { transform: translateY(0) scale(.9, 1.1); }
+  68%  { transform: translateY(-15%) scale(1.04, .96); }
+  86%  { transform: translateY(0) scale(.95, 1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
 .cara { position: absolute; inset: 0; border: 3px solid #000; border-radius: 18%; display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: 14%; backface-visibility: hidden; background: var(--grano), var(--grano), #ff7ab8; box-shadow: inset 0 -5px 0 rgba(0, 0, 0, .18); }
 .cara span { width: 72%; aspect-ratio: 1; border-radius: 50%; place-self: center; }
 .cara span.p { background: #000; }
@@ -242,6 +511,21 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .res-dados .par { background: #3ddc6a; padding: 0 6px; }
 .res-dados .impar { background: var(--rojo); color: var(--papel); padding: 0 6px; }
 @keyframes aparece { from { opacity: 0; transform: translateY(14px) rotate(-.8deg); } }
+
+/* ---------- Barrera de la bruja ---------- */
+/* Si el reto viene de un comodin no sale un modal sobre un velo: entras al laberinto. */
+.modal-fondo.barrera {
+  background:
+    radial-gradient(circle at 50% 50%, #000 1.7px, transparent 1.8px) 0 0 / 17px 17px,
+    repeating-linear-gradient(118deg, #3b1030 0 38px, #15052b 38px 76px, #5c1038 76px 104px);
+  animation: entra-barrera .3s steps(3, end); }
+@keyframes entra-barrera { from { opacity: 0; } }
+/* La tarjeta deja de ser rectangulo con borde y pasa a ser papel recortado. */
+.modal.recorte { border: 0; border-radius: 0; padding-top: 58px;
+  clip-path: polygon(1% 2%, 44% 0, 99% 2%, 97% 40%, 100% 72%, 98% 99%, 52% 97%, 2% 100%, 3% 61%, 0 28%);
+  filter: drop-shadow(9px 10px 0 #000); }
+.modal.recorte::before { display: none; }
+.ojo { position: absolute; top: 9px; left: 50%; width: 52px; height: 52px; margin-left: -26px; z-index: 3; }
 @keyframes girar { to { transform: rotateX(360deg) rotateY(720deg); } }
 
 @media (max-width: 600px) {
@@ -254,4 +538,11 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 @media (prefers-reduced-motion: reduce) {
   .dado, .rueda, .barra i, .casilla { transition: none !important; }
   .ficha, .ficha.activa, .invocando .dado, .modal { animation: none !important; }
+  .ficha .pierna, .ficha .brazo, .ficha .cabeza { animation: none !important; }
+  .modal-fondo.barrera { animation: none !important; }
+  .app.rodando .tablero, .app.fiesta .tablero, .casilla.resaltada::before { animation: none !important; }
+  .app.fiesta .tablero-caja::after, .ficha::after { display: none; }
+  .burbuja.alerta, .burbuja-panel, .letrero, .dado-caja.girando { animation: none !important; }
+  .ficha .menea, .ficha .ala, .ficha .llama { animation: none !important; }
+  .telon-abre .hoja, .telon-abre b, .telon-abre .volante, .telon-abre .ojo-telon { animation-duration: .25s !important; }
 }

@@ -3,6 +3,11 @@ import './App.css';
 import Simbolos from './components/Simbolos.jsx';
 import Tablero from './components/Tablero.jsx';
 import Dado3D from './components/Dado3D.jsx';
+import Burbuja from './components/Burbuja.jsx';
+import Carril from './components/Carril.jsx';
+import { memeDe } from './components/lona.js';
+import FichaDibujo from './components/FichaDibujo.jsx';
+import { FICHAS, fichaLibre } from './components/fichas.js';
 import Ruleta from './components/Ruleta.jsx';
 import { colorDe, MAX_JUGADORES } from './components/colores.js';
 import { CASILLAS, COMODINES, META, MOVIMIENTOS } from './data/casillas.js';
@@ -13,12 +18,30 @@ import { guardarPartida, cargarPartida, borrarPartida, nuevaJugada } from './gam
 const sinMovimiento = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const T_DADO = sinMovimiento ? 150 : 1000;
 const T_PASO = sinMovimiento ? 60 : 220;
+// Secuencia del turno: ver el dado -> se va la burbuja -> camina el muñeco -> letrero -> vuelve la burbuja.
+const T_VER_DADO = sinMovimiento ? 100 : 560;
+const T_CIERRE = sinMovimiento ? 0 : 340;
+const T_LETRERO = sinMovimiento ? 700 : 3200;
 const esperar = (ms) => new Promise(r => setTimeout(r, ms));
 
 const partidaVacia = () => ({
   fase: 'setup', jugadores: [], turno: 0, etapa: 'tirar', casilla: null, nota: '',
   numDados: 1, dados: [1], giros: 0, premios: [], bolsa: [], bitacora: [], lugares: 0, reto: null,
 });
+
+// En un celular el espiral de 9x7 deja casillas de unos 40px: ilegibles.
+// Ahi se muestra el carril y la lona completa queda a un toque.
+function useEsCelular() {
+  const consulta = '(max-width: 760px)';
+  const [es, setEs] = useState(() => typeof window !== 'undefined' && window.matchMedia(consulta).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(consulta);
+    const alCambiar = (e) => setEs(e.matches);
+    mq.addEventListener('change', alCambiar);
+    return () => mq.removeEventListener('change', alCambiar);
+  }, []);
+  return es;
+}
 
 function TarjetaCasilla({ n, nota, extra }) {
   const cas = CASILLAS[n];
@@ -32,7 +55,7 @@ function TarjetaCasilla({ n, nota, extra }) {
         <p>{cas.mensaje}</p>
         {nota && <small>{nota}</small>}
         {cas.aclara && <div className="aclara"><i>Cómo se juega</i>{cas.aclara}</div>}
-        {comodin && <div className="aviso-comodin"><svg aria-hidden="true"><use href="#i-estrella" /></svg>Casilla comodín: puedes cambiarla por un reto misterioso.</div>}
+        {comodin && <div className="aviso-comodin"><svg aria-hidden="true"><use href="#i-sello" /></svg>Casilla comodín: puedes cambiarla por un reto misterioso.</div>}
         {extra}
       </div>
     </div>
@@ -47,6 +70,13 @@ export default function App() {
   const pRef = useRef(partida);
   const [ocupado, setOcupado] = useState(false);
   const [vista, setVista] = useState(null);
+  const [verLona, setVerLona] = useState(false);
+  const [burbuja, setBurbuja] = useState(false);
+  const [letrero, setLetrero] = useState(null);
+  const [tirando, setTirando] = useState(false);
+  const [ficha, setFicha] = useState(FICHAS[0].id);
+  const [telon, setTelon] = useState(false);
+  const esCelular = useEsCelular();
   const [modalReto, setModalReto] = useState(null);
   const [modalDados, setModalDados] = useState(null);
   const [confirmarNueva, setConfirmarNueva] = useState(false);
@@ -65,12 +95,15 @@ export default function App() {
     e.preventDefault();
     const nom = nombre.trim();
     if (!nom || partida.jugadores.length >= MAX_JUGADORES) return;
-    actualizar(p => ({ ...p, jugadores: [...p.jugadores, { nombre: nom, premio: premio.trim(), pos: 1, pierde: 0, gano: 0, tiros: 0 }] }));
+    actualizar(p => ({ ...p, jugadores: [...p.jugadores, { nombre: nom, premio: premio.trim(), ficha, pos: 1, pierde: 0, gano: 0, tiros: 0 }] }));
+    setFicha(fichaLibre([...pRef.current.jugadores, { ficha }]));
     setNombre(''); setPremio('');
   };
   const quitarJugador = (i) => actualizar(p => ({ ...p, jugadores: p.jugadores.filter((_, k) => k !== i) }));
   const comenzar = () => {
     if (partida.jugadores.length < 2) return;
+    setTelon(true);
+    setTimeout(() => setTelon(false), sinMovimiento ? 300 : 2250);
     actualizar(p => ({
       ...partidaVacia(), fase: 'jugando',
       jugadores: p.jugadores.map(j => ({ ...j, pos: 1, pierde: 0, gano: 0, tiros: 0 })),
@@ -97,9 +130,26 @@ export default function App() {
 
   const rodar = async (cuantos) => {
     const dados = Array.from({ length: cuantos }, () => tirarDado());
+    setBurbuja(true); setTirando(true);
     actualizar(p => ({ ...p, dados, giros: p.giros + 1 }));
     await esperar(T_DADO);
+    setTirando(false);
     return dados;
+  };
+
+  // Deja ver el resultado del dado y quita la burbuja de enmedio para que el tablero se vea.
+  const despejar = async () => {
+    await esperar(T_VER_DADO);
+    setBurbuja(false);
+    await esperar(T_CIERRE);
+  };
+
+  // Al terminar el recorrido: letrero con la casilla donde cayo y de vuelta a la burbuja.
+  const anunciar = async () => {
+    setLetrero(pRef.current.jugadores[pRef.current.turno].pos);
+    await esperar(T_LETRERO);
+    setLetrero(null);
+    setBurbuja(true);
   };
 
   const terminarEn = (etapa, nota, cambios = {}) => actualizar(p => ({ ...p, etapa, nota, casilla: p.jugadores[p.turno].pos, ...cambios }));
@@ -159,9 +209,11 @@ export default function App() {
     const dados = await rodar(p.numDados);
     const total = dados.reduce((a, b) => a + b, 0);
     cambiarJugador(i, { tiros: pRef.current.jugadores[i].tiros + 1 });
+    await despejar();
     const rebote = await caminar(i, total, 1);
     const rastro = [`saca ${dados.join(' + ')}${rebote ? ' y rebota' : ''}`];
     await resolver(i, rastro, rebote ? 'Te pasaste de la 60 y rebotaste.' : '');
+    await anunciar();
     setOcupado(false);
   };
 
@@ -171,8 +223,10 @@ export default function App() {
     const i = pRef.current.turno;
     actualizar(q => ({ ...q, etapa: 'moviendo' }));
     const [w] = await rodar(1);
+    await despejar();
     await caminar(i, w, -1);
     await resolver(i, [`retrocede ${w}`], `Salió ${w}: retrocedes ${w}.`, 1);
+    await anunciar();
     setOcupado(false);
   };
 
@@ -221,7 +275,7 @@ export default function App() {
 
   // ======================= PANTALLAS =======================
   const encabezado = (
-    <header className="top">
+    <header className={`top${partida.fase === 'jugando' ? ' compacto' : ''}`}>
       <div>
         <h1>Oca Borracha</h1>
         <p className="lema"><span className="cinta">Hazifest Vol. 1</span>El juego más culero del momento</p>
@@ -265,12 +319,28 @@ export default function App() {
               <label>Nombre<input className="campo" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre del compa…" maxLength={14} autoFocus /></label>
               <label>Premio si llega a la 60<input className="campo" value={premio} onChange={e => setPremio(e.target.value)} placeholder="Ej. que le inviten una chela" maxLength={40} /></label>
               <button type="submit" className="btn-cromo" disabled={!nombre.trim() || partida.jugadores.length >= MAX_JUGADORES}>Agregar</button>
+              <fieldset className="pick-ficha">
+                <legend>Con qué ficha juegas</legend>
+                {FICHAS.map((f, k) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    className={`pick${ficha === f.id ? ' puesta' : ''}`}
+                    style={{ '--c': colorDe(partida.jugadores.length).c, '--r': `${(k % 3) * 2.6 - 2.6}deg` }}
+                    aria-pressed={ficha === f.id}
+                    onClick={() => setFicha(f.id)}
+                  >
+                    <svg viewBox="0 0 40 56" aria-hidden="true"><FichaDibujo tipo={f.id} inicial="" /></svg>
+                    <span>{f.nombre}</span>
+                  </button>
+                ))}
+              </fieldset>
             </form>
             {partida.jugadores.length > 0 && (
               <ul className="registrados">
                 {partida.jugadores.map((j, i) => (
                   <li key={i} style={{ '--c': colorDe(i).c }}>
-                    <span className="chip" />
+                    <svg className="ficha-mini" viewBox="0 0 40 56" aria-hidden="true"><FichaDibujo tipo={j.ficha} inicial={(j.nombre || '?')[0].toUpperCase()} /></svg>
                     <span><strong>{j.nombre}</strong>{j.premio && <small>Premio: {j.premio}</small>}</span>
                     <button type="button" onClick={() => quitarJugador(i)} aria-label={`Quitar a ${j.nombre}`}>×</button>
                   </li>
@@ -301,16 +371,37 @@ export default function App() {
   return (
     <>
       <Simbolos />
+      {telon && (
+        <div className="telon-abre" aria-hidden="true">
+          <i className="hoja izq" /><i className="hoja der" />
+          <span className="volante" />
+          <svg className="ojo-telon" viewBox="0 0 40 40"><use href="#i-ojo" /></svg>
+          <b>¡Que empiece la peda!</b>
+        </div>
+      )}
       {encabezado}
-      <main className="app">
+      <main className={`app${etapa === 'moviendo' ? ' rodando' : ''}${etapa === 'ganador' || etapa === 'fin' ? ' fiesta' : ''}`}>
         <div className="col-tablero">
-          <Tablero jugadores={jugadores} turno={turno} resaltada={enVista} onVer={(n) => setVista(n === vista ? null : n)} />
+          {esCelular && (
+            <button type="button" className="btn-cromo cambia-vista" onClick={() => setVerLona(v => !v)}>
+              {verLona ? 'Volver al carril' : 'Ver la lona completa'}
+            </button>
+          )}
+          {esCelular && !verLona
+            ? <Carril jugadores={jugadores} turno={turno} resaltada={enVista} onVer={(n) => setVista(n === vista ? null : n)} />
+            : <Tablero jugadores={jugadores} turno={turno} resaltada={enVista} onVer={(n) => setVista(n === vista ? null : n)} />}
         </div>
 
-        <aside className="lado">
+        <Burbuja
+          color={colorDe(turno).c}
+          inicial={(actual.nombre || '?')[0].toUpperCase()}
+          aviso={etapa === 'fin' ? 'Se acabó la partida' : `Turno de ${actual.nombre}`}
+          alerta={etapa === 'tirar' || etapa === 'otraVez' || etapa === 'retroceder' || etapa === 'comodin'}
+          abierta={burbuja}
+          onAbrir={setBurbuja}
+        >
           <section className="tarjeta-sticker turno" aria-label="Turno">
-            <div className="quien"><span className="chip" style={{ '--c': colorDe(turno).c }} />{etapa === 'fin' ? 'Se acabó la partida' : `Turno de ${actual.nombre}`}</div>
-            <div className="dados">{partida.dados.map((v, k) => <Dado3D key={k} valor={v} giros={partida.giros} tam={partida.dados.length > 1 ? 56 : 68} />)}</div>
+            <div className="dados">{partida.dados.map((v, k) => <Dado3D key={k} valor={v} giros={partida.giros} girando={tirando} tam={partida.dados.length > 1 ? 66 : 84} />)}</div>
             {textoAccion && <button type="button" className={`btn-tirar${etapa === 'retroceder' ? ' trampa' : ''}`} onClick={alTirar} disabled={etapa === 'moviendo' || ocupado}>{textoAccion}</button>}
             {(etapa === 'listo') && <button type="button" className="btn-tirar" onClick={pasarTurno}>Siguiente turno</button>}
             {etapa === 'fin' && <button type="button" className="btn-tirar" onClick={nuevaPartida}>Jugar otra</button>}
@@ -380,7 +471,19 @@ export default function App() {
               </ul>
             </details>
           </section>
-        </aside>
+        </Burbuja>
+
+        {letrero && (
+          <button type="button" className="letrero" onClick={() => { setLetrero(null); setBurbuja(true); }}>
+            <img className="letrero-meme" src={memeDe(letrero)} alt="" />
+            <span className="letrero-caja">
+              <span className="letrero-num">{letrero}</span>
+              <strong>{CASILLAS[letrero].corto}</strong>
+              <span className="letrero-txt">{CASILLAS[letrero].mensaje}</span>
+              {CASILLAS[letrero].aclara && <small>{CASILLAS[letrero].aclara}</small>}
+            </span>
+          </button>
+        )}
 
         <section className="tarjeta-sticker ancho" ref={ruletaRef}>
           <h2>Ruleta de la Victoria</h2>
@@ -398,7 +501,7 @@ export default function App() {
               {MOVIMIENTOS.map(([n, txt]) => (
                 <li key={n}><span className={`sello-mini ${CASILLAS[n].tipo || ''}`}>{CASILLAS[n].sello || n}</span><span><strong>{n}. {CASILLAS[n].corto}.</strong> {txt}</span></li>
               ))}
-              <li><svg className="estrella-mini" aria-hidden="true"><use href="#i-estrella" /></svg><span><strong>Comodines ({COMODINES.join(', ')}).</strong> Puedes hacer lo de la lona o cambiarlo por un reto misterioso.</span></li>
+              <li><svg className="bruja-mini" aria-hidden="true"><use href="#i-sello" /></svg><span><strong>Comodines ({COMODINES.join(', ')}).</strong> Puedes hacer lo de la lona o cambiarlo por un reto misterioso.</span></li>
             </ul>
           </div>
           <div>
@@ -423,8 +526,9 @@ export default function App() {
       </main>
 
       {modalReto && (
-        <div className="modal-fondo" role="dialog" aria-modal="true" aria-label="Reto misterioso">
-          <div className="modal">
+        <div className={`modal-fondo${modalReto.desdeComodin ? ' barrera' : ''}`} role="dialog" aria-modal="true" aria-label="Reto misterioso">
+          <div className={`modal${modalReto.desdeComodin ? ' recorte' : ''}`}>
+            {modalReto.desdeComodin && <svg className="ojo" aria-hidden="true"><use href="#i-ojo" /></svg>}
             {modalReto.girando ? (
               <div className="invocando"><Dado3D valor={1} giros={3} tam={72} /><p>Invocando el caos…</p></div>
             ) : (

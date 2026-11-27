@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Parche ya aplicado, no hace falta versionarlo
+oca-borracha-tablero.patch
