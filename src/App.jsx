@@ -78,7 +78,7 @@ export default function App() {
   const [burbuja, setBurbuja] = useState(false);
   const [letrero, setLetrero] = useState(null);
   const [tirando, setTirando] = useState(false);
-  const [siguiendo, setSiguiendo] = useState(false);   // la cámara del tablero sigue a la ficha
+  const [camara, setCamara] = useState(null);            // cámara del tablero: null · 'entra' · 'sigue'
   const [seccion, setSeccion] = useState('turno');       // qué parte del panel muestra la perilla
   const [franja, setFranja] = useState(null);            // franja de cambio de turno: { i, k }
   const [portadaVista, setPortadaVista] = useState(0);   // hasta qué lugar ya se cerró la portada del ganador
@@ -159,13 +159,13 @@ export default function App() {
     setBurbuja(false);
     await esperar(T_CIERRE);
     // La cámara se acerca a la ficha antes de que empiece a caminar.
-    if (!sinMovimiento) { setSiguiendo(true); await esperar(T_CAMARA); }
+    if (!sinMovimiento) { setCamara('entra'); await esperar(T_CAMARA); setCamara('sigue'); }
   };
 
   // Al terminar el recorrido: letrero con la casilla donde cayo y de vuelta a la burbuja.
   const anunciar = async () => {
     // Primero se aleja la cámara para que el letrero salga sobre el tablero completo.
-    if (!sinMovimiento) { setSiguiendo(false); await esperar(T_CAMARA); }
+    if (!sinMovimiento) { setCamara(null); await esperar(T_CAMARA); }
     setLetrero(pRef.current.jugadores[pRef.current.turno].pos);
     await esperar(T_LETRERO);
     setLetrero(null);
@@ -414,7 +414,7 @@ export default function App() {
           )}
           {esCelular && !verLona
             ? <Carril jugadores={jugadores} turno={turno} resaltada={enVista} onVer={(n) => setVista(n === vista ? null : n)} />
-            : <Tablero jugadores={jugadores} turno={turno} resaltada={enVista} camara={siguiendo ? actual.pos : null} onVer={(n) => setVista(n === vista ? null : n)} />}
+            : <Tablero jugadores={jugadores} turno={turno} resaltada={enVista} camara={camara ? { n: actual.pos, fase: camara } : null} onVer={(n) => setVista(n === vista ? null : n)} />}
         </div>
 
         <Burbuja

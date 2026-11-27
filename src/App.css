@@ -252,6 +252,30 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .letrero-txt { font: 400 15px/1.3 var(--texto); }
 .letrero small { margin-top: 4px; padding: 7px 9px; background: #000; color: var(--papel); font-size: 13px; line-height: 1.35; }
 
+/* ---------- Capa de fichas ---------- */
+/* Ocupa toda la cuadricula y es contenedor de tamaño: asi cqw/cqh miden la cuadricula
+   y cada ficha puede ubicarse con transform, que se anima sin repintar nada. */
+.capa-fichas { grid-area: 1 / 1 / -1 / -1; position: relative; z-index: 5; pointer-events: none; container-type: size; }
+/* Centro de la casilla: (ancho + hueco) * fraccion - medio hueco. --k abre el abanico cuando hay varias.
+   El +3.4cqh baja el punto de apoyo para que la ficha se pare justo encima de la banda del titulo. */
+.viajera { position: absolute; left: 0; top: 0; width: 0; height: 0;
+  transform: translate(calc((100cqw + var(--gap)) * var(--cx) - var(--gap) / 2 + var(--k) * 2.7cqw),
+                       calc((100cqh + var(--gap)) * var(--cy) - var(--gap) / 2 + 3.4cqh));
+  transition: transform .22s linear; }
+.viajera.activa { z-index: 2; }
+.viajera .ficha { position: absolute; left: 0; bottom: 0; width: 4.2cqw; translate: -50% 0; transform-origin: 50% 100%;
+  animation: brinca .24s ease-out; }
+.viajera.varias .ficha { width: 3.1cqw; rotate: calc(var(--k) * 9deg); }
+.viajera .ficha.activa { animation: brinca .24s ease-out, latido 1s ease-in-out .3s infinite; }
+.viajera .ficha .gafete { font-size: clamp(6px, .95cqw, 11px); }
+/* El brinco de cada paso: sube mientras la capa la desliza a la siguiente casilla y cae aplastandose. */
+@keyframes brinca {
+  0% { transform: translateY(0) scale(1, 1); }
+  45% { transform: translateY(-55%) scale(.95, 1.06); }
+  80% { transform: translateY(0) scale(1.14, .86); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
 /* ---------- La carrera, en el encabezado ---------- */
 .carrera { position: relative; flex: 1 1 260px; min-width: 200px; height: 58px; margin: 0 clamp(10px, 2.4vw, 34px); }
 .carrera-linea { position: absolute; left: 0; right: 0; bottom: 14px; height: 4px;
@@ -356,6 +380,8 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .burbuja-cuerpo > .tarjeta-sticker:nth-child(even)::before { left: 22%; transform: rotate(4deg); }
 
 /* ---------- Tablero ---------- */
+/* --gap registrada como longitud: asi se hereda ya calculada y la capa de fichas usa el mismo valor exacto. */
+@property --gap { syntax: '<length>'; inherits: true; initial-value: 8px; }
 /* Regla: la foto de cada casilla es la protagonista. Las normales son todas iguales
    (borde blanco, derechas); solo las especiales llevan color, con significado fijo.
    La personalidad vive en el marco, la Ruleta, las fichas y las animaciones. */
@@ -365,11 +391,13 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 /* El marco: rosa grueso con filo papel y negro, y cinta canela en las esquinas. */
 .tablero { position: relative; width: 100%; aspect-ratio: 1.55; display: grid;
   grid-template-columns: repeat(9, minmax(0, 1fr)); grid-template-rows: repeat(7, minmax(0, 1fr));
-  gap: clamp(6px, 1.15cqi, 12px); padding: clamp(8px, 1.4cqi, 16px);
+  --gap: clamp(6px, 1.15cqi, 12px); gap: var(--gap); padding: clamp(8px, 1.4cqi, 16px);
   background: var(--grano), #121212;
   border: clamp(5px, .8cqi, 9px) solid var(--chicle); border-radius: 6px;
   box-shadow: 0 0 0 3px var(--papel), 0 0 0 6px #000, var(--dura-xl);
   transform-origin: 0 0; transition: transform .45s cubic-bezier(.3, .8, .3, 1); }
+/* Siguiendo a la ficha la cámara va pareja y al mismo ritmo que los pasos (T_PASO = 220ms en App.jsx). */
+.tablero.cam-sigue { transition: transform .22s linear; }
 .cinta-esq { position: absolute; z-index: 6; pointer-events: none;
   width: clamp(44px, 7cqi, 92px); height: clamp(15px, 2.2cqi, 28px);
   background: var(--cinta); box-shadow: 1px 1px 0 rgba(0, 0, 0, .35); }
@@ -499,6 +527,8 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 /* Mientras una ficha camina: el tablero se cimbra y el marco cambia de color a golpes. */
 /* Sin cimbra: el tambaleo mareaba. Solo cambian las luces del marco. */
 .app.rodando .tablero { animation: luces .36s steps(1, end) infinite; }
+/* Con la cámara encima las luces no se ven, y cada cambio de color repintaba el tablero entero ampliado: era lo que trababa. */
+.app.rodando .tablero.cam-entra, .app.rodando .tablero.cam-sigue { animation: none; }
 /* Cuando alguien gana: marco en fiesta y papel picado cayendo encima del tablero. */
 .app.fiesta .tablero { animation: luces .18s steps(1, end) infinite; }
 .app.fiesta .tablero-caja::after {
@@ -730,6 +760,8 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   .app.fiesta .tablero-caja::after, .ficha::after { display: none; }
   .burbuja.girando .aro, .cuna { animation: none !important; transition: none !important; }
   .grito, .franja-turno, .portada, .portada-acc, .chispa-p { animation: none !important; }
+  .viajera { transition: none !important; }
+  .viajera .ficha { animation: none !important; }
   .burbuja.alerta, .burbuja-panel, .letrero, .dado-caja.girando .dado-vuelo, .dado-caja.girando .dado-sombra, .dados.tirando { animation: none !important; }
   .dado-pop { animation: none !important; transform: rotate(-8deg); }
   .ficha .menea, .ficha .ala, .ficha .llama { animation: none !important; }

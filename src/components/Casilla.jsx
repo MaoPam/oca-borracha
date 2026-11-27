@@ -38,7 +38,7 @@ const NOMBRE_TIPO = { avanza: 'avanzar', atras: 'retroceder', reto: 'comodín', 
 // en una banda negra abajo. Las normales son todas iguales y van derechas;
 // solo las especiales cambian el color del borde y del número, llevan un icono
 // y se pegan un poco chuecas. La usan el espiral y el carril de celular.
-export default function Casilla({ n, jugadores, turno, resaltada, onVer, estilo }) {
+export default function Casilla({ n, jugadores, turno, resaltada, onVer, estilo, conFichas = true }) {
   const cas = CASILLAS[n];
   const tipo = tipoDe(n, cas);
   const especial = tipo !== 'normal';
@@ -57,7 +57,7 @@ export default function Casilla({ n, jugadores, turno, resaltada, onVer, estilo 
         {especial && <IconoTipo tipo={tipo} />}
         <span className="lab">{cas.corto}</span>
       </span>
-      <Fichas jugadores={jugadores} turno={turno} n={n} />
+      {conFichas && <Fichas jugadores={jugadores} turno={turno} n={n} />}
     </button>
   );
 }
