@@ -11,7 +11,9 @@ import FichaDibujo from './components/FichaDibujo.jsx';
 import { FICHAS, fichaLibre } from './components/fichas.js';
 import Ruleta from './components/Ruleta.jsx';
 import Pirinola from './components/Pirinola.jsx';
-import { CARAS_PIRINOLA, CARA_COMODIN, caraAlAzar } from './data/pirinola.js';
+import Stats from './components/Stats.jsx';
+import { CARAS_PIRINOLA, CARA_COMODIN, CASTIGO_CARA, caraAlAzar } from './data/pirinola.js';
+import { aplicarStat, STATS_INICIO } from './game/stats.js';
 import { colorDe, MAX_JUGADORES } from './components/colores.js';
 import { CASILLAS, COMODINES, META, MOVIMIENTOS } from './data/casillas.js';
 import { RETOS } from './data/retos.js';
@@ -39,7 +41,7 @@ const AVISO_TIRO = {
 // Bolsa de retos con 1 de cada 3 papelitos de comodín.
 const nuevaBolsa = () => armarBolsa(RETOS.length, CARTAS.map(c => c.id), PROPORCION_COMODINES);
 // Con lo que arranca cada quien: posición inicial y el comodín Divide dolor.
-const alInicio = (j) => ({ ...j, pos: 1, tope: 1, pierde: 0, gano: 0, tiros: 0, comodines: ['divide-dolor'] });
+const alInicio = (j) => ({ ...j, pos: 1, tope: 1, pierde: 0, gano: 0, tiros: 0, comodines: ['divide-dolor'], stats: { ...STATS_INICIO } });
 
 const partidaVacia = () => ({
   fase: 'setup', jugadores: [], turno: 0, etapa: 'tirar', casilla: null, nota: '',
@@ -243,6 +245,19 @@ export default function App() {
     cambiarJugador(i, { comodines: [...(j.comodines || []), id] });
     anotar(i, `${j.nombre} se guarda el comodín ${carta.titulo}.`);
   };
+  // ---------- Stats ----------
+  // Le aplica a un jugador un trago, shot, fondo o agua (las veces que toque).
+  const beber = (i, accion, veces = 1) => {
+    const j = pRef.current.jugadores[i];
+    if (j) cambiarJugador(i, { stats: aplicarStat(j.stats, accion, veces) });
+  };
+  // Lo que se registra a mano desde la pestaña Stats (queda en la bitácora).
+  const NOMBRE_ACCION = { trago: '+1 trago', shot: 'un shot', fondo: 'fondo', agua: 'agüita' };
+  const registrar = (i, accion) => {
+    beber(i, accion);
+    anotar(i, `${pRef.current.jugadores[i].nombre}: ${NOMBRE_ACCION[accion]}.`);
+  };
+
   // Aviso grande de "X usa…" que se quita solo.
   const avisar = (i, carta) => {
     const n = ++usadoN.current;
@@ -266,6 +281,7 @@ export default function App() {
     const j = pRef.current.jugadores[i];
     anotar(i, `${j.nombre} usa ${SALIDAS[tipo].titulo} en "${desde}": ${SALIDAS[tipo].desc.toLowerCase()}`);
     avisar(i, SALIDAS[tipo]);
+    if (tipo === 'ofrenda') beber(i, 'shot');   // la ofrenda es 1 shot
   };
 
   const terminarEn = (etapa, nota, cambios = {}) => actualizar(p => ({ ...p, etapa, nota, casilla: p.jugadores[p.turno].pos, ...cambios }));
@@ -360,7 +376,10 @@ export default function App() {
     const p = pRef.current;
     const quedan = p.jugadores.filter(j => !j.gano).length;
     if (quedan <= 1) { actualizar(q => ({ ...q, etapa: 'fin' })); return; }
-    const { indice, jugadores, avisos } = siguienteTurno(p.jugadores, p.turno);
+    const sig = siguienteTurno(p.jugadores, p.turno);
+    const { indice, avisos } = sig;
+    // Si el turno dio la vuelta (vuelve a alguien de antes en la lista), terminó una ronda: baja el mareo de todos.
+    const jugadores = indice <= p.turno ? sig.jugadores.map(j => ({ ...j, stats: aplicarStat(j.stats, 'ronda') })) : sig.jugadores;
     actualizar(q => ({ ...q, jugadores, turno: indice, etapa: 'tirar', nota: `Ahora tira ${jugadores[indice].nombre}.` }));
     avisos.forEach(a => anotar(p.turno, a));
     setVista(null);
@@ -397,6 +416,7 @@ export default function App() {
     }
     if (!m?.reto) return;
     const raja = salida === 'raja' ? ` Se raja y toma: ${m.cara}.` : '';
+    if (salida === 'raja' && CASTIGO_CARA[m.cara]) beber(pRef.current.turno, ...CASTIGO_CARA[m.cara]);
     anotar(pRef.current.turno, `${m.desdeComodin ? 'Cambia la casilla por el reto' : 'Reto manual'}: ${m.reto.titulo}.${raja}`);
     if (salida?.tipo) usarSalida(salida.tipo, salida.i, m.reto.titulo);
     if (m.desdeComodin && pRef.current.etapa === 'comodin') {
@@ -666,6 +686,7 @@ export default function App() {
             </ul>
           </section>
             ),
+            stats: <Stats jugadores={jugadores} turno={turno} onRegistrar={registrar} />,
             comodines: (
           <section className="lcd-sec comodines">
             <h2>Comodines</h2>

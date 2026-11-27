@@ -12,6 +12,7 @@ const ANCHO = 112, ALTO = 118;   // tamaño del aparato, el mismo que en el CSS
 // Cada ícono es una lista de filas; '#' es un pixel prendido.
 const PESTANAS = [
   ['turno', 'TURNO', ['#######', '#.....#', '#.#.#.#', '#.....#', '#.#.#.#', '#.....#', '#######']],
+  ['stats', 'STATS', ['.##.##.', '#######', '#######', '#######', '.#####.', '..###..', '...#...']],
   ['lugares', 'LUGARES', ['.#####.', '#######', '.#####.', '..###..', '...#...', '..###..', '.#####.']],
   ['lista', 'PASA', ['.......', '#.#####', '.......', '#.####.', '.......', '#.#####', '.......']],
   ['comodines', 'COMODIN', ['...#...', '...#...', '#######', '.#####.', '..###..', '.##.##.', '##...##']],
@@ -126,6 +127,8 @@ export default function Burbuja({ color, ficha, nombre, aviso, pista, alerta, gi
         title="Arrástralo para moverlo · A: jugar · B: abrir el panel"
       >
         <span className="digi-antena" aria-hidden="true" />
+        <span className="digi-llavero" aria-hidden="true"><i className="argolla" /><i className="cadena" /><i className="dije cora" /><i className="dije estrella" /><i className="dije cuenta" /></span>
+        <span className="digi-calco" aria-hidden="true">XOXO</span>
         <button
           type="button"
           className="digi-pantalla"
@@ -156,7 +159,8 @@ export default function Burbuja({ color, ficha, nombre, aviso, pista, alerta, gi
           aria-label="Panel de la partida"
         >
           {/* El panel es el mismo aparato en grande: cuerpo del color del jugador y una pantalla LCD. */}
-          <div className="panel-lcd">
+          {/* En Stats la pantalla cambia a la luz rosa (opción A1). */}
+          <div className={`panel-lcd${seccion === 'stats' ? ' rosa' : ''}`}>
             <div className="burbuja-tope">
               <svg className="tope-ficha" viewBox="0 0 40 56" aria-hidden="true"><FichaDibujo tipo={ficha} inicial="" /></svg>
               <strong>{aviso}</strong>
