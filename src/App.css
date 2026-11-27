@@ -221,6 +221,13 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .evento p { margin: 0; font: 400 16px/1.4 var(--texto); }
 .evento-quien { color: #4a4336; font: 400 13px/1 var(--rotulo); text-transform: uppercase; }
 
+/* ---------- Ideas de premios bajo la ruleta ---------- */
+.ideas-premio { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ideas-premio > span { font: 400 13px/1 var(--rotulo); text-transform: uppercase; }
+.idea { padding: 5px 8px 4px; text-align: left; color: #000; background: var(--papel); border: 2px dashed #000; font: 600 12.5px/1.25 var(--texto); cursor: pointer; }
+.idea:hover { background: var(--rotulo-am); border-style: solid; }
+.idea:focus-visible { outline: 3px solid var(--seleccion); outline-offset: 2px; }
+
 /* ---------- Comodines ---------- */
 .evento-guarda, .guarda-nota { padding: 6px 10px 5px; background: #000; color: var(--rotulo-am); font: 400 12px/1.25 var(--rotulo); text-transform: uppercase; }
 .guarda-nota { margin: 0 0 14px; text-transform: none; font: 600 14px/1.35 var(--texto); }

@@ -14,6 +14,7 @@ import Pirinola from './components/Pirinola.jsx';
 import Stats from './components/Stats.jsx';
 import { CARAS_PIRINOLA, CARA_COMODIN, CASTIGO_CARA, caraAlAzar } from './data/pirinola.js';
 import { aplicarStat, STATS_INICIO } from './game/stats.js';
+import { PRECARGADOS } from './data/premios.js';
 import { colorDe, MAX_JUGADORES } from './components/colores.js';
 import { CASILLAS, COMODINES, META, MOVIMIENTOS } from './data/casillas.js';
 import { RETOS } from './data/retos.js';
@@ -168,7 +169,8 @@ export default function App() {
     actualizar(p => ({
       ...partidaVacia(), fase: 'jugando',
       jugadores: p.jugadores.map(alInicio),
-      premios: p.jugadores.map(j => j.premio).filter(Boolean),
+      // Los premios de cada jugador más los precargados, sin repetir.
+      premios: [...new Set([...p.jugadores.map(j => j.premio).filter(Boolean), ...PRECARGADOS])],
       bolsa: nuevaBolsa(), casilla: 1,
       nota: `Todas las fichas en el inicio. Empieza ${p.jugadores[0].nombre}.`,
       bitacora: [nuevaJugada('', '¡Empieza la peda!')],

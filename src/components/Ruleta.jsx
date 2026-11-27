@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PREMIOS_SUGERIDOS } from '../data/premios.js';
 
 // Ruleta de la Victoria como tornamesa sonidera: los premios son las pistas de un
 // disco. Baja la aguja, el disco gira y frena, y la pantallita dice qué pista tocó.
@@ -84,6 +85,15 @@ export default function Ruleta({ premios, onQuitar, onAgregar }) {
           <input className="campo" value={nuevo} onChange={e => setNuevo(e.target.value)} placeholder="Agregar premio extra…" maxLength={40} aria-label="Premio extra" />
           <button type="submit" className="btn-cromo">Agregar</button>
         </form>
+        {/* Ideas que todavía no están en la ruleta: un toque y entran. */}
+        {!girando && PREMIOS_SUGERIDOS.some(s => !premios.includes(s)) && (
+          <div className="ideas-premio">
+            <span>Ideas:</span>
+            {PREMIOS_SUGERIDOS.filter(s => !premios.includes(s)).map(s => (
+              <button key={s} type="button" className="idea" onClick={() => { setPista(null); onAgregar(s); }}>+ {s}</button>
+            ))}
+          </div>
+        )}
         {n > 0 && (
           <ul className="premios">
             {premios.map((p, i) => (
