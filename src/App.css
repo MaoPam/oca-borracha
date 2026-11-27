@@ -185,6 +185,39 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .grito.g-especial { background: var(--cromo); }
 @keyframes grita { 0% { opacity: 0; transform: rotate(-7deg) scale(2.3); } 60% { opacity: 1; transform: rotate(-11deg) scale(.88); } 100% { opacity: 1; transform: rotate(-7deg) scale(1); } }
 
+/* ---------- Letrero de "tira el dado" ----------
+   Sale cuando la casilla pide tirar (la 3 y la 58) en lugar de tirar solo. */
+.aviso-tiro { position: fixed; z-index: 46; left: 50%; bottom: 7vh; width: min(92vw, 460px); transform: translateX(-50%) rotate(-1deg);
+  display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--rotulo-am); color: #000;
+  border: 3px solid #000; box-shadow: 0 0 0 4px var(--papel), 8px 9px 0 4px #000; animation: llega-aviso .4s cubic-bezier(.2, .9, .3, 1) both; }
+@keyframes llega-aviso { from { opacity: 0; transform: translateX(-50%) translateY(30px) rotate(-6deg); } }
+.aviso-dado { flex: none; width: 54px; height: 54px; display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: 7px;
+  background: var(--papel); border: 3px solid #000; border-radius: 10px; box-shadow: 3px 3px 0 #000; animation: menea-dado .9s ease-in-out infinite; }
+.aviso-dado i { width: 70%; aspect-ratio: 1; margin: auto; border-radius: 50%; background: #000; }
+@keyframes menea-dado { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(10deg) translateY(-3px); } }
+.aviso-txt { flex: 1; min-width: 0; font: 400 14px/1.3 var(--texto); }
+.aviso-txt b { display: block; margin-bottom: 3px; font: 400 19px/1 var(--rotulo); }
+.aviso-tiro .btn-tirar { flex: none; min-height: 48px; padding: 0 18px; font-size: 18px; }
+
+/* ---------- Tiro dentro del reto ---------- */
+.tirar-reto { width: 100%; margin-bottom: 14px; }
+.tiro-reto { display: grid; gap: 4px; margin-bottom: 16px; padding: 10px; background: #000; color: var(--papel); border: 3px solid #000; }
+.tiro-reto b { color: var(--rotulo-am); font: 400 26px/1 var(--rotulo); }
+.tiro-reto span { font: 400 14px/1.2 var(--rotulo); text-transform: uppercase; }
+
+/* ---------- Eventos de la carrera ---------- */
+.evento-fondo { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(11, 11, 11, .78); }
+.evento { position: relative; width: min(100%, 420px); display: grid; justify-items: center; gap: 10px; padding: 40px 24px 24px; text-align: center;
+  background: var(--grano-suave), var(--papel); color: #000; border: 4px solid #000; box-shadow: 0 0 0 4px var(--c), 10px 10px 0 4px #000;
+  transform: rotate(-1.5deg); animation: llega-evento .45s cubic-bezier(.2, .9, .3, 1) both; }
+@keyframes llega-evento { from { opacity: 0; transform: translateY(-40px) rotate(-8deg) scale(.9); } }
+.evento-linea { position: absolute; top: -34px; left: 50%; display: grid; place-items: center; width: 74px; height: 74px; margin-left: -37px;
+  border-radius: 50%; background: var(--chicle); border: 4px solid #000; box-shadow: 4px 4px 0 #000; font: 400 28px/1 var(--rotulo); }
+.evento-linea small { font: 400 9px/1 var(--rotulo); text-transform: uppercase; }
+.evento strong { font: 400 clamp(22px, 5vw, 30px)/1.02 var(--rotulo); text-transform: uppercase; }
+.evento p { margin: 0; font: 400 16px/1.4 var(--texto); }
+.evento-quien { color: #4a4336; font: 400 13px/1 var(--rotulo); text-transform: uppercase; }
+
 /* ---------- Cambio de turno ---------- */
 .franja-turno { position: fixed; z-index: 47; left: -6vw; right: -6vw; top: 38vh; height: clamp(84px, 14vh, 120px); pointer-events: none;
   display: grid; place-items: center; background: var(--chicle); border-block: 4px solid #000; box-shadow: 0 7px 0 #000;
@@ -282,6 +315,12 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   background: repeating-linear-gradient(90deg, var(--papel) 0 8px, transparent 8px 13px); opacity: .5; }
 .carrera-marca { position: absolute; bottom: 10px; width: 2px; height: 12px; margin-left: -1px; background: var(--papel); opacity: .65; }
 .carrera-marca b { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%); color: var(--papel); font: 400 9px/1 var(--rotulo); }
+/* Las líneas con evento: más gruesas, rosas y con banderita; se prenden mientras su evento está en pantalla. */
+.carrera-marca.evento { width: 4px; height: 20px; margin-left: -2px; background: var(--chicle); opacity: 1; box-shadow: 1px 1px 0 #000; }
+.carrera-marca.evento::before { content: ''; position: absolute; left: 4px; top: 0; width: 9px; height: 7px; background: var(--chicle);
+  clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.carrera-marca.prendida { animation: prende-linea .3s steps(1, end) infinite; }
+@keyframes prende-linea { 50% { background: var(--rotulo-am); } }
 .carrera-f { position: absolute; bottom: 15px; width: 20px; height: 28px; margin-left: -10px; filter: var(--troquel);
   transition: left .22s ease-out, bottom .2s ease-out; }
 .carrera-f.arriba { bottom: 27px; }
@@ -687,7 +726,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 /* ---------- Mesa de tiro ----------
    Una capa al centro de la pantalla, encima de todo, donde los dados tienen espacio
    para volar: el panel recortaba la primera mitad del lanzamiento. */
-.mesa-tiro { position: fixed; inset: 0; z-index: 48; display: flex; flex-direction: column; align-items: center; justify-content: center;
+.mesa-tiro { position: fixed; inset: 0; z-index: 52; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 26px; pointer-events: none; background: rgba(11, 11, 11, .38); animation: aparece-mesa .18s ease-out both; }
 @keyframes aparece-mesa { from { background-color: rgba(11, 11, 11, 0); } }
 .dados-tiro { display: flex; gap: 38px; animation: sacude-mesa 1s linear both; }
@@ -749,7 +788,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .pill { display: inline-block; padding: 2px 10px 3px; background: #000; color: var(--amarillo); font: 400 16px var(--cartel); text-transform: uppercase; letter-spacing: .03em; }
 .invocando { display: grid; justify-items: center; gap: 12px; padding: 20px 0; font: 400 20px var(--cartel); text-transform: uppercase; }
 .invocando .dado { animation: girar .5s linear infinite; }
-.aviso-dados { padding: 10px; border: 2px dashed #000; font-size: 15px !important; }
+
 .res-dados { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin-bottom: 16px; font: 400 18px var(--cartel); text-transform: uppercase; }
 .res-dados strong { width: 100%; font: 400 40px/1 var(--gotica); }
 .res-dados .par { background: #3ddc6a; padding: 0 6px; }
@@ -788,7 +827,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   .app.rodando .tablero, .app.fiesta .tablero, .casilla.resaltada { animation: none !important; }
   .tablero > .meta { animation: none !important; }
   .app.fiesta .tablero-caja::after, .ficha::after { display: none; }
-  .digi.alerta, .lcd-txt i { animation: none !important; }
+  .digi.alerta, .lcd-txt i, .aviso-tiro, .aviso-dado, .evento, .carrera-marca.prendida { animation: none !important; }
   .grito, .franja-turno, .portada, .portada-acc, .chispa-p { animation: none !important; }
   .viajera { transition: none !important; }
   .viajera .ficha, .viajera .polvo-f::before, .viajera .polvo-f::after { animation: none !important; }

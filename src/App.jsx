@@ -13,9 +13,10 @@ import Ruleta from './components/Ruleta.jsx';
 import { colorDe, MAX_JUGADORES } from './components/colores.js';
 import { CASILLAS, COMODINES, META, MOVIMIENTOS } from './data/casillas.js';
 import { RETOS } from './data/retos.js';
-import { pasos, efecto, siguienteTurno, tirarDado, barajar } from './game/reglas.js';
+import { pasos, efecto, siguienteTurno, tirarDado, barajar, lineasCruzadas } from './game/reglas.js';
 import { guardarPartida, cargarPartida, borrarPartida, nuevaJugada } from './game/guardado.js';
 import { gritoDe } from './game/gritos.js';
+import { EVENTOS } from './data/eventos.js';
 
 const sinMovimiento = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const T_DADO = sinMovimiento ? 150 : 1000;
@@ -26,6 +27,11 @@ const T_CIERRE = sinMovimiento ? 0 : 340;
 const T_LETRERO = sinMovimiento ? 700 : 3200;
 const T_FRANJA = 1700;  // lo que dura la franja de cambio de turno (igual que su animación)
 const esperar = (ms) => new Promise(r => setTimeout(r, ms));
+// Casillas que piden tirar el dado antes de seguir: en vez de tirarlo solo, sale un letrero.
+const AVISO_TIRO = {
+  reparte: 'Lo que salga son los tragos que repartes.',
+  retroceder: 'Lo que salga son las casillas que retrocedes.',
+};
 
 const partidaVacia = () => ({
   fase: 'setup', jugadores: [], turno: 0, etapa: 'tirar', casilla: null, nota: '',
@@ -78,6 +84,7 @@ export default function App() {
   const [letrero, setLetrero] = useState(null);
   const [tirando, setTirando] = useState(false);
   const [tiro, setTiro] = useState(null);                // mesa de tiro al centro: { k, dados }
+  const [eventos, setEventos] = useState([]);            // eventos de la carrera por mostrar, en fila
   const [seccion, setSeccion] = useState('turno');       // qué pestaña del panel del digivice se ve
   const [franja, setFranja] = useState(null);            // franja de cambio de turno: { i, k }
   const [portadaVista, setPortadaVista] = useState(0);   // hasta qué lugar ya se cerró la portada del ganador
@@ -90,8 +97,8 @@ export default function App() {
   const [nombre, setNombre] = useState('');
   const [premio, setPremio] = useState('');
   const ruletaRef = useRef(null);
-  const franjaN = useRef(0);
-  const tiroN = useRef(0);     // igual que franjaN, para la mesa de tiro   // cuenta las franjas, para que cada una sepa si sigue siendo la última
+  const franjaN = useRef(0);   // cuenta las franjas, para que cada una sepa si sigue siendo la última
+  const tiroN = useRef(0);     // lo mismo, para la mesa de tiro
 
   const actualizar = (fn) => { const sig = fn(pRef.current); pRef.current = sig; setPartida(sig); };
   const cambiarJugador = (i, cambios) => actualizar(p => ({ ...p, jugadores: p.jugadores.map((j, k) => (k === i ? { ...j, ...cambios } : j)) }));
@@ -110,7 +117,7 @@ export default function App() {
     e.preventDefault();
     const nom = nombre.trim();
     if (!nom || partida.jugadores.length >= MAX_JUGADORES) return;
-    actualizar(p => ({ ...p, jugadores: [...p.jugadores, { nombre: nom, premio: premio.trim(), ficha, pos: 1, pierde: 0, gano: 0, tiros: 0 }] }));
+    actualizar(p => ({ ...p, jugadores: [...p.jugadores, { nombre: nom, premio: premio.trim(), ficha, pos: 1, tope: 1, lineas: [], pierde: 0, gano: 0, tiros: 0 }] }));
     setFicha(fichaLibre([...pRef.current.jugadores, { ficha }]));
     setNombre(''); setPremio('');
   };
@@ -122,7 +129,7 @@ export default function App() {
     setTimeout(() => anunciaTurno(0), sinMovimiento ? 320 : 2900);
     actualizar(p => ({
       ...partidaVacia(), fase: 'jugando',
-      jugadores: p.jugadores.map(j => ({ ...j, pos: 1, pierde: 0, gano: 0, tiros: 0 })),
+      jugadores: p.jugadores.map(j => ({ ...j, pos: 1, tope: 1, lineas: [], pierde: 0, gano: 0, tiros: 0 })),
       premios: p.jugadores.map(j => j.premio).filter(Boolean),
       bolsa: barajar(RETOS.map((_, i) => i)), casilla: 1,
       nota: `Todas las fichas en el inicio. Empieza ${p.jugadores[0].nombre}.`,
@@ -132,7 +139,7 @@ export default function App() {
   const continuar = () => { const g = partida.guardada; pRef.current = g; setPartida(g); };
   const nuevaPartida = () => {
     borrarPartida();
-    const jugadores = pRef.current.jugadores.map(j => ({ ...j, pos: 1, pierde: 0, gano: 0, tiros: 0 }));
+    const jugadores = pRef.current.jugadores.map(j => ({ ...j, pos: 1, tope: 1, lineas: [], pierde: 0, gano: 0, tiros: 0 }));
     const p = { ...partidaVacia(), jugadores };
     pRef.current = p; setPartida(p); setConfirmarNueva(false); setVista(null);
   };
@@ -140,7 +147,10 @@ export default function App() {
   // ---------- Movimiento ----------
   const caminar = async (i, cantidad, direccion) => {
     const { ruta, rebote } = pasos(pRef.current.jugadores[i].pos, cantidad, direccion);
-    for (const pos of ruta) { cambiarJugador(i, { pos }); await esperar(T_PASO); }
+    for (const pos of ruta) {
+      cambiarJugador(i, { pos, tope: Math.max(pRef.current.jugadores[i].tope || 1, pos) });
+      await esperar(T_PASO);
+    }
     return rebote;
   };
 
@@ -169,8 +179,22 @@ export default function App() {
     setLetrero(pRef.current.jugadores[pRef.current.turno].pos);
     await esperar(T_LETRERO);
     setLetrero(null);
-    setSeccion('turno');
-    setBurbuja(true);
+    if (!AVISO_TIRO[pRef.current.etapa]) { setSeccion('turno'); setBurbuja(true); }
+  };
+
+  // Eventos de la carrera: la primera vez que el jugador llega o rebasa una línea.
+  const revisaLineas = (i) => {
+    const j = pRef.current.jugadores[i];
+    const nuevas = lineasCruzadas(j.tope || j.pos, j.lineas || [], EVENTOS.map(e => e.linea));
+    if (!nuevas.length) return;
+    cambiarJugador(i, { lineas: [...(j.lineas || []), ...nuevas] });
+    const evs = nuevas.map(l => ({ ...EVENTOS.find(e => e.linea === l), i, nombre: j.nombre }));
+    evs.forEach(e => anotar(i, `${j.nombre} cruza la línea ${e.linea}: ${e.titulo}.`));
+    setEventos(cola => [...cola, ...evs]);
+  };
+  const cerrarEvento = (accion) => {
+    setEventos(cola => cola.slice(1));
+    if (accion === 'reto') abrirReto(false);
   };
 
   const terminarEn = (etapa, nota, cambios = {}) => actualizar(p => ({ ...p, etapa, nota, casilla: p.jugadores[p.turno].pos, ...cambios }));
@@ -190,12 +214,9 @@ export default function App() {
     }
     if (prof > 3) { log(`${n}: ${cas.corto}`); return terminarEn('listo', previa); }
     switch (e.tipo) {
-      case 'reparte': {
+      case 'reparte':
         log(`${n}: reparte tragos`);
-        const [w] = await rodar(1);
-        anotar(i, `${j.nombre} reparte ${w} trago${w > 1 ? 's' : ''}.`, { casilla: n, dados: [w] });
-        return terminarEn('listo', conPrevia(`Salió ${w}: reparte ${w} trago${w > 1 ? 's' : ''}.`));
-      }
+        return terminarEn('reparte', conPrevia('Tira el dado: lo que salga son los tragos que repartes.'));
       case 'otraVez':
         log(`${n}: tira de nuevo y bebe`);
         return terminarEn('otraVez', conPrevia('Bebe y vuelve a tirar.'));
@@ -235,6 +256,18 @@ export default function App() {
     const rastro = [`saca ${dados.join(' + ')}${rebote ? ' y rebota' : ''}`];
     await resolver(i, rastro, rebote ? 'Te pasaste de la 60 y rebotaste.' : '');
     await anunciar();
+    revisaLineas(i);
+    setOcupado(false);
+  };
+
+  // El tiro de la casilla 3: lo pide el letrero y se hace en la mesa de tiro.
+  const tirarReparte = async () => {
+    if (ocupado || pRef.current.etapa !== 'reparte') return;
+    setOcupado(true);
+    const i = pRef.current.turno, j = pRef.current.jugadores[i];
+    const [w] = await rodar(1);
+    anotar(i, `${j.nombre} reparte ${w} trago${w > 1 ? 's' : ''}.`, { casilla: j.pos, dados: [w] });
+    terminarEn('listo', `Salió ${w}: reparte ${w} trago${w > 1 ? 's' : ''}.`);
     setOcupado(false);
   };
 
@@ -248,6 +281,7 @@ export default function App() {
     await caminar(i, w, -1);
     await resolver(i, [`retrocede ${w}`], `Salió ${w}: retrocedes ${w}.`, 1);
     await anunciar();
+    revisaLineas(i);
     setOcupado(false);
   };
 
@@ -281,6 +315,18 @@ export default function App() {
     if (m?.desdeComodin && pRef.current.etapa === 'comodin') terminarEn('listo', `Reto misterioso: ${m.reto.titulo}.`, { reto: m.reto });
   };
   const hacerLona = () => terminarEn('listo', 'Haces lo que dice la lona.');
+  const tirarParaReto = async () => {
+    const m = modalReto;
+    if (!m?.reto?.dados || m.tirando) return;
+    const dados = Array.from({ length: m.reto.dados }, () => tirarDado());
+    const k = ++tiroN.current;
+    setModalReto(x => ({ ...x, tirando: true }));
+    setTiro({ k, dados });
+    await esperar(T_DADO);
+    setTimeout(() => setTiro(t => (t?.k === k ? null : t)), T_VER_DADO);
+    setModalReto(x => (x ? { ...x, tirando: false, tiro: dados } : x));
+    anotar(pRef.current.turno, `Reto ${m.reto.titulo}: salió ${dados.join(' y ')}.`);
+  };
 
   // ---------- Dados extra ----------
   const tirarExtra = () => {
@@ -302,7 +348,7 @@ export default function App() {
         <h1>Oca Borracha</h1>
         <p className="lema"><span className="cinta">Hazifest Vol. 1</span>El juego más culero del momento</p>
       </div>
-      {partida.fase === 'jugando' && <Carrera jugadores={partida.jugadores} turno={partida.turno} />}
+      {partida.fase === 'jugando' && <Carrera jugadores={partida.jugadores} turno={partida.turno} lineas={EVENTOS.map(e => e.linea)} prendida={eventos[0]?.linea} />}
       {partida.fase === 'jugando' && (
         <div className="ctl">
           <div className="dados-sel" role="group" aria-label="Cuántos dados">
@@ -388,11 +434,12 @@ export default function App() {
     otraVez: 'Tirar otra vez',
     retroceder: '¡Retroceder!',
     moviendo: 'Tirando…',
+    reparte: 'Tirar para repartir',
   }[etapa];
-  const alTirar = () => (etapa === 'retroceder' ? retroceder() : tirar());
+  const alTirar = () => (etapa === 'retroceder' ? retroceder() : etapa === 'reparte' ? tirarReparte() : tirar());
   // Lo que dice la pantallita del digivice y lo que hace su botón A en cada momento del turno.
   // Sin acentos: la tipografía de pixeles no los trae todos.
-  const PISTAS = { tirar: 'TIRA!', otraVez: 'OTRA VEZ', retroceder: 'PA ATRAS', moviendo: 'TIRANDO', comodin: 'ELIGE', listo: 'SIGUE', ganador: 'GANO!', fin: 'FIN' };
+  const PISTAS = { tirar: 'TIRA!', otraVez: 'OTRA VEZ', retroceder: 'TIRA DADO', reparte: 'TIRA DADO', moviendo: 'TIRANDO', comodin: 'ELIGE', listo: 'SIGUE', ganador: 'GANO!', fin: 'FIN' };
   const accion = textoAccion ? { texto: textoAccion, fn: alTirar, listo: etapa !== 'moviendo' && !ocupado }
     : etapa === 'listo' ? { texto: 'Siguiente turno', fn: pasarTurno, listo: true }
     : etapa === 'fin' ? { texto: 'Jugar otra', fn: nuevaPartida, listo: true }
@@ -430,7 +477,7 @@ export default function App() {
           nombre={actual.nombre}
           ficha={actual.ficha}
           aviso={etapa === 'fin' ? 'Se acabó la partida' : `Turno de ${actual.nombre}`}
-          alerta={etapa === 'tirar' || etapa === 'otraVez' || etapa === 'retroceder' || etapa === 'comodin'}
+          alerta={etapa === 'tirar' || etapa === 'otraVez' || etapa === 'retroceder' || etapa === 'reparte' || etapa === 'comodin'}
           girando={tirando}
           abierta={burbuja}
           onAbrir={setBurbuja}
@@ -544,6 +591,14 @@ export default function App() {
           </div>
         )}
 
+        {AVISO_TIRO[etapa] && !letrero && !burbuja && !ocupado && (
+          <div className="aviso-tiro" role="status">
+            <span className="aviso-dado" aria-hidden="true">{[0, 2, 4, 6, 8].map(k => <i key={k} style={{ gridArea: `${Math.floor(k / 3) + 1} / ${(k % 3) + 1}` }} />)}</span>
+            <span className="aviso-txt"><b>¡Tira el dado!</b>{AVISO_TIRO[etapa]}</span>
+            <button type="button" className="btn-tirar" onClick={alTirar}>Tirar</button>
+          </div>
+        )}
+
         {franja && jugadores[franja.i] && (
           <div className="franja-turno" key={franja.k} aria-live="polite">
             <div className="franja-in">
@@ -617,6 +672,18 @@ export default function App() {
         </div>
       )}
 
+      {eventos[0] && (
+        <div className="evento-fondo" role="dialog" aria-modal="true" aria-label={`Línea ${eventos[0].linea}: ${eventos[0].titulo}`}>
+          <div className="evento" style={{ '--c': colorDe(eventos[0].i).c }}>
+            <span className="evento-linea"><small>Línea</small>{eventos[0].linea}</span>
+            <strong>{eventos[0].titulo}</strong>
+            <p>{eventos[0].texto}</p>
+            <small className="evento-quien">La cruzó {eventos[0].nombre}</small>
+            <button type="button" className="btn-rosa grande" onClick={() => cerrarEvento(eventos[0].accion)}>{eventos[0].accion === 'reto' ? 'Sacar el reto' : '¡Hecho!'}</button>
+          </div>
+        </div>
+      )}
+
       {modalReto && (
         <div className={`modal-fondo${modalReto.desdeComodin ? ' barrera' : ''}`} role="dialog" aria-modal="true" aria-label="Reto misterioso">
           <div className={`modal${modalReto.desdeComodin ? ' recorte' : ''}`}>
@@ -628,7 +695,17 @@ export default function App() {
                 <span className="pill">{modalReto.desdeComodin ? 'Tu destino' : 'Reto manual'}</span>
                 <h2>{modalReto.reto.titulo}</h2>
                 <p>{modalReto.reto.desc}</p>
-                {modalReto.reto.requiereDados && <p className="aviso-dados">Este reto usa dados: abre el panel y busca "Dados extra" en la pestaña Extras.</p>}
+                {modalReto.reto.dados && (modalReto.tiro ? (
+                  <div className="tiro-reto">
+                    <b>Salió {modalReto.tiro.join(' y ')}</b>
+                    {modalReto.tiro.length > 1 && <span>Suma {modalReto.tiro.reduce((a, b) => a + b, 0)} · Producto {modalReto.tiro.reduce((a, b) => a * b, 1)}</span>}
+                    <span>{modalReto.tiro.reduce((a, b) => a + b, 0) % 2 ? 'Impar' : 'Par'}</span>
+                  </div>
+                ) : (
+                  <button type="button" className="btn-cromo tirar-reto" onClick={tirarParaReto} disabled={modalReto.tirando}>
+                    {modalReto.tirando ? 'Tirando…' : `Tirar ${modalReto.reto.dados} dado${modalReto.reto.dados > 1 ? 's' : ''} para el reto`}
+                  </button>
+                ))}
                 <button type="button" className="btn-rosa grande" onClick={cerrarReto}>¡Aceptar destino!</button>
               </>
             )}

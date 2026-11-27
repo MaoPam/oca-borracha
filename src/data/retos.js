@@ -1,8 +1,8 @@
 // Retos misteriosos: salen en las casillas comodín o con el botón "Reto manual".
-// requiereDados: true muestra el aviso para usar la herramienta de dados.
+// dados: cuántos dados pide el reto. El reto trae su propio botón para tirarlos.
 export const RETOS = [
   { titulo: "Lucha de Ego", desc: "Retas a quien quieras a fuercitas, si te gana te tomas un shot." },
-  { titulo: "Nuzlocke", desc: "Escoge 3 personas para tomar contigo. Cada persona que se niegue a tomar es un x2 a los que debes tomar tú. Toman el producto de lo que salga de tirar los dos dados" },
+  { titulo: "Nuzlocke", desc: "Escoge 3 personas para tomar contigo. Cada persona que se niegue a tomar es un x2 a los que debes tomar tú. Toman el producto de lo que salga de tirar los dos dados", dados: 2 },
   { titulo: "Flashback", desc: "Tienes que mostrar la última imagen de la carpeta de borrados." },
   { titulo: "Trago de confianza", desc: "Escoges a alguien para que te prepare un trago misterioso con lo que haya." },
   { titulo: "Tatuaje callejero", desc: "El de enfrente tiene derecho a dibujarte lo que quiera (cara o brazo)." },
@@ -23,15 +23,15 @@ export const RETOS = [
     { titulo: "Fotooo", desc: "Tomas una sola foto, si no salen todos los jugadores bebes" },
   { titulo: "Cultura general", desc: "Dices una categoría. El primero en no responder o repetir bebe." },
       { titulo: "2 de 3 caidas", desc: "Duelo de pulgares con el de la derecha, 2 shots al perdedor" },
-  { titulo: "Proliferación", desc: "Tira 2 dados — el producto de los números es la cantidad de shots para tu equipo. ¡Suerte!", requiereDados: true },
+  { titulo: "Proliferación", desc: "Tira 2 dados — el producto de los números es la cantidad de shots para tu equipo. ¡Suerte!", dados: 2 },
   { titulo: "Francotirador", desc: "Avienta una tapa al vaso de alguien, si atinas, se lo fondea." },
   { titulo: "Dominó", desc: "Los tragos van en cadena (1, 2, 3...). El primero en romperla toma 3 shots." },
   { titulo: "Amnesia", desc: "Prohibido decir 'sí' o 'no' por 5 min. Quien falle, shot." },
-  { titulo: "Tiro de gracia", desc: "Tira 1 dado — si es par tú repartes los shots, si es impar tú te los tomas todos.", requiereDados: true },
+  { titulo: "Tiro de gracia", desc: "Tira 1 dado — si es par tú repartes los shots, si es impar tú te los tomas todos.", dados: 1 },
   { titulo: "Examen de vista", desc: "Mira al de tu izquierda 10 seg, cierra los ojos y describe su outfit. Cada error es un trago." },
   { titulo: "Incógnito", desc: "Dale like a la foto más vieja de alguien. Si adivinan de quién es, shot. Si no, te salvas." },
   { titulo: "Debugger", desc: "Fixea al más sobrio: sírvele un trago y se lo tiene que tomar." },
-  { titulo: "Critico", desc: "Escoge a alguien, despues tira el dado, 5 o 6 bebe él, si sale 1  bebes tú" },
+  { titulo: "Critico", desc: "Escoge a alguien, despues tira el dado, 5 o 6 bebe él, si sale 1  bebes tú", dados: 1 },
       { titulo: "Ruleta rusa", desc: "El que saque el numero mas bajo recibe un zape o shot de los todos los demas jugadores (1 shot x equipo)" },
   { titulo: "Sommelier", desc: "A ciegas prueba la bebida de un compa. Si atinas se salvan, si no, tu equipo fondea." },
     { titulo: "Equilibrio", desc: "10 pasos con tu bebida en la cabeza, si se te cae lo llenas y fondeatelo" },

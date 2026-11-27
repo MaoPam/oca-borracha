@@ -1,7 +1,7 @@
 // Pruebas de las reglas: npm test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { trazarEspiral, pasos, efecto, siguienteTurno } from './reglas.js';
+import { trazarEspiral, pasos, efecto, siguienteTurno, lineasCruzadas } from './reglas.js';
 import { CASILLAS, COMODINES, META } from '../data/casillas.js';
 import { RETOS } from '../data/retos.js';
 
@@ -68,4 +68,19 @@ test('turnos: salta a quien pierde turno y a quien ya ganó', () => {
   assert.equal(r.avisos.length, 1);
   assert.equal(js[1].pierde, 1, 'no muta la lista original');
   assert.equal(siguienteTurno(r.jugadores, 3).indice, 0);
+});
+
+test('líneas de la carrera: cada una se dispara una sola vez por jugador', () => {
+  const L = [15, 30, 45];
+  assert.deepEqual(lineasCruzadas(14, [], L), []);
+  assert.deepEqual(lineasCruzadas(15, [], L), [15], 'llegar justo a la línea cuenta');
+  assert.deepEqual(lineasCruzadas(33, [15], L), [30]);
+  assert.deepEqual(lineasCruzadas(33, [15, 30], L), [], 'una línea ya cruzada no se repite');
+  assert.deepEqual(lineasCruzadas(50, [], L), [15, 30, 45], 'si brinca varias, salen todas');
+});
+
+test('los retos que hablan de dados dicen cuántos piden', () => {
+  for (const r of RETOS) {
+    if (/\bdados?\b/i.test(r.desc)) assert.ok(r.dados >= 1, `al reto ${r.titulo} le falta dados`);
+  }
 });
