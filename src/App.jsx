@@ -77,6 +77,7 @@ export default function App() {
   const [burbuja, setBurbuja] = useState(false);
   const [letrero, setLetrero] = useState(null);
   const [tirando, setTirando] = useState(false);
+  const [tiro, setTiro] = useState(null);                // mesa de tiro al centro: { k, dados }
   const [seccion, setSeccion] = useState('turno');       // qué parte del panel muestra la perilla
   const [franja, setFranja] = useState(null);            // franja de cambio de turno: { i, k }
   const [portadaVista, setPortadaVista] = useState(0);   // hasta qué lugar ya se cerró la portada del ganador
@@ -89,7 +90,8 @@ export default function App() {
   const [nombre, setNombre] = useState('');
   const [premio, setPremio] = useState('');
   const ruletaRef = useRef(null);
-  const franjaN = useRef(0);   // cuenta las franjas, para que cada una sepa si sigue siendo la última
+  const franjaN = useRef(0);
+  const tiroN = useRef(0);     // igual que franjaN, para la mesa de tiro   // cuenta las franjas, para que cada una sepa si sigue siendo la última
 
   const actualizar = (fn) => { const sig = fn(pRef.current); pRef.current = sig; setPartida(sig); };
   const cambiarJugador = (i, cambios) => actualizar(p => ({ ...p, jugadores: p.jugadores.map((j, k) => (k === i ? { ...j, ...cambios } : j)) }));
@@ -144,10 +146,14 @@ export default function App() {
 
   const rodar = async (cuantos) => {
     const dados = Array.from({ length: cuantos }, () => tirarDado());
+    const k = ++tiroN.current;
     setBurbuja(true); setSeccion('turno'); setTirando(true);
+    setTiro({ k, dados });
     actualizar(p => ({ ...p, dados, giros: p.giros + 1 }));
     await esperar(T_DADO);
     setTirando(false);
+    // La mesa se queda un momento enseñando el total y se va sola.
+    setTimeout(() => setTiro(t => (t?.k === k ? null : t)), T_VER_DADO);
     return dados;
   };
 
@@ -429,7 +435,7 @@ export default function App() {
           secciones={{
             turno: (
           <section className="tarjeta-sticker turno" aria-label="Turno">
-            <div className={`dados${tirando ? ' tirando' : ''}`}>{partida.dados.map((v, k) => <Dado3D key={k} valor={v} giros={partida.giros} girando={tirando} tam={partida.dados.length > 1 ? 66 : 84} />)}</div>
+            <div className="dados quietos">{partida.dados.map((v, k) => <Dado3D key={k} valor={v} giros={partida.giros} tam={partida.dados.length > 1 ? 66 : 84} conResultado={false} />)}</div>
             {textoAccion && <button type="button" className={`btn-tirar${etapa === 'retroceder' ? ' trampa' : ''}`} onClick={alTirar} disabled={etapa === 'moviendo' || ocupado}>{textoAccion}</button>}
             {(etapa === 'listo') && <button type="button" className="btn-tirar" onClick={pasarTurno}>Siguiente turno</button>}
             {etapa === 'fin' && <button type="button" className="btn-tirar" onClick={nuevaPartida}>Jugar otra</button>}
@@ -495,6 +501,16 @@ export default function App() {
             ),
           }}
         />
+
+        {/* giros={1}: en la mesa el dado siempre da las mismas vueltas, no unas por cada tirada de la partida. */}
+        {tiro && (
+          <div className="mesa-tiro" key={tiro.k} aria-live="polite">
+            <div className="dados-tiro">
+              {tiro.dados.map((v, k) => <Dado3D key={k} valor={v} giros={1} girando tam={tiro.dados.length > 1 ? 96 : 116} conResultado={false} />)}
+            </div>
+            <span className="total-pop">¡{tiro.dados.reduce((a, b) => a + b, 0)}!</span>
+          </div>
+        )}
 
         {letrero && (
           <div className="aterrizaje">

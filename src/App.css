@@ -701,14 +701,48 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   70% { transform: scale(.72); }
   82%, 100% { opacity: 1; transform: scale(1); }
 }
-/* Sacudida chiquita de la fila de dados justo cuando caen. */
-.dados.tirando { animation: sacudida-dados 1s linear; }
-@keyframes sacudida-dados {
+/* Los dados del panel solo muestran la cara: el lanzamiento se ve en la mesa de tiro. */
+.dados.quietos .dado { transition: none; }
+
+/* ---------- Mesa de tiro ----------
+   Una capa al centro de la pantalla, encima de todo, donde los dados tienen espacio
+   para volar: el panel recortaba la primera mitad del lanzamiento. */
+.mesa-tiro { position: fixed; inset: 0; z-index: 48; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 26px; pointer-events: none; background: rgba(11, 11, 11, .38); animation: aparece-mesa .18s ease-out both; }
+@keyframes aparece-mesa { from { background-color: rgba(11, 11, 11, 0); } }
+.dados-tiro { display: flex; gap: 38px; animation: sacude-mesa 1s linear both; }
+/* La mesa se sacude justo cuando los dados tocan (58% del lanzamiento). */
+@keyframes sacude-mesa {
   0%, 56% { transform: none; }
-  59% { transform: translate(-3px, 1px); }
-  62% { transform: translate(3px, -1px); }
-  66% { transform: translate(-2px, 0); }
+  59% { transform: translate(-7px, 3px); }
+  62% { transform: translate(7px, -3px); }
+  66% { transform: translate(-4px, 1px); }
   70%, 100% { transform: none; }
+}
+/* El giro sale de cero hasta la cara que tocó (la que el componente pone en línea). */
+.mesa-tiro .dado { transition: none; animation: gira-tiro 1s cubic-bezier(.17, .85, .22, 1); }
+@keyframes gira-tiro { from { transform: rotateX(0deg) rotateY(0deg); } }
+/* Con dos dados, el segundo entra desde la derecha. */
+.dados-tiro .dado-caja:nth-child(2) .dado-vuelo { animation-name: lanza-dado-der; }
+@keyframes lanza-dado-der {
+  0%   { transform: translate(150%, 30%); filter: blur(2.5px); }
+  12%  { transform: translate(112%, -30%); filter: blur(2.5px); }
+  24%  { transform: translate(75%, -62%); filter: blur(2px); }
+  36%  { transform: translate(40%, -60%); filter: blur(2px); }
+  48%  { transform: translate(14%, -32%); filter: blur(1.4px); }
+  58%  { transform: translate(0, 0) scale(1.12, .88); filter: blur(0); }
+  70%  { transform: translate(0, -24%) scale(.96, 1.04); filter: blur(0); }
+  82%  { transform: translate(0, 0) scale(1.06, .94); }
+  90%  { transform: translate(0, -7%); }
+  100% { transform: translate(0, 0); filter: blur(0); }
+}
+.total-pop { padding: 6px 20px 10px; background: var(--rotulo-am); color: #000; border: 4px solid #000;
+  box-shadow: 0 0 0 4px var(--papel), 8px 8px 0 4px #000; font: 400 clamp(44px, 9vw, 76px)/1 var(--rotulo);
+  transform: rotate(-6deg); animation: pop-total .5s .92s both; }
+@keyframes pop-total {
+  0% { opacity: 0; transform: rotate(-14deg) scale(.3); }
+  60% { opacity: 1; transform: rotate(-4deg) scale(1.18); }
+  100% { opacity: 1; transform: rotate(-6deg) scale(1); }
 }
 /* El resultado sale como sticker en cuanto el dado se detiene. */
 .dado-pop { position: absolute; z-index: 3; right: -24%; top: -28%; width: 50%; aspect-ratio: 1; display: grid; place-items: center;
@@ -778,7 +812,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   .grito, .franja-turno, .portada, .portada-acc, .chispa-p { animation: none !important; }
   .viajera { transition: none !important; }
   .viajera .ficha, .viajera .polvo-f::before, .viajera .polvo-f::after, .app.rodando .tablero::after { animation: none !important; }
-  .burbuja.alerta, .burbuja-panel, .letrero, .dado-caja.girando .dado-vuelo, .dado-caja.girando .dado-sombra, .dados.tirando { animation: none !important; }
+  .burbuja.alerta, .burbuja-panel, .letrero, .dado-caja.girando .dado-vuelo, .dado-caja.girando .dado-sombra, .mesa-tiro, .dados-tiro, .mesa-tiro .dado, .total-pop { animation: none !important; }
   .dado-pop { animation: none !important; transform: rotate(-8deg); }
   .ficha .menea, .ficha .ala, .ficha .llama { animation: none !important; }
   .telon-abre .hoja, .telon-abre b, .telon-abre .volante, .telon-abre .ojo-telon { animation-duration: .25s !important; }
