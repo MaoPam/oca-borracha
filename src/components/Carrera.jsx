@@ -6,7 +6,7 @@ const enTira = (pos) => `${((pos - 1) / (META - 1)) * 100}%`;
 
 // La carrera: cada ficha en su lugar sobre una tira del 1 al 60, en el encabezado,
 // para saber quién va ganando sin abrir la burbuja.
-export default function Carrera({ jugadores, turno, lineas = [], prendida }) {
+export default function Carrera({ jugadores, turno }) {
   const todos = jugadores.map((j, i) => ({ j, i }));
   const enJuego = todos.filter(({ j }) => !j.gano);
   const lider = enJuego.length ? enJuego.reduce((a, b) => (b.j.pos > a.j.pos ? b : a)) : null;
@@ -21,9 +21,7 @@ export default function Carrera({ jugadores, turno, lineas = [], prendida }) {
   return (
     <div className="carrera" aria-label="Quién va ganando">
       <span className="carrera-linea" />
-      {[...new Set([1, ...lineas, 60])].map(n => (
-        <i key={n} className={`carrera-marca${lineas.includes(n) ? ' evento' : ''}${prendida === n ? ' prendida' : ''}`} style={{ left: enTira(n) }}><b>{n}</b></i>
-      ))}
+      {[1, 15, 30, 45, 60].map(n => <i key={n} className="carrera-marca" style={{ left: enTira(n) }}><b>{n}</b></i>)}
       {todos.map(({ j, i }) => (
         <span
           key={i}

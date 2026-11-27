@@ -214,6 +214,9 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .evento-linea { position: absolute; top: -34px; left: 50%; display: grid; place-items: center; width: 74px; height: 74px; margin-left: -37px;
   border-radius: 50%; background: var(--chicle); border: 4px solid #000; box-shadow: 4px 4px 0 #000; font: 400 28px/1 var(--rotulo); }
 .evento-linea small { font: 400 9px/1 var(--rotulo); text-transform: uppercase; }
+.evento-tipo { margin-top: 4px; padding: 5px 12px 4px; border: 2px solid #000; box-shadow: 2px 2px 0 #000; font: 400 13px/1 var(--rotulo); text-transform: uppercase; transform: rotate(-3deg); }
+.evento-tipo.premio { background: var(--neon); color: #000; }
+.evento-tipo.castigo { background: var(--laberinto); color: #fff; }
 .evento strong { font: 400 clamp(22px, 5vw, 30px)/1.02 var(--rotulo); text-transform: uppercase; }
 .evento p { margin: 0; font: 400 16px/1.4 var(--texto); }
 .evento-quien { color: #4a4336; font: 400 13px/1 var(--rotulo); text-transform: uppercase; }
@@ -315,12 +318,6 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   background: repeating-linear-gradient(90deg, var(--papel) 0 8px, transparent 8px 13px); opacity: .5; }
 .carrera-marca { position: absolute; bottom: 10px; width: 2px; height: 12px; margin-left: -1px; background: var(--papel); opacity: .65; }
 .carrera-marca b { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%); color: var(--papel); font: 400 9px/1 var(--rotulo); }
-/* Las líneas con evento: más gruesas, rosas y con banderita; se prenden mientras su evento está en pantalla. */
-.carrera-marca.evento { width: 4px; height: 20px; margin-left: -2px; background: var(--chicle); opacity: 1; box-shadow: 1px 1px 0 #000; }
-.carrera-marca.evento::before { content: ''; position: absolute; left: 4px; top: 0; width: 9px; height: 7px; background: var(--chicle);
-  clip-path: polygon(0 0, 100% 50%, 0 100%); }
-.carrera-marca.prendida { animation: prende-linea .3s steps(1, end) infinite; }
-@keyframes prende-linea { 50% { background: var(--rotulo-am); } }
 .carrera-f { position: absolute; bottom: 15px; width: 20px; height: 28px; margin-left: -10px; filter: var(--troquel);
   transition: left .22s ease-out, bottom .2s ease-out; }
 .carrera-f.arriba { bottom: 27px; }
@@ -827,7 +824,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   .app.rodando .tablero, .app.fiesta .tablero, .casilla.resaltada { animation: none !important; }
   .tablero > .meta { animation: none !important; }
   .app.fiesta .tablero-caja::after, .ficha::after { display: none; }
-  .digi.alerta, .lcd-txt i, .aviso-tiro, .aviso-dado, .evento, .carrera-marca.prendida { animation: none !important; }
+  .digi.alerta, .lcd-txt i, .aviso-tiro, .aviso-dado, .evento { animation: none !important; }
   .grito, .franja-turno, .portada, .portada-acc, .chispa-p { animation: none !important; }
   .viajera { transition: none !important; }
   .viajera .ficha, .viajera .polvo-f::before, .viajera .polvo-f::after { animation: none !important; }

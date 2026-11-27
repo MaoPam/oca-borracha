@@ -348,7 +348,7 @@ export default function App() {
         <h1>Oca Borracha</h1>
         <p className="lema"><span className="cinta">Hazifest Vol. 1</span>El juego más culero del momento</p>
       </div>
-      {partida.fase === 'jugando' && <Carrera jugadores={partida.jugadores} turno={partida.turno} lineas={EVENTOS.map(e => e.linea)} prendida={eventos[0]?.linea} />}
+      {partida.fase === 'jugando' && <Carrera jugadores={partida.jugadores} turno={partida.turno} />}
       {partida.fase === 'jugando' && (
         <div className="ctl">
           <div className="dados-sel" role="group" aria-label="Cuántos dados">
@@ -676,6 +676,7 @@ export default function App() {
         <div className="evento-fondo" role="dialog" aria-modal="true" aria-label={`Línea ${eventos[0].linea}: ${eventos[0].titulo}`}>
           <div className="evento" style={{ '--c': colorDe(eventos[0].i).c }}>
             <span className="evento-linea"><small>Línea</small>{eventos[0].linea}</span>
+            {eventos[0].tipo && <span className={`evento-tipo ${eventos[0].tipo}`}>{eventos[0].tipo === 'castigo' ? 'Castigo' : 'Premio'}</span>}
             <strong>{eventos[0].titulo}</strong>
             <p>{eventos[0].texto}</p>
             <small className="evento-quien">La cruzó {eventos[0].nombre}</small>
