@@ -30,24 +30,9 @@ const FLECHAS = PUNTOS.slice(1, -1).flatMap((b, k) => {
 // Fila y columna de una casilla; la 60 es el centro del letrero de la Ruleta.
 const celdaDe = (n) => (n >= META ? [meta.filas[0], (meta.cols[0] + meta.cols[1]) / 2] : camino[n - 1]);
 
-// Cámara que sigue a la ficha: el tablero se agranda ZOOM veces y se recorre para que la
-// casilla quede al centro. Los porcentajes de translate son del propio tablero, así que
-// sirve igual en cualquier tamaño de pantalla.
-const ZOOM = 1.9;
-const centroPct = (n) => {
-  const [f, c] = celdaDe(n);
-  // 1.5% y 2.3%: el relleno del tablero, en horizontal y en vertical.
-  return [1.5 + ((c + 0.5) / 9) * 97, 2.3 + ((f + 0.5) / 7) * 95.4];
-};
-const tope = (v) => Math.min(0, Math.max(100 - 100 * ZOOM, v));   // que nunca se vea fuera del tablero
-const encuadre = (n) => {
-  const [x, y] = centroPct(n);
-  return `translate(${tope(50 - x * ZOOM)}%, ${tope(50 - y * ZOOM)}%) scale(${ZOOM})`;
-};
-
 // Las fichas viven en su propia capa, encima de la cuadrícula. Cada una es un solo
-// elemento que se desliza de casilla en casilla (transition en el CSS), así que se ve
-// el recorrido. Antes estaban dentro de cada casilla y saltaban de una a otra.
+// elemento: la capa la desliza de casilla en casilla (transition en el CSS) mientras el
+// dibujo brinca hacia arriba y abajo. Las dos cosas juntas dibujan el arco.
 function CapaFichas({ jugadores, turno }) {
   const porCasilla = {};
   jugadores.forEach((j, i) => { (porCasilla[j.pos] ||= []).push(i); });
@@ -64,7 +49,8 @@ function CapaFichas({ jugadores, turno }) {
             className={`viajera${m > 1 ? ' varias' : ''}${activa ? ' activa' : ''}`}
             style={{ '--cx': (c + 0.5) / 9, '--cy': (f + 0.5) / 7, '--k': juntas.indexOf(i) - (m - 1) / 2, '--c': col.c, '--tc': col.tc }}
           >
-            {/* key={j.pos}: el dibujo se vuelve a montar en cada paso y repite el brinco. */}
+            {/* key={j.pos}: el dibujo y el polvito se vuelven a montar en cada paso, y repiten su animación. */}
+            <span key={`p${j.pos}`} className="polvo-f" />
             <span key={j.pos} className={`ficha f-${j.ficha || 'corcholata'}${activa ? ' activa' : ''}`} title={j.nombre}>
               {activa && <span className="gafete">{j.nombre}</span>}
               <svg viewBox="0 0 40 56"><FichaDibujo tipo={j.ficha} inicial={(j.nombre || '?')[0].toUpperCase()} /></svg>
@@ -76,12 +62,10 @@ function CapaFichas({ jugadores, turno }) {
   );
 }
 
-// camara: { n, fase } mientras la cámara está activa. 'entra' es el acercamiento (suave),
-// 'sigue' es el recorrido (parejo, al mismo ritmo que los pasos de la ficha).
-export default function Tablero({ jugadores, turno, resaltada, camara, onVer }) {
+export default function Tablero({ jugadores, turno, resaltada, onVer }) {
   return (
     <div className="tablero-caja">
-      <div className={`tablero${camara ? ` cam-${camara.fase}` : ''}`} style={camara ? { transform: encuadre(camara.n) } : undefined} aria-label="Tablero de 60 casillas">
+      <div className="tablero" aria-label="Tablero de 60 casillas">
         <span className="cinta-esq e1" aria-hidden="true" /><span className="cinta-esq e2" aria-hidden="true" />
         <span className="cinta-esq e3" aria-hidden="true" /><span className="cinta-esq e4" aria-hidden="true" />
 

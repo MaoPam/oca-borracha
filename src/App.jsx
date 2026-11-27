@@ -24,7 +24,6 @@ const T_PASO = sinMovimiento ? 60 : 220;
 const T_VER_DADO = sinMovimiento ? 100 : 560;
 const T_CIERRE = sinMovimiento ? 0 : 340;
 const T_LETRERO = sinMovimiento ? 700 : 3200;
-const T_CAMARA = 450;   // lo que tarda la cámara en acercarse o alejarse del tablero
 const T_FRANJA = 1700;  // lo que dura la franja de cambio de turno (igual que su animación)
 const esperar = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -78,7 +77,6 @@ export default function App() {
   const [burbuja, setBurbuja] = useState(false);
   const [letrero, setLetrero] = useState(null);
   const [tirando, setTirando] = useState(false);
-  const [camara, setCamara] = useState(null);            // cámara del tablero: null · 'entra' · 'sigue'
   const [seccion, setSeccion] = useState('turno');       // qué parte del panel muestra la perilla
   const [franja, setFranja] = useState(null);            // franja de cambio de turno: { i, k }
   const [portadaVista, setPortadaVista] = useState(0);   // hasta qué lugar ya se cerró la portada del ganador
@@ -158,14 +156,10 @@ export default function App() {
     await esperar(T_VER_DADO);
     setBurbuja(false);
     await esperar(T_CIERRE);
-    // La cámara se acerca a la ficha antes de que empiece a caminar.
-    if (!sinMovimiento) { setCamara('entra'); await esperar(T_CAMARA); setCamara('sigue'); }
   };
 
   // Al terminar el recorrido: letrero con la casilla donde cayo y de vuelta a la burbuja.
   const anunciar = async () => {
-    // Primero se aleja la cámara para que el letrero salga sobre el tablero completo.
-    if (!sinMovimiento) { setCamara(null); await esperar(T_CAMARA); }
     setLetrero(pRef.current.jugadores[pRef.current.turno].pos);
     await esperar(T_LETRERO);
     setLetrero(null);
@@ -414,7 +408,7 @@ export default function App() {
           )}
           {esCelular && !verLona
             ? <Carril jugadores={jugadores} turno={turno} resaltada={enVista} onVer={(n) => setVista(n === vista ? null : n)} />
-            : <Tablero jugadores={jugadores} turno={turno} resaltada={enVista} camara={camara ? { n: actual.pos, fase: camara } : null} onVer={(n) => setVista(n === vista ? null : n)} />}
+            : <Tablero jugadores={jugadores} turno={turno} resaltada={enVista} onVer={(n) => setVista(n === vista ? null : n)} />}
         </div>
 
         <Burbuja

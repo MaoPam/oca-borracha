@@ -264,17 +264,35 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   transition: transform .22s linear; }
 .viajera.activa { z-index: 2; }
 .viajera .ficha { position: absolute; left: 0; bottom: 0; width: 4.2cqw; translate: -50% 0; transform-origin: 50% 100%;
-  animation: brinca .24s ease-out; }
+  animation: brinca .3s linear; }
 .viajera.varias .ficha { width: 3.1cqw; rotate: calc(var(--k) * 9deg); }
-.viajera .ficha.activa { animation: brinca .24s ease-out, latido 1s ease-in-out .3s infinite; }
+.viajera .ficha.activa { animation: brinca .3s linear, latido 1s ease-in-out .35s infinite; }
 .viajera .ficha .gafete { font-size: clamp(6px, .95cqw, 11px); }
-/* El brinco de cada paso: sube mientras la capa la desliza a la siguiente casilla y cae aplastandose. */
+/* El brinco de cada paso. Del 0 al 73% vuela (lo mismo que tarda la capa en deslizarla, .22s):
+   la altura sigue una parabola de verdad, muestreada punto por punto, porque entre dos
+   keyframes el navegador va en linea recta. Del 73% al final cae aplastandose. */
 @keyframes brinca {
   0% { transform: translateY(0) scale(1, 1); }
-  45% { transform: translateY(-55%) scale(.95, 1.06); }
-  80% { transform: translateY(0) scale(1.14, .86); }
+  7.3% { transform: translateY(-26%) scale(.97, 1.04); }
+  14.6% { transform: translateY(-46%) scale(.96, 1.05); }
+  21.9% { transform: translateY(-60%); }
+  29.2% { transform: translateY(-69%); }
+  36.5% { transform: translateY(-72%) scale(1, 1); }
+  43.8% { transform: translateY(-69%); }
+  51.1% { transform: translateY(-60%); }
+  58.4% { transform: translateY(-46%) scale(.96, 1.05); }
+  65.7% { transform: translateY(-26%) scale(.97, 1.04); }
+  73% { transform: translateY(0) scale(1.22, .8); }
+  86% { transform: translateY(0) scale(.94, 1.07); }
   100% { transform: translateY(0) scale(1, 1); }
 }
+/* Polvito al caer: dos bolitas que salen hacia los lados justo cuando aterriza. */
+.viajera .polvo-f { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.viajera .polvo-f::before, .viajera .polvo-f::after { content: ''; position: absolute; top: -.6cqw; width: 1.1cqw; height: 1.1cqw;
+  border-radius: 50%; background: var(--papel); border: 1.5px solid #000; opacity: 0; animation: polvo-f .34s .21s ease-out both; }
+.viajera .polvo-f::before { left: -2.3cqw; --dx: -1.6cqw; }
+.viajera .polvo-f::after { left: 1.2cqw; --dx: 1.6cqw; }
+@keyframes polvo-f { 0% { opacity: 1; transform: translate(0, 0) scale(.4); } 100% { opacity: 0; transform: translate(var(--dx), -1.2cqw) scale(1.4); } }
 
 /* ---------- La carrera, en el encabezado ---------- */
 .carrera { position: relative; flex: 1 1 260px; min-width: 200px; height: 58px; margin: 0 clamp(10px, 2.4vw, 34px); }
@@ -385,19 +403,15 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 /* Regla: la foto de cada casilla es la protagonista. Las normales son todas iguales
    (borde blanco, derechas); solo las especiales llevan color, con significado fijo.
    La personalidad vive en el marco, la Ruleta, las fichas y las animaciones. */
-/* overflow: hidden recorta el tablero cuando la cámara se acerca. */
-.tablero-caja { position: relative; container-type: inline-size; padding: clamp(14px, 2vw, 28px); overflow: hidden; }
+.tablero-caja { position: relative; container-type: inline-size; padding: clamp(14px, 2vw, 28px); }
 
 /* El marco: rosa grueso con filo papel y negro, y cinta canela en las esquinas. */
 .tablero { position: relative; width: 100%; aspect-ratio: 1.55; display: grid;
   grid-template-columns: repeat(9, minmax(0, 1fr)); grid-template-rows: repeat(7, minmax(0, 1fr));
   --gap: clamp(6px, 1.15cqi, 12px); gap: var(--gap); padding: clamp(8px, 1.4cqi, 16px);
   background: var(--grano), #121212;
-  border: clamp(5px, .8cqi, 9px) solid var(--chicle); border-radius: 6px;
-  box-shadow: 0 0 0 3px var(--papel), 0 0 0 6px #000, var(--dura-xl);
-  transform-origin: 0 0; transition: transform .45s cubic-bezier(.3, .8, .3, 1); }
-/* Siguiendo a la ficha la cámara va pareja y al mismo ritmo que los pasos (T_PASO = 220ms en App.jsx). */
-.tablero.cam-sigue { transition: transform .22s linear; }
+  --marco: clamp(5px, .8cqi, 9px); border: var(--marco) solid var(--chicle); border-radius: 6px;
+  box-shadow: 0 0 0 3px var(--papel), 0 0 0 6px #000, var(--dura-xl); }
 .cinta-esq { position: absolute; z-index: 6; pointer-events: none;
   width: clamp(44px, 7cqi, 92px); height: clamp(15px, 2.2cqi, 28px);
   background: var(--cinta); box-shadow: 1px 1px 0 rgba(0, 0, 0, .35); }
@@ -525,10 +539,12 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 
 /* ---------- Ambiente: el tablero se prende solo cuando pasa algo ---------- */
 /* Mientras una ficha camina: el tablero se cimbra y el marco cambia de color a golpes. */
-/* Sin cimbra: el tambaleo mareaba. Solo cambian las luces del marco. */
-.app.rodando .tablero { animation: luces .36s steps(1, end) infinite; }
-/* Con la cámara encima las luces no se ven, y cada cambio de color repintaba el tablero entero ampliado: era lo que trababa. */
-.app.rodando .tablero.cam-entra, .app.rodando .tablero.cam-sigue { animation: none; }
+/* Luces del marco mientras se camina. Van en una capa encima que solo cambia de opacidad:
+   cambiar el color del borde obligaba a repintar el tablero entero, con sus 59 fotos, 8 veces por segundo. */
+.tablero::after { content: ''; position: absolute; inset: calc(-1 * var(--marco)); z-index: 7; pointer-events: none;
+  border: var(--marco) solid var(--rotulo-am); border-radius: 6px; opacity: 0; }
+.app.rodando .tablero::after { animation: luces-marco .36s steps(1, end) infinite; }
+@keyframes luces-marco { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 /* Cuando alguien gana: marco en fiesta y papel picado cayendo encima del tablero. */
 .app.fiesta .tablero { animation: luces .18s steps(1, end) infinite; }
 .app.fiesta .tablero-caja::after {
@@ -761,7 +777,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   .burbuja.girando .aro, .cuna { animation: none !important; transition: none !important; }
   .grito, .franja-turno, .portada, .portada-acc, .chispa-p { animation: none !important; }
   .viajera { transition: none !important; }
-  .viajera .ficha { animation: none !important; }
+  .viajera .ficha, .viajera .polvo-f::before, .viajera .polvo-f::after, .app.rodando .tablero::after { animation: none !important; }
   .burbuja.alerta, .burbuja-panel, .letrero, .dado-caja.girando .dado-vuelo, .dado-caja.girando .dado-sombra, .dados.tirando { animation: none !important; }
   .dado-pop { animation: none !important; transform: rotate(-8deg); }
   .ficha .menea, .ficha .ala, .ficha .llama { animation: none !important; }
