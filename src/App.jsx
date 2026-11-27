@@ -78,7 +78,7 @@ export default function App() {
   const [letrero, setLetrero] = useState(null);
   const [tirando, setTirando] = useState(false);
   const [tiro, setTiro] = useState(null);                // mesa de tiro al centro: { k, dados }
-  const [seccion, setSeccion] = useState('turno');       // qué parte del panel muestra la perilla
+  const [seccion, setSeccion] = useState('turno');       // qué pestaña del panel del digivice se ve
   const [franja, setFranja] = useState(null);            // franja de cambio de turno: { i, k }
   const [portadaVista, setPortadaVista] = useState(0);   // hasta qué lugar ya se cerró la portada del ganador
   const [ficha, setFicha] = useState(FICHAS[0].id);
@@ -390,6 +390,13 @@ export default function App() {
     moviendo: 'Tirando…',
   }[etapa];
   const alTirar = () => (etapa === 'retroceder' ? retroceder() : tirar());
+  // Lo que dice la pantallita del digivice y lo que hace su botón A en cada momento del turno.
+  // Sin acentos: la tipografía de pixeles no los trae todos.
+  const PISTAS = { tirar: 'TIRA!', otraVez: 'OTRA VEZ', retroceder: 'PA ATRAS', moviendo: 'TIRANDO', comodin: 'ELIGE', listo: 'SIGUE', ganador: 'GANO!', fin: 'FIN' };
+  const accion = textoAccion ? { texto: textoAccion, fn: alTirar, listo: etapa !== 'moviendo' && !ocupado }
+    : etapa === 'listo' ? { texto: 'Siguiente turno', fn: pasarTurno, listo: true }
+    : etapa === 'fin' ? { texto: 'Jugar otra', fn: nuevaPartida, listo: true }
+    : null;
   const grito = letrero ? gritoDe(letrero, CASILLAS[letrero]) : null;
   const verPortada = ganadorActual && portadaVista !== partida.lugares;
 
@@ -420,7 +427,7 @@ export default function App() {
 
         <Burbuja
           color={colorDe(turno).c}
-          inicial={(actual.nombre || '?')[0].toUpperCase()}
+          nombre={actual.nombre}
           ficha={actual.ficha}
           aviso={etapa === 'fin' ? 'Se acabó la partida' : `Turno de ${actual.nombre}`}
           alerta={etapa === 'tirar' || etapa === 'otraVez' || etapa === 'retroceder' || etapa === 'comodin'}
@@ -429,10 +436,8 @@ export default function App() {
           onAbrir={setBurbuja}
           seccion={seccion}
           onSeccion={setSeccion}
-          acciones={{
-            reto: () => abrirReto(false),
-            dados: () => setModalDados({ cuantos: 1, vals: [1], giros: 0, girando: false, res: null }),
-          }}
+          pista={PISTAS[etapa] || ''}
+          accion={accion}
           secciones={{
             turno: (
           <section className="tarjeta-sticker turno" aria-label="Turno">
@@ -498,6 +503,17 @@ export default function App() {
                 ))}
               </ul>
             </details>
+          </section>
+            ),
+            extras: (
+          <section className="tarjeta-sticker extras">
+            <h2>Extras</h2>
+            <button type="button" className="btn-cromo extra" onClick={() => abrirReto(false)}>
+              <strong>Reto manual</strong><span>¿Alguien rompió una regla?</span>
+            </button>
+            <button type="button" className="btn-cromo extra" onClick={() => setModalDados({ cuantos: 1, vals: [1], giros: 0, girando: false, res: null })}>
+              <strong>Dados extra</strong><span>Para los retos que usan dados</span>
+            </button>
           </section>
             ),
           }}
@@ -612,7 +628,7 @@ export default function App() {
                 <span className="pill">{modalReto.desdeComodin ? 'Tu destino' : 'Reto manual'}</span>
                 <h2>{modalReto.reto.titulo}</h2>
                 <p>{modalReto.reto.desc}</p>
-                {modalReto.reto.requiereDados && <p className="aviso-dados">Este reto usa dados: toca la perilla y elige "Dados".</p>}
+                {modalReto.reto.requiereDados && <p className="aviso-dados">Este reto usa dados: abre el panel y busca "Dados extra" en la pestaña Extras.</p>}
                 <button type="button" className="btn-rosa grande" onClick={cerrarReto}>¡Aceptar destino!</button>
               </>
             )}

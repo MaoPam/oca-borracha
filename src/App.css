@@ -315,40 +315,46 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .carril .ficha .gafete { font-size: 11px; }
 
 /* ---------- Burbuja flotante ---------- */
-/* La perilla: aro de muescas, centro del color del jugador y su ficha encima. */
-.burbuja { position: fixed; z-index: 45; width: 74px; height: 74px; padding: 0;
-  display: grid; place-items: center; border: 3px solid #000; border-radius: 50%;
-  background: #111; color: #000; cursor: grab; box-shadow: 4px 5px 0 #000;
-  /* touch-action: none es lo que deja arrastrarla con el dedo sin que la pagina se mueva. */
-  touch-action: none; transition: transform .1s, box-shadow .1s; }
-.burbuja:active { cursor: grabbing; transform: scale(.94); box-shadow: 2px 2px 0 #000; }
-.burbuja:focus-visible { outline: 3px solid var(--seleccion); outline-offset: 3px; }
-.burbuja .aro { position: absolute; inset: 3px; z-index: 0; border-radius: 50%;
-  background: repeating-conic-gradient(var(--papel) 0 5deg, transparent 5deg 30deg); }
-.burbuja::after { content: ''; position: absolute; inset: 12px; z-index: 1; border-radius: 50%; background: var(--c); border: 3px solid #000; }
-.burbuja.activa::after { background: var(--papel); }
-.burbuja-ficha { position: relative; z-index: 2; width: 27px; height: 38px; pointer-events: none; filter: var(--troquel); }
-.burbuja.alerta { animation: tocame 1.15s ease-in-out infinite; }
-@keyframes tocame { 50% { transform: scale(1.11); } }
-/* Mientras rueda el dado, el aro de muescas da vueltas. */
-.burbuja.girando .aro { animation: gira-aro .55s linear infinite; }
-@keyframes gira-aro { to { transform: rotate(360deg); } }
+/* ---------- Digivice ---------- */
+/* Cuerpo del color del jugador con filo claro por dentro, antena, pantalla LCD y dos teclas.
+   touch-action: none es lo que deja arrastrarlo con el dedo sin que la pagina se mueva. */
+.digi { position: fixed; z-index: 45; width: 112px; height: 118px; touch-action: none; user-select: none; cursor: grab;
+  background: var(--c); border: 3px solid #000; border-radius: 30px 30px 42px 42px;
+  box-shadow: 4px 5px 0 #000, inset 0 0 0 4px rgba(255, 255, 255, .32); }
+.digi:active { cursor: grabbing; }
+.digi.alerta { animation: tocame 1.15s ease-in-out infinite; }
+@keyframes tocame { 50% { transform: scale(1.08); } }
+.digi-antena { position: absolute; left: 50%; top: -11px; width: 18px; height: 10px; margin-left: -9px; background: #000; border-radius: 5px 5px 0 0; }
+.digi-pantalla { position: absolute; left: 11px; right: 11px; top: 13px; height: 52px; display: flex; align-items: center; gap: 5px;
+  padding: 3px 6px; overflow: hidden; cursor: pointer; text-align: left;
+  background: #a9c27d; border: 3px solid #000; border-radius: 5px; }
+/* La rejilla de pixeles de la pantalla. */
+.digi-pantalla::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .09) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(0, 0, 0, .09) 0 1px, transparent 1px 3px); }
+.digi.activa .digi-pantalla { background: #c3d99a; }
+.digi-pantalla:focus-visible, .digi-a:focus-visible, .digi-b:focus-visible { outline: 3px solid var(--seleccion); outline-offset: 2px; }
+.lcd-ficha { flex: none; width: 24px; height: 34px; overflow: visible; filter: url(#lcd); }
+.lcd-txt { min-width: 0; display: grid; gap: 5px; color: #22341a; }
+.lcd-txt b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 7px/1.1 var(--pixel); font-weight: 400; }
+.lcd-txt i { font: 400 6px/1.2 var(--pixel); font-style: normal; }
+.digi.alerta .lcd-txt i, .digi.girando .lcd-txt i { animation: parpadea-lcd .6s steps(1, end) infinite; }
+@keyframes parpadea-lcd { 50% { opacity: 0; } }
+.digi-teclas { position: absolute; left: 0; right: 0; bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 16px; }
+.digi-a, .digi-b { padding: 0; border-radius: 50%; background: #111; border: 2px solid #000; box-shadow: 1px 2px 0 #000; cursor: pointer;
+  font: 400 10px/1 var(--rotulo); }
+.digi-a { width: 32px; height: 32px; color: var(--rotulo-am); }
+.digi-b { width: 25px; height: 25px; color: var(--papel); }
+.digi-a:active, .digi-b:active { transform: translateY(2px); box-shadow: none; }
 
-/* Las cuñas del abanico: salen del centro de la perilla hacia --dx/--dy, una tras otra. */
-.cunas { position: fixed; z-index: 46; width: 0; height: 0; pointer-events: none; }
-.cuna { position: absolute; left: -27px; top: -27px; width: 54px; height: 54px; display: grid; place-items: center; padding: 0;
-  border-radius: 50%; background: var(--papel); color: #000; border: 3px solid #000; box-shadow: 3px 3px 0 #000;
-  font: 400 8.5px/1 var(--rotulo); text-transform: uppercase; cursor: pointer; pointer-events: none;
-  opacity: 0; transform: translate(0, 0) scale(.2) rotate(-90deg);
-  transition: transform .32s cubic-bezier(.3, 1.35, .5, 1) calc(var(--i) * 40ms), opacity .2s calc(var(--i) * 40ms); }
-.cunas.abierto .cuna { opacity: 1; transform: translate(var(--dx), var(--dy)) scale(1) rotate(0deg); pointer-events: auto; }
-.cuna.c-turno { background: var(--chicle); }
-.cuna.urge, .cuna:focus-visible { outline: 3px solid var(--seleccion); outline-offset: 2px; }
-.cunas-velo { position: fixed; inset: 0; z-index: 43; padding: 0; background: transparent; border: 0; cursor: default; }
+/* Extras del panel: el reto manual y los dados extra. */
+.extras { display: grid; gap: 10px; }
+.extras .extra { min-height: 0; display: grid; justify-items: start; gap: 4px; padding: 12px 14px; text-align: left; }
+.extra strong { font: 400 17px/1 var(--rotulo); text-transform: uppercase; }
+.extra span { font: 400 13px/1.3 var(--texto); text-transform: none; letter-spacing: 0; }
 
 /* El panel es un flyer: hoja de papel con grano, pegada chueca y con cinta canela arriba. */
 .burbuja-panel { position: fixed; z-index: 44;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 92px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 144px);
   width: min(94vw, 390px); max-height: min(74vh, 740px);
   display: flex; flex-direction: column; transform: rotate(-.7deg);
   background: var(--grano), #15110f; border: 3px solid #000;
@@ -782,7 +788,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   .app.rodando .tablero, .app.fiesta .tablero, .casilla.resaltada { animation: none !important; }
   .tablero > .meta { animation: none !important; }
   .app.fiesta .tablero-caja::after, .ficha::after { display: none; }
-  .burbuja.girando .aro, .cuna { animation: none !important; transition: none !important; }
+  .digi.alerta, .lcd-txt i { animation: none !important; }
   .grito, .franja-turno, .portada, .portada-acc, .chispa-p { animation: none !important; }
   .viajera { transition: none !important; }
   .viajera .ficha, .viajera .polvo-f::before, .viajera .polvo-f::after { animation: none !important; }
