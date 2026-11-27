@@ -8,7 +8,7 @@ import FichaDibujo from './FichaDibujo.jsx';
 const CLAVE = 'oca-borracha:burbuja';
 const MARGEN = 10;
 const ANCHO = 112, ALTO = 118;   // tamaño del aparato, el mismo que en el CSS
-const PESTANAS = [['turno', 'Turno'], ['lugares', 'Lugares'], ['lista', 'Lo que pasa'], ['extras', 'Extras']];
+const PESTANAS = [['turno', 'Turno'], ['lugares', 'Lugares'], ['lista', 'Lo que pasa'], ['comodines', 'Comodines'], ['extras', 'Extras']];
 
 const leerPos = () => {
   try {

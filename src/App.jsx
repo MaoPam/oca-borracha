@@ -13,7 +13,8 @@ import Ruleta from './components/Ruleta.jsx';
 import { colorDe, MAX_JUGADORES } from './components/colores.js';
 import { CASILLAS, COMODINES, META, MOVIMIENTOS } from './data/casillas.js';
 import { RETOS } from './data/retos.js';
-import { pasos, efecto, siguienteTurno, tirarDado, barajar, lineasCruzadas } from './game/reglas.js';
+import { pasos, efecto, siguienteTurno, tirarDado, lineasCruzadas, armarBolsa } from './game/reglas.js';
+import { CARTAS, PROPORCION_COMODINES, cartaDe } from './data/comodines.js';
 import { guardarPartida, cargarPartida, borrarPartida, nuevaJugada } from './game/guardado.js';
 import { gritoDe } from './game/gritos.js';
 import { EVENTOS } from './data/eventos.js';
@@ -32,6 +33,11 @@ const AVISO_TIRO = {
   reparte: 'Lo que salga son los tragos que repartes.',
   retroceder: 'Lo que salga son las casillas que retrocedes.',
 };
+
+// Bolsa de retos con 1 de cada 3 papelitos de comodín.
+const nuevaBolsa = () => armarBolsa(RETOS.length, CARTAS.map(c => c.id), PROPORCION_COMODINES);
+// Con lo que arranca cada quien: posición inicial y el comodín Divide dolor.
+const alInicio = (j) => ({ ...j, pos: 1, tope: 1, pierde: 0, gano: 0, tiros: 0, comodines: ['divide-dolor'] });
 
 const partidaVacia = () => ({
   fase: 'setup', jugadores: [], turno: 0, etapa: 'tirar', casilla: null, nota: '',
@@ -93,6 +99,8 @@ export default function App() {
   const [telon, setTelon] = useState(false);
   const esCelular = useEsCelular();
   const [modalReto, setModalReto] = useState(null);
+  const [usado, setUsado] = useState(null);              // aviso del comodín que alguien acaba de usar
+  const [porUsar, setPorUsar] = useState(null);          // comodín al que ya se le dio "Usar" una vez: falta confirmar
   const [modalDados, setModalDados] = useState(null);
   const [confirmarNueva, setConfirmarNueva] = useState(false);
   const [nombre, setNombre] = useState('');
@@ -100,6 +108,7 @@ export default function App() {
   const ruletaRef = useRef(null);
   const franjaN = useRef(0);   // cuenta las franjas, para que cada una sepa si sigue siendo la última
   const tiroN = useRef(0);     // lo mismo, para la mesa de tiro
+  const usadoN = useRef(0);    // y para el aviso de comodín usado
 
   const actualizar = (fn) => { const sig = fn(pRef.current); pRef.current = sig; setPartida(sig); };
   const cambiarJugador = (i, cambios) => actualizar(p => ({ ...p, jugadores: p.jugadores.map((j, k) => (k === i ? { ...j, ...cambios } : j)) }));
@@ -130,9 +139,9 @@ export default function App() {
     setTimeout(() => anunciaTurno(0), sinMovimiento ? 320 : 2900);
     actualizar(p => ({
       ...partidaVacia(), fase: 'jugando',
-      jugadores: p.jugadores.map(j => ({ ...j, pos: 1, tope: 1, pierde: 0, gano: 0, tiros: 0 })),
+      jugadores: p.jugadores.map(alInicio),
       premios: p.jugadores.map(j => j.premio).filter(Boolean),
-      bolsa: barajar(RETOS.map((_, i) => i)), casilla: 1,
+      bolsa: nuevaBolsa(), casilla: 1,
       nota: `Todas las fichas en el inicio. Empieza ${p.jugadores[0].nombre}.`,
       bitacora: [nuevaJugada('', '¡Empieza la peda!')],
     }));
@@ -140,7 +149,7 @@ export default function App() {
   const continuar = () => { const g = partida.guardada; pRef.current = g; setPartida(g); };
   const nuevaPartida = () => {
     borrarPartida();
-    const jugadores = pRef.current.jugadores.map(j => ({ ...j, pos: 1, tope: 1, pierde: 0, gano: 0, tiros: 0 }));
+    const jugadores = pRef.current.jugadores.map(alInicio);
     const p = { ...partidaVacia(), jugadores };
     pRef.current = p; setPartida(p); setConfirmarNueva(false); setVista(null);
   };
@@ -194,9 +203,31 @@ export default function App() {
     evs.forEach(e => anotar(i, `${j.nombre} cruza la línea ${e.linea}: ${e.titulo}.`));
     setEventos(cola => [...cola, ...evs]);
   };
-  const cerrarEvento = (accion) => {
+  const cerrarEvento = (ev) => {
     setEventos(cola => cola.slice(1));
-    if (accion === 'reto') abrirReto(false);
+    if (ev.comodin) darComodin(ev.i, ev.comodin);
+    if (ev.accion === 'reto') abrirReto(false);
+  };
+
+  // ---------- Comodines ----------
+  // Cada jugador guarda los ids de sus cartas en jugador.comodines (puede tener repetidas).
+  const darComodin = (i, id) => {
+    const j = pRef.current.jugadores[i], carta = cartaDe(id);
+    if (!j || !carta) return;
+    cambiarJugador(i, { comodines: [...(j.comodines || []), id] });
+    anotar(i, `${j.nombre} se guarda el comodín ${carta.titulo}.`);
+  };
+  // Usar pide dos toques: el primero arma el botón ("¿Seguro?") y el segundo lo gasta.
+  const usarComodin = (i, k) => {
+    const clave = `${i}-${k}`;
+    if (porUsar !== clave) { setPorUsar(clave); return; }
+    setPorUsar(null);
+    const j = pRef.current.jugadores[i], carta = cartaDe(j.comodines[k]);
+    cambiarJugador(i, { comodines: j.comodines.filter((_, x) => x !== k) });
+    anotar(i, `${j.nombre} usa ${carta?.titulo ?? 'un comodín'}: ${carta?.desc ?? ''}`);
+    const n = ++usadoN.current;
+    setUsado({ i, carta, n });
+    setTimeout(() => setUsado(u => (u?.n === n ? null : u)), sinMovimiento ? 1500 : 2600);
   };
 
   const terminarEn = (etapa, nota, cambios = {}) => actualizar(p => ({ ...p, etapa, nota, casilla: p.jugadores[p.turno].pos, ...cambios }));
@@ -299,20 +330,27 @@ export default function App() {
   };
 
   // ---------- Retos ----------
-  const sacarReto = () => {
+  // Saca un papelito de la bolsa: o un reto ({ reto }) o un comodín ({ comodin }).
+  const sacarPapelito = () => {
     let bolsa = [...pRef.current.bolsa];
-    if (!bolsa.length) bolsa = barajar(RETOS.map((_, i) => i));
-    const idx = bolsa.pop();
+    if (!bolsa.length) bolsa = nuevaBolsa();
+    const x = bolsa.pop();
     actualizar(p => ({ ...p, bolsa }));
-    return RETOS[idx];
+    const carta = typeof x === 'string' && cartaDe(x);
+    return carta ? { comodin: carta } : { reto: RETOS[x] ?? RETOS[0] };
   };
   const abrirReto = (desdeComodin) => {
     setModalReto({ girando: true, desdeComodin });
-    setTimeout(() => setModalReto({ girando: false, desdeComodin, reto: sacarReto() }), sinMovimiento ? 200 : 1200);
+    setTimeout(() => setModalReto({ girando: false, desdeComodin, ...sacarPapelito() }), sinMovimiento ? 200 : 1200);
   };
   const cerrarReto = () => {
     const m = modalReto;
     setModalReto(null);
+    if (m?.comodin) {
+      darComodin(pRef.current.turno, m.comodin.id);
+      if (m.desdeComodin && pRef.current.etapa === 'comodin') terminarEn('listo', `Sacaste el comodín ${m.comodin.titulo}: te salvas de la casilla.`);
+      return;
+    }
     if (m?.reto) anotar(pRef.current.turno, `${m.desdeComodin ? 'Cambia la casilla por el reto' : 'Reto manual'}: ${m.reto.titulo}.`);
     if (m?.desdeComodin && pRef.current.etapa === 'comodin') terminarEn('listo', `Reto misterioso: ${m.reto.titulo}.`, { reto: m.reto });
   };
@@ -554,6 +592,31 @@ export default function App() {
             </details>
           </section>
             ),
+            comodines: (
+          <section className="tarjeta-sticker comodines">
+            <h2>Comodines</h2>
+            <p className="ayuda">Se usan cuando quieras, aunque no sea tu turno. Toca dos veces para gastarlo.</p>
+            <ul className="mano">
+              {jugadores.map((j, i) => (
+                <li key={i} style={{ '--c': colorDe(i).c }}>
+                  <span className="mano-quien"><span className="chip" /><strong>{j.nombre}</strong></span>
+                  {(j.comodines || []).length ? (
+                    <span className="mano-cartas">
+                      {j.comodines.map((id, k) => {
+                        const c = cartaDe(id);
+                        return c && (
+                          <button key={`${id}-${k}`} type="button" className={`carta-com${porUsar === `${i}-${k}` ? ' armada' : ''}`} onClick={() => usarComodin(i, k)} title={c.desc}>
+                            <b>{c.titulo}</b><small>{porUsar === `${i}-${k}` ? '¿Seguro? Toca otra vez' : c.desc}</small>
+                          </button>
+                        );
+                      })}
+                    </span>
+                  ) : <em>Sin comodines</em>}
+                </li>
+              ))}
+            </ul>
+          </section>
+            ),
             extras: (
           <section className="tarjeta-sticker extras">
             <h2>Extras</h2>
@@ -601,6 +664,14 @@ export default function App() {
           </div>
         )}
 
+        {usado && jugadores[usado.i] && (
+          <div className="usado" key={usado.n} role="status" style={{ '--c': colorDe(usado.i).c }}>
+            <small>{jugadores[usado.i].nombre} usa</small>
+            <b>{usado.carta?.titulo}</b>
+            <span>{usado.carta?.desc}</span>
+          </div>
+        )}
+
         {franja && jugadores[franja.i] && (
           <div className="franja-turno" key={franja.k} aria-live="polite">
             <div className="franja-in">
@@ -636,7 +707,8 @@ export default function App() {
             <ul className="lista-reglas texto">
               <li><span><strong>Ofrenda de paz:</strong> te salvas de un reto pero tomas 1 shot. (Solo para personas en pareja)</span></li>
               <li><span><strong>Qlo si no:</strong> si no lo haces, te tomas lo que el otro prepare. (Solteros)</span></li>
-              <li><span><strong>Divide dolor:</strong> tienes derecho, 1 vez por juego, a dividir tus tragos con alguien más.</span></li>
+              <li><span><strong>Divide dolor:</strong> todos empiezan con este comodín: úsalo 1 vez para dividir tus tragos con alguien más.</span></li>
+              <li><span><strong>Comodines:</strong> 1 de cada 3 papelitos de la bolsa de retos es un comodín. Te lo guardas y lo usas cuando quieras desde el digivice.</span></li>
             </ul>
           </div>
         </section>
@@ -681,8 +753,9 @@ export default function App() {
             {eventos[0].tipo && <span className={`evento-tipo ${eventos[0].tipo}`}>{eventos[0].tipo === 'castigo' ? 'Castigo' : 'Premio'}</span>}
             <strong>{eventos[0].titulo}</strong>
             <p>{eventos[0].texto}</p>
+            {eventos[0].comodin && <span className="evento-guarda">★ Se guarda en tus comodines</span>}
             <small className="evento-quien">{eventos[0].nombre} llegó primero: es solo suyo</small>
-            <button type="button" className="btn-rosa grande" onClick={() => cerrarEvento(eventos[0].accion)}>{eventos[0].accion === 'reto' ? 'Sacar el reto' : '¡Hecho!'}</button>
+            <button type="button" className="btn-rosa grande" onClick={() => cerrarEvento(eventos[0])}>{eventos[0].accion === 'reto' ? 'Sacar el reto' : eventos[0].comodin ? '¡Guardarlo!' : '¡Hecho!'}</button>
           </div>
         </div>
       )}
@@ -695,10 +768,11 @@ export default function App() {
               <div className="invocando"><Dado3D valor={1} giros={3} tam={72} conResultado={false} /><p>Invocando el caos…</p></div>
             ) : (
               <>
-                <span className="pill">{modalReto.desdeComodin ? 'Tu destino' : 'Reto manual'}</span>
-                <h2>{modalReto.reto.titulo}</h2>
-                <p>{modalReto.reto.desc}</p>
-                {modalReto.reto.dados && (modalReto.tiro ? (
+                <span className="pill">{modalReto.comodin ? '¡Comodín!' : modalReto.desdeComodin ? 'Tu destino' : 'Reto manual'}</span>
+                <h2>{(modalReto.comodin || modalReto.reto).titulo}</h2>
+                <p>{(modalReto.comodin || modalReto.reto).desc}</p>
+                {modalReto.comodin && <p className="guarda-nota">Te lo guardas. Úsalo cuando quieras desde la pestaña Comodines del digivice.{modalReto.desdeComodin && ' Y te salvas de la casilla.'}</p>}
+                {modalReto.reto?.dados && (modalReto.tiro ? (
                   <div className="tiro-reto">
                     <b>Salió {modalReto.tiro.join(' y ')}</b>
                     {modalReto.tiro.length > 1 && <span>Suma {modalReto.tiro.reduce((a, b) => a + b, 0)} · Producto {modalReto.tiro.reduce((a, b) => a * b, 1)}</span>}
@@ -709,7 +783,7 @@ export default function App() {
                     {modalReto.tirando ? 'Tirando…' : `Tirar ${modalReto.reto.dados} dado${modalReto.reto.dados > 1 ? 's' : ''} para el reto`}
                   </button>
                 ))}
-                <button type="button" className="btn-rosa grande" onClick={cerrarReto}>¡Aceptar destino!</button>
+                <button type="button" className="btn-rosa grande" onClick={cerrarReto}>{modalReto.comodin ? '¡Guardarlo!' : '¡Aceptar destino!'}</button>
               </>
             )}
           </div>

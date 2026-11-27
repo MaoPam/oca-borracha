@@ -1,7 +1,8 @@
 // Pruebas de las reglas: npm test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { trazarEspiral, pasos, efecto, siguienteTurno, lineasCruzadas } from './reglas.js';
+import { trazarEspiral, pasos, efecto, siguienteTurno, lineasCruzadas, armarBolsa } from './reglas.js';
+import { CARTAS, PROPORCION_COMODINES } from '../data/comodines.js';
 import { CASILLAS, COMODINES, META } from '../data/casillas.js';
 import { RETOS } from '../data/retos.js';
 
@@ -77,6 +78,16 @@ test('líneas de la carrera: cada una se la lleva solo el primero', () => {
   assert.deepEqual(lineasCruzadas(33, [15], L), [30]);
   assert.deepEqual(lineasCruzadas(33, [15, 30], L), [], 'si otro ya la ganó, ya no sale');
   assert.deepEqual(lineasCruzadas(50, [], L), [15, 30, 45], 'si brinca varias, salen todas');
+});
+
+test('la bolsa trae todos los retos y 1 de cada 3 papelitos es comodín', () => {
+  const bolsa = armarBolsa(RETOS.length, CARTAS.map(c => c.id), PROPORCION_COMODINES);
+  const retos = bolsa.filter(x => typeof x === 'number');
+  const comodines = bolsa.filter(x => typeof x === 'string');
+  assert.deepEqual([...retos].sort((a, b) => a - b), RETOS.map((_, i) => i), 'no falta ni sobra ningún reto');
+  assert.ok(Math.abs(comodines.length / bolsa.length - 1 / 3) < 0.02, `comodines: ${comodines.length} de ${bolsa.length}`);
+  assert.ok(comodines.every(id => CARTAS.some(c => c.id === id)));
+  assert.equal(new Set(CARTAS.map(c => c.id)).size, CARTAS.length, 'ids de comodín sin repetir');
 });
 
 test('los retos que hablan de dados dicen cuántos piden', () => {

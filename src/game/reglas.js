@@ -72,6 +72,15 @@ export function siguienteTurno(jugadores, actual) {
 
 export const tirarDado = (rand = Math.random) => 1 + Math.floor(rand() * 6);
 
+// Bolsa de retos revuelta: los números son retos (su lugar en la lista) y los textos son comodines (su id).
+// Se agregan comodines hasta que sean la proporción pedida (1/3), sin quitar ningún reto.
+export function armarBolsa(nRetos, idsComodin, proporcion, rand = Math.random) {
+  const nComodines = Math.round((nRetos * proporcion) / (1 - proporcion));
+  const retos = Array.from({ length: nRetos }, (_, i) => i);
+  const comodines = Array.from({ length: nComodines }, (_, k) => idsComodin[k % idsComodin.length]);
+  return barajar([...retos, ...comodines], rand);
+}
+
 export function barajar(arr, rand = Math.random) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }

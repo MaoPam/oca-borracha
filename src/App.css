@@ -221,6 +221,35 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .evento p { margin: 0; font: 400 16px/1.4 var(--texto); }
 .evento-quien { color: #4a4336; font: 400 13px/1 var(--rotulo); text-transform: uppercase; }
 
+/* ---------- Comodines ---------- */
+.evento-guarda, .guarda-nota { padding: 6px 10px 5px; background: #000; color: var(--rotulo-am); font: 400 12px/1.25 var(--rotulo); text-transform: uppercase; }
+.guarda-nota { margin: 0 0 14px; text-transform: none; font: 600 14px/1.35 var(--texto); }
+.mano { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.mano li { display: grid; gap: 6px; }
+.mano-quien { display: flex; align-items: center; gap: 8px; }
+.mano-quien strong { font: 400 15px/1 var(--rotulo); }
+.mano em { color: var(--gris, #8a8377); font: 600 13px/1 var(--texto); }
+.mano-cartas { display: flex; flex-wrap: wrap; gap: 8px; }
+.carta-com { display: grid; gap: 3px; width: 128px; padding: 8px 9px; text-align: left; cursor: pointer; color: #000;
+  background: var(--rotulo-am); border: 2px solid #000; border-left: 7px solid var(--c); box-shadow: 3px 3px 0 #000; }
+.carta-com b { font: 400 13px/1 var(--rotulo); text-transform: uppercase; }
+.carta-com small { font: 600 11px/1.25 var(--texto); }
+.carta-com:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
+.carta-com.armada { background: var(--chicle); }
+.carta-com:focus-visible { outline: 3px solid var(--seleccion); outline-offset: 2px; }
+.usado { position: fixed; z-index: 56; left: 50%; top: 22vh; width: min(88vw, 340px); display: grid; justify-items: center; gap: 6px; padding: 18px 18px 20px;
+  text-align: center; pointer-events: none; color: #000; background: var(--rotulo-am); border: 4px solid #000; box-shadow: 0 0 0 4px var(--c), 8px 8px 0 4px #000;
+  animation: sale-usado 2.6s cubic-bezier(.2, .9, .3, 1) both; }
+@keyframes sale-usado {
+  0% { opacity: 0; transform: translateX(-50%) scale(.4) rotate(-14deg); }
+  14% { opacity: 1; transform: translateX(-50%) scale(1.06) rotate(3deg); }
+  22%, 82% { opacity: 1; transform: translateX(-50%) rotate(-2deg); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-30px) rotate(-2deg); }
+}
+.usado small { font: 400 12px/1 var(--rotulo); text-transform: uppercase; }
+.usado b { font: 400 clamp(22px, 6vw, 30px)/1 var(--rotulo); text-transform: uppercase; }
+.usado span { font: 600 14px/1.35 var(--texto); }
+
 /* ---------- Cambio de turno ---------- */
 .franja-turno { position: fixed; z-index: 47; left: -6vw; right: -6vw; top: 38vh; height: clamp(84px, 14vh, 120px); pointer-events: none;
   display: grid; place-items: center; background: var(--chicle); border-block: 4px solid #000; box-shadow: 0 7px 0 #000;
@@ -830,6 +859,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   .viajera .ficha, .viajera .polvo-f::before, .viajera .polvo-f::after { animation: none !important; }
   .burbuja.alerta, .burbuja-panel, .letrero, .dado-caja.girando .dado-vuelo, .dado-caja.girando .dado-sombra, .mesa-tiro, .dados-tiro, .mesa-tiro .dado, .total-pop { animation: none !important; }
   .dado-pop { animation: none !important; transform: rotate(-8deg); }
+  .usado { animation: none !important; transform: translateX(-50%) rotate(-2deg); }
   .ficha .menea, .ficha .ala, .ficha .llama { animation: none !important; }
   .telon-abre * { animation-duration: .2s !important; animation-delay: 0s !important; }
 }
