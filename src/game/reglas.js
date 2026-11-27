@@ -52,6 +52,22 @@ export function efecto(n) {
 // tomadas es la lista de la partida entera: cada línea es solo para el primero que llega.
 export const lineasCruzadas = (tope, tomadas, lineas) => lineas.filter(l => tope >= l && !tomadas.includes(l));
 
+// Salidas de las reglas de supervivencia para una casilla o un reto ({ fisico, deDos }):
+//   ofrenda: quiénes pueden usar la Ofrenda de paz (tienen pareja y es de contacto). No se gasta.
+//   qlo: si aplica el Qlo si no (el reto es de dos: te tomas lo que te prepare la otra persona).
+export const salidasDe = (fuente, jugadores) => ({
+  ofrenda: fuente?.fisico ? jugadores.flatMap((j, i) => (j.pareja && !j.gano ? [i] : [])) : [],
+  qlo: !!fuente?.deDos,
+});
+
+// Junta los comodines repetidos para enseñarlos como "Divide dolor ×2":
+// ['divide-dolor', 'espejo', 'divide-dolor'] -> [{ id: 'divide-dolor', n: 2 }, { id: 'espejo', n: 1 }]
+export const agruparComodines = (ids = []) => ids.reduce((grupos, id) => {
+  const g = grupos.find(x => x.id === id);
+  if (g) g.n += 1; else grupos.push({ id, n: 1 });
+  return grupos;
+}, []);
+
 // Siguiente jugador que sí tira: salta a quien ya ganó y a quien pierde turno.
 // Devuelve el índice y la lista de avisos ("X no tira este turno").
 export function siguienteTurno(jugadores, actual) {

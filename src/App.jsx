@@ -15,7 +15,7 @@ import { CARAS_PIRINOLA, CARA_COMODIN, caraAlAzar } from './data/pirinola.js';
 import { colorDe, MAX_JUGADORES } from './components/colores.js';
 import { CASILLAS, COMODINES, META, MOVIMIENTOS } from './data/casillas.js';
 import { RETOS } from './data/retos.js';
-import { pasos, efecto, siguienteTurno, tirarDado, lineasCruzadas, armarBolsa } from './game/reglas.js';
+import { pasos, efecto, siguienteTurno, tirarDado, lineasCruzadas, armarBolsa, salidasDe, agruparComodines } from './game/reglas.js';
 import { CARTAS, PROPORCION_COMODINES, cartaDe } from './data/comodines.js';
 import { guardarPartida, cargarPartida, borrarPartida, nuevaJugada } from './game/guardado.js';
 import { gritoDe } from './game/gritos.js';
@@ -80,6 +80,29 @@ function TarjetaCasilla({ n, nota, extra }) {
   );
 }
 
+// Salidas de las reglas de supervivencia para la casilla o el reto que toca (fuente).
+// Ofrenda de paz: un botón por cada quien tiene pareja (no se gasta). Qlo si no: para quien tiene el turno.
+function Salidas({ fuente, jugadores, turno, onSalida }) {
+  const { ofrenda, qlo } = salidasDe(fuente, jugadores);
+  if (!ofrenda.length && !qlo) return null;
+  return (
+    <div className="salidas">
+      <i>¿Alguien no quiere?</i>
+      {ofrenda.map(i => (
+        <button key={i} type="button" className="btn-cromo salida" onClick={() => onSalida('ofrenda', i)}>💍 {jugadores[i].nombre}: Ofrenda de paz · 1 shot</button>
+      ))}
+      {qlo && (
+        <button type="button" className="btn-cromo salida" onClick={() => onSalida('qlo', turno)}>Qlo si no: {jugadores[turno].nombre} se toma lo que le prepare la otra persona</button>
+      )}
+    </div>
+  );
+}
+
+const SALIDAS = {
+  ofrenda: { titulo: 'Ofrenda de paz', desc: 'Se salva y toma 1 shot.' },
+  qlo: { titulo: 'Qlo si no', desc: 'Se toma lo que le prepare la otra persona.' },
+};
+
 export default function App() {
   const [partida, setPartida] = useState(() => {
     const guardada = cargarPartida();
@@ -107,6 +130,7 @@ export default function App() {
   const [confirmarNueva, setConfirmarNueva] = useState(false);
   const [nombre, setNombre] = useState('');
   const [premio, setPremio] = useState('');
+  const [pareja, setPareja] = useState(false);
   const ruletaRef = useRef(null);
   const franjaN = useRef(0);   // cuenta las franjas, para que cada una sepa si sigue siendo la última
   const tiroN = useRef(0);     // lo mismo, para la mesa de tiro
@@ -129,9 +153,9 @@ export default function App() {
     e.preventDefault();
     const nom = nombre.trim();
     if (!nom || partida.jugadores.length >= MAX_JUGADORES) return;
-    actualizar(p => ({ ...p, jugadores: [...p.jugadores, { nombre: nom, premio: premio.trim(), ficha, pos: 1, tope: 1, pierde: 0, gano: 0, tiros: 0 }] }));
+    actualizar(p => ({ ...p, jugadores: [...p.jugadores, { nombre: nom, premio: premio.trim(), pareja, ficha, pos: 1, tope: 1, pierde: 0, gano: 0, tiros: 0 }] }));
     setFicha(fichaLibre([...pRef.current.jugadores, { ficha }]));
-    setNombre(''); setPremio('');
+    setNombre(''); setPremio(''); setPareja(false);
   };
   const quitarJugador = (i) => actualizar(p => ({ ...p, jugadores: p.jugadores.filter((_, k) => k !== i) }));
   const comenzar = () => {
@@ -219,17 +243,29 @@ export default function App() {
     cambiarJugador(i, { comodines: [...(j.comodines || []), id] });
     anotar(i, `${j.nombre} se guarda el comodín ${carta.titulo}.`);
   };
-  // Usar pide dos toques: el primero arma el botón ("¿Seguro?") y el segundo lo gasta.
-  const usarComodin = (i, k) => {
-    const clave = `${i}-${k}`;
-    if (porUsar !== clave) { setPorUsar(clave); return; }
-    setPorUsar(null);
-    const j = pRef.current.jugadores[i], carta = cartaDe(j.comodines[k]);
-    cambiarJugador(i, { comodines: j.comodines.filter((_, x) => x !== k) });
-    anotar(i, `${j.nombre} usa ${carta?.titulo ?? 'un comodín'}: ${carta?.desc ?? ''}`);
+  // Aviso grande de "X usa…" que se quita solo.
+  const avisar = (i, carta) => {
     const n = ++usadoN.current;
     setUsado({ i, carta, n });
     setTimeout(() => setUsado(u => (u?.n === n ? null : u)), sinMovimiento ? 1500 : 2600);
+  };
+  // Usar pide dos toques: el primero arma el botón ("¿Seguro?") y el segundo gasta UNO de ese tipo
+  // (si tienes Divide dolor ×2, te queda ×1).
+  const usarComodin = (i, id) => {
+    const clave = `${i}-${id}`;
+    if (porUsar !== clave) { setPorUsar(clave); return; }
+    setPorUsar(null);
+    const j = pRef.current.jugadores[i], carta = cartaDe(id), k = (j.comodines || []).indexOf(id);
+    if (k < 0) return;
+    cambiarJugador(i, { comodines: j.comodines.filter((_, x) => x !== k) });
+    anotar(i, `${j.nombre} usa ${carta?.titulo ?? 'un comodín'}: ${carta?.desc ?? ''}`);
+    avisar(i, carta);
+  };
+  // Ofrenda de paz o Qlo si no: no se gastan, solo se anotan y se avisa.
+  const usarSalida = (tipo, i, desde) => {
+    const j = pRef.current.jugadores[i];
+    anotar(i, `${j.nombre} usa ${SALIDAS[tipo].titulo} en "${desde}": ${SALIDAS[tipo].desc.toLowerCase()}`);
+    avisar(i, SALIDAS[tipo]);
   };
 
   const terminarEn = (etapa, nota, cambios = {}) => actualizar(p => ({ ...p, etapa, nota, casilla: p.jugadores[p.turno].pos, ...cambios }));
@@ -349,8 +385,9 @@ export default function App() {
     setModalReto({ girando: true, desdeComodin, cara, ...papel });
   };
   const alCaerPirinola = () => setModalReto(m => (m ? { ...m, girando: false } : m));
-  // seRaja: no hizo el reto y se toma lo que marcó la pirinola.
-  const cerrarReto = (seRaja = false) => {
+  // salida: nada si lo hace; 'raja' si se toma lo que marcó la pirinola;
+  // { tipo: 'ofrenda' | 'qlo', i } si alguien usa una regla de supervivencia.
+  const cerrarReto = (salida = null) => {
     const m = modalReto;
     setModalReto(null);
     if (m?.comodin) {
@@ -359,10 +396,14 @@ export default function App() {
       return;
     }
     if (!m?.reto) return;
-    const raja = seRaja ? ` Se raja y toma: ${m.cara}.` : '';
+    const raja = salida === 'raja' ? ` Se raja y toma: ${m.cara}.` : '';
     anotar(pRef.current.turno, `${m.desdeComodin ? 'Cambia la casilla por el reto' : 'Reto manual'}: ${m.reto.titulo}.${raja}`);
+    if (salida?.tipo) usarSalida(salida.tipo, salida.i, m.reto.titulo);
     if (m.desdeComodin && pRef.current.etapa === 'comodin') {
-      terminarEn('listo', seRaja ? `Te rajaste del reto ${m.reto.titulo}: te toca ${m.cara}.` : `Reto misterioso: ${m.reto.titulo}.`, { reto: seRaja ? null : m.reto });
+      const nota = salida === 'raja' ? `Te rajaste del reto ${m.reto.titulo}: te toca ${m.cara}.`
+        : salida?.tipo ? `${SALIDAS[salida.tipo].titulo} en el reto ${m.reto.titulo}.`
+        : `Reto misterioso: ${m.reto.titulo}.`;
+      terminarEn('listo', nota, { reto: salida ? null : m.reto });
     }
   };
   const hacerLona = () => terminarEn('listo', 'Haces lo que dice la lona.');
@@ -397,7 +438,7 @@ export default function App() {
     <header className={`top${partida.fase === 'jugando' ? ' compacto' : ''}`}>
       <div>
         <h1>Oca Borracha</h1>
-        <p className="lema"><span className="cinta">Hazifest Vol. 1</span>El juego más culero del momento</p>
+        <p className="lema"><span className="cinta">PejeFest</span>El juego más culero del momento</p>
       </div>
       {partida.fase === 'jugando' && <Carrera jugadores={partida.jugadores} turno={partida.turno} />}
       {partida.fase === 'jugando' && (
@@ -439,6 +480,10 @@ export default function App() {
               <label>Nombre<input className="campo" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre del compa…" maxLength={14} autoFocus /></label>
               <label>Premio si llega a la 60<input className="campo" value={premio} onChange={e => setPremio(e.target.value)} placeholder="Ej. que le inviten una chela" maxLength={40} /></label>
               <button type="submit" className="btn-cromo" disabled={!nombre.trim() || partida.jugadores.length >= MAX_JUGADORES}>Agregar</button>
+              <label className="check-pareja">
+                <input type="checkbox" checked={pareja} onChange={e => setPareja(e.target.checked)} />
+                <span>💍 Tiene pareja<small>Puede usar la Ofrenda de paz en retos de contacto. Se puede cambiar en el juego.</small></span>
+              </label>
               <fieldset className="pick-ficha">
                 <legend>Con qué ficha juegas</legend>
                 {FICHAS.map((f, k) => (
@@ -461,7 +506,7 @@ export default function App() {
                 {partida.jugadores.map((j, i) => (
                   <li key={i} style={{ '--c': colorDe(i).c }}>
                     <svg className="ficha-mini" viewBox="0 0 40 56" aria-hidden="true"><FichaDibujo tipo={j.ficha} inicial={(j.nombre || '?')[0].toUpperCase()} /></svg>
-                    <span><strong>{j.nombre}</strong>{j.premio && <small>Premio: {j.premio}</small>}</span>
+                    <span><strong>{j.nombre}{j.pareja && ' 💍'}</strong>{j.premio && <small>Premio: {j.premio}</small>}</span>
                     <button type="button" onClick={() => quitarJugador(i)} aria-label={`Quitar a ${j.nombre}`}>×</button>
                   </li>
                 ))}
@@ -554,11 +599,18 @@ export default function App() {
               <TarjetaCasilla
                 n={partida.casilla}
                 nota={partida.nota}
-                extra={etapa === 'comodin' && (
-                  <div className="eleccion">
-                    <button type="button" className="btn-cromo" onClick={hacerLona}>Hacer el de la lona</button>
-                    <button type="button" className="btn-dorado" onClick={() => abrirReto(true)}>¡Reto misterioso!</button>
-                  </div>
+                extra={(
+                  <>
+                    {etapa === 'comodin' && (
+                      <div className="eleccion">
+                        <button type="button" className="btn-cromo" onClick={hacerLona}>Hacer el de la lona</button>
+                        <button type="button" className="btn-dorado" onClick={() => abrirReto(true)}>¡Reto misterioso!</button>
+                      </div>
+                    )}
+                    {(etapa === 'comodin' || etapa === 'listo') && !partida.reto && (
+                      <Salidas fuente={CASILLAS[partida.casilla]} jugadores={jugadores} turno={turno} onSalida={(tipo, i) => usarSalida(tipo, i, CASILLAS[partida.casilla].corto)} />
+                    )}
+                  </>
                 )}
               />
             )}
@@ -617,25 +669,34 @@ export default function App() {
             comodines: (
           <section className="lcd-sec comodines">
             <h2>Comodines</h2>
-            <p className="ayuda">Se usan cuando quieras, aunque no sea tu turno. Toca dos veces para gastarlo.</p>
+            <p className="ayuda">Se usan cuando quieras, aunque no sea tu turno. Toca dos veces para gastar uno. Los repetidos se acumulan (×2).</p>
             <ul className="mano">
-              {jugadores.map((j, i) => (
-                <li key={i} style={{ '--c': colorDe(i).c }}>
-                  <span className="mano-quien"><span className="chip" /><strong>{j.nombre}</strong></span>
-                  {(j.comodines || []).length ? (
-                    <span className="mano-cartas">
-                      {j.comodines.map((id, k) => {
-                        const c = cartaDe(id);
-                        return c && (
-                          <button key={`${id}-${k}`} type="button" className={`carta-com${porUsar === `${i}-${k}` ? ' armada' : ''}`} onClick={() => usarComodin(i, k)} title={c.desc}>
-                            <b>{c.titulo}</b><small>{porUsar === `${i}-${k}` ? '¿Seguro? Toca otra vez' : c.desc}</small>
-                          </button>
-                        );
-                      })}
+              {jugadores.map((j, i) => {
+                const grupos = agruparComodines(j.comodines);
+                return (
+                  <li key={i} style={{ '--c': colorDe(i).c }}>
+                    <span className="mano-quien">
+                      <span className="chip" /><strong>{j.nombre}</strong>
+                      <button type="button" className={`pareja-t${j.pareja ? ' si' : ''}`} aria-pressed={!!j.pareja} onClick={() => cambiarJugador(i, { pareja: !j.pareja })}>
+                        💍 {j.pareja ? 'Con pareja' : 'Sin pareja'}
+                      </button>
                     </span>
-                  ) : <em>Sin comodines</em>}
-                </li>
-              ))}
+                    {j.pareja && <span className="ofrenda-fija">Ofrenda de paz: siempre activa en retos de contacto</span>}
+                    {grupos.length ? (
+                      <span className="mano-cartas">
+                        {grupos.map(({ id, n }) => {
+                          const c = cartaDe(id), armada = porUsar === `${i}-${id}`;
+                          return c && (
+                            <button key={id} type="button" className={`carta-com${armada ? ' armada' : ''}`} onClick={() => usarComodin(i, id)} title={c.desc}>
+                              <b>{c.titulo}{n > 1 && <span className="cuantos"> ×{n}</span>}</b><small>{armada ? '¿Seguro? Toca otra vez' : c.desc}</small>
+                            </button>
+                          );
+                        })}
+                      </span>
+                    ) : <em>Sin comodines</em>}
+                  </li>
+                );
+              })}
             </ul>
           </section>
             ),
@@ -727,9 +788,9 @@ export default function App() {
           <div>
             <h2>Reglas de supervivencia</h2>
             <ul className="lista-reglas texto">
-              <li><span><strong>Ofrenda de paz:</strong> te salvas de un reto pero tomas 1 shot. (Solo para personas en pareja)</span></li>
-              <li><span><strong>Qlo si no:</strong> si no lo haces, te tomas lo que el otro prepare. (Solteros)</span></li>
-              <li><span><strong>Divide dolor:</strong> todos empiezan con este comodín: úsalo 1 vez para dividir tus tragos con alguien más.</span></li>
+              <li><span><strong>Ofrenda de paz:</strong> si tienes pareja (💍), en casillas y retos de contacto (beso, morder, a solas…) te salvas tomando 1 shot. Siempre activa, no se gasta.</span></li>
+              <li><span><strong>Qlo si no:</strong> en retos de dos, si no lo haces te tomas lo que te prepare la otra persona.</span></li>
+              <li><span><strong>Divide dolor:</strong> todos empiezan con uno y es de un solo uso: divides tus tragos con alguien más. Si te vuelve a salir en la bolsa, se te acumula.</span></li>
               <li><span><strong>Comodines:</strong> 1 de cada 3 papelitos de la bolsa de retos es un comodín. Te lo guardas y lo usas cuando quieras desde el digivice.</span></li>
             </ul>
           </div>
@@ -815,8 +876,9 @@ export default function App() {
                     <span className="piri-cara"><span className="piri-mini" aria-hidden="true" />Si te rajas: <b>{modalReto.cara}</b></span>
                     <div className="reto-botones">
                       <button type="button" className="btn-rosa grande" onClick={() => cerrarReto()}>¡Lo hago!</button>
-                      <button type="button" className="btn-cromo" onClick={() => cerrarReto(true)}>Me rajo · {modalReto.cara}</button>
+                      <button type="button" className="btn-cromo" onClick={() => cerrarReto('raja')}>Me rajo · {modalReto.cara}</button>
                     </div>
+                    <Salidas fuente={modalReto.reto} jugadores={jugadores} turno={turno} onSalida={(tipo, i) => cerrarReto({ tipo, i })} />
                   </>
                 )}
               </div>

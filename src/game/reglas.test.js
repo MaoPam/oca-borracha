@@ -1,7 +1,7 @@
 // Pruebas de las reglas: npm test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { trazarEspiral, pasos, efecto, siguienteTurno, lineasCruzadas, armarBolsa } from './reglas.js';
+import { trazarEspiral, pasos, efecto, siguienteTurno, lineasCruzadas, armarBolsa, salidasDe, agruparComodines } from './reglas.js';
 import { CARTAS, PROPORCION_COMODINES } from '../data/comodines.js';
 import { CASILLAS, COMODINES, META } from '../data/casillas.js';
 import { RETOS } from '../data/retos.js';
@@ -88,6 +88,20 @@ test('la bolsa trae todos los retos y 1 de cada 3 papelitos es comodín', () => 
   assert.ok(Math.abs(comodines.length / bolsa.length - 1 / 3) < 0.02, `comodines: ${comodines.length} de ${bolsa.length}`);
   assert.ok(comodines.every(id => CARTAS.some(c => c.id === id)));
   assert.equal(new Set(CARTAS.map(c => c.id)).size, CARTAS.length, 'ids de comodín sin repetir');
+});
+
+test('Divide dolor se acumula: dos repetidos se ven como ×2', () => {
+  assert.deepEqual(agruparComodines(['divide-dolor', 'espejo', 'divide-dolor']), [{ id: 'divide-dolor', n: 2 }, { id: 'espejo', n: 1 }]);
+  assert.deepEqual(agruparComodines([]), []);
+  assert.deepEqual(agruparComodines(undefined), [], 'partidas guardadas sin comodines');
+});
+
+test('Ofrenda de paz solo en contacto y para quien tiene pareja; Qlo si no en retos de dos', () => {
+  const js = [{ nombre: 'Ana', pareja: true }, { nombre: 'Beto' }, { nombre: 'Caro', pareja: true, gano: 1 }];
+  assert.deepEqual(salidasDe(CASILLAS[52], js), { ofrenda: [0], qlo: false }, 'beso de tres: Ana sí, Caro ya ganó');
+  assert.deepEqual(salidasDe(CASILLAS[28], js), { ofrenda: [0], qlo: true }, 'muerde: contacto y de dos');
+  assert.deepEqual(salidasDe(CASILLAS[2], js), { ofrenda: [], qlo: false }, 'todos beben: nada');
+  assert.equal(salidasDe(RETOS.find(r => r.titulo === 'Miradas'), js).qlo, true);
 });
 
 test('los retos que hablan de dados dicen cuántos piden', () => {

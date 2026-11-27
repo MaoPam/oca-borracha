@@ -250,6 +250,22 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .usado b { font: 400 clamp(22px, 6vw, 30px)/1 var(--rotulo); text-transform: uppercase; }
 .usado span { font: 600 14px/1.35 var(--texto); }
 
+/* ---------- Reglas de supervivencia: Ofrenda de paz y Qlo si no ---------- */
+.salidas { display: grid; gap: 8px; margin-top: 12px; padding: 10px; border: 2px dashed currentColor; text-align: left; }
+.salidas i { font: 400 12px/1.2 var(--rotulo); font-style: normal; text-transform: uppercase; }
+.salidas .salida { min-height: 40px; padding: 8px 10px; text-align: left; font: 600 14px/1.3 var(--texto); text-transform: none; letter-spacing: 0; }
+.burbuja-cuerpo .salidas i { font: 400 7px/1.4 var(--pixel); }
+.burbuja-cuerpo .salidas .salida { font: 600 13px/1.3 var(--texto); text-transform: none; }
+.modal .salidas { margin-top: 14px; }
+.check-pareja { grid-column: 1 / -1; display: flex !important; align-items: flex-start; gap: 10px; cursor: pointer; }
+.check-pareja input { flex: none; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--chicle); }
+.check-pareja small { display: block; margin-top: 2px; font: 400 13px/1.3 var(--texto); text-transform: none; color: #4a4336; }
+.pareja-t { margin-left: auto; padding: 4px 7px; background: transparent; color: inherit; border: 2px dashed currentColor; font: 600 11px/1 var(--texto); cursor: pointer; }
+.pareja-t.si { border-style: solid; }
+.burbuja-cuerpo .pareja-t.si { background: var(--lcd-tinta); color: var(--lcd); }
+.ofrenda-fija { font: 400 7px/1.5 var(--pixel); text-transform: uppercase; }
+.cuantos { font-size: 1.15em; }
+
 /* ---------- Cambio de turno ---------- */
 .franja-turno { position: fixed; z-index: 47; left: -6vw; right: -6vw; top: 38vh; height: clamp(84px, 14vh, 120px); pointer-events: none;
   display: grid; place-items: center; background: var(--chicle); border-block: 4px solid #000; box-shadow: 0 7px 0 #000;
@@ -888,18 +904,31 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .invocando .dado { animation: girar .5s linear infinite; }
 
 /* ---------- Pirinola de los retos ---------- */
-.piri-escena { position: relative; width: 100%; max-width: 320px; height: 210px; margin: 0 auto; overflow: hidden; }
-.piri-mesa { position: absolute; left: -12px; right: -12px; bottom: 6px; height: 92px; border-radius: 50%; background: #3b2618; border: 3px solid #000;
-  background-image: repeating-linear-gradient(176deg, transparent 0 14px, rgba(0, 0, 0, .18) 14px 16px); }
-.piri-carril { position: absolute; left: 14px; right: 86px; bottom: 44px; height: 132px; }
-.piri-mueve { position: absolute; inset: 0; }
-.piri-gira { position: absolute; left: 0; bottom: 0; width: 72px; height: 132px; transform-origin: 50% 100%; }
-.piri-tallo { position: absolute; left: 30px; top: 0; width: 12px; height: 32px; background: #c9a46a; border: 3px solid #000; border-bottom: 0; }
-.piri-cuerpo { position: absolute; left: 0; top: 28px; width: 72px; height: 62px; display: grid; place-items: center; padding: 0 5px; text-align: center;
-  background: var(--rotulo-am); border: 3px solid #000; color: #000; font: 400 11px/1.05 var(--rotulo); text-transform: uppercase;
-  box-shadow: inset 9px 0 0 rgba(0, 0, 0, .16), inset -9px 0 0 rgba(0, 0, 0, .28); }
-.piri-punta { position: absolute; left: 8px; top: 88px; width: 56px; height: 44px; background: var(--chicle); border: 3px solid #000; clip-path: polygon(0 0, 100% 0, 50% 100%); }
-.piri-sombra { position: absolute; left: 14px; bottom: -6px; width: 44px; height: 9px; border-radius: 50%; background: rgba(0, 0, 0, .55); }
+/* Escena de 280px fija (cabe en el modal de un celular). La pirinola mide 80x140 y gira desde su punta. */
+.piri-escena { position: relative; width: 280px; max-width: 100%; height: 226px; margin: 0 auto; overflow: hidden; }
+.piri-mesa { position: absolute; left: -16px; right: -16px; bottom: 4px; height: 96px; border-radius: 50%; border: 3px solid #000;
+  background: radial-gradient(ellipse at 50% 40%, #6b4126, #3b2618 70%); box-shadow: inset 0 -10px 0 rgba(0, 0, 0, .35); }
+.piri-mesa::after { content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: repeating-linear-gradient(176deg, transparent 0 14px, rgba(0, 0, 0, .16) 14px 16px); }
+.piri-ruta { position: absolute; left: 50%; bottom: 44px; width: 80px; height: 140px; margin-left: -40px; }
+.piri-sombra { position: absolute; left: 14px; bottom: -7px; width: 52px; height: 11px; border-radius: 50%; background: rgba(0, 0, 0, .55); }
+.piri-tambalea { position: absolute; inset: 0; transform-origin: 50% 100%; }
+.piri-tallo { position: absolute; left: 33px; top: 0; width: 14px; height: 30px; background: linear-gradient(90deg, #e0bd84, #a8763e); border: 3px solid #000; border-bottom: 0; border-radius: 4px 4px 0 0; }
+.piri-borrosa { position: absolute; left: 0; right: 0; top: 26px; height: 62px; perspective: 320px; }
+/* El prisma: 6 caras de 40px alrededor del eje; translateZ(34.6px) es el radio de un hexágono de lado 40. */
+.piri-prisma { position: absolute; inset: 0; transform-style: preserve-3d; }
+.piri-cara-3d { position: absolute; left: 50%; top: 0; width: 40px; height: 62px; margin-left: -20px; display: grid; place-items: center; padding: 0 2px;
+  border: 2px solid #000; color: #000; text-align: center; font: 400 8px/1.1 var(--rotulo); text-transform: uppercase; backface-visibility: hidden;
+  transform: rotateY(calc(var(--i) * 60deg)) translateZ(34.6px); box-shadow: inset 0 -8px 0 rgba(0, 0, 0, .14); }
+.piri-punta { position: absolute; left: 6px; top: 86px; width: 68px; height: 54px; border: 3px solid #000; clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: linear-gradient(90deg, #ff6fb3, var(--chicle) 45%, #b8125f); }
+.piri-polvo { position: absolute; left: 50%; bottom: 44px; width: 28px; height: 28px; margin-left: -14px; border-radius: 50%; opacity: 0;
+  background: var(--papel); border: 3px solid #000; }
+.piri-chispa { position: absolute; left: 50%; bottom: 64px; width: 18px; height: 18px; margin-left: -9px; opacity: 0; background: var(--rotulo-am);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); }
+.piri-sello { position: absolute; z-index: 3; left: 50%; top: 42%; padding: 8px 12px 7px; white-space: nowrap; opacity: 0;
+  background: var(--rotulo-am); color: #000; border: 3px solid #000; box-shadow: 0 0 0 3px var(--chicle), 5px 6px 0 3px #000;
+  font: 400 26px/1 var(--rotulo); text-transform: uppercase; transform: translate(-50%, -50%) rotate(-8deg); }
 .reto-sale { animation: entra-reto .46s cubic-bezier(.2, .9, .3, 1) both; }
 @keyframes entra-reto { from { opacity: 0; transform: translateX(120px) rotate(14deg); } }
 .piri-cara { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 6px 10px 5px; background: #000; color: var(--papel);
