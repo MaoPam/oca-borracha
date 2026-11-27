@@ -11,6 +11,7 @@
   --cielo: #6fd3ff;         /* azul Y2K */
   --laberinto: #e0002b;     /* rojo del barrio final */
   --naranja-metro: #f77f1b; /* señalética del metro */
+  --seleccion: #a66bff;     /* aro de la casilla seleccionada: ningun tipo de casilla usa violeta */
 
   /* Cromo: tres franjas planas, nunca un degradado suave. */
   --cromo: linear-gradient(176deg, #f3f4f8 0 30%, #9aa1b3 30% 48%, #fbfbfe 48% 64%, #5a6072 64% 100%);

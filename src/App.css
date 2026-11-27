@@ -322,11 +322,12 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 
 /* ---------- Al tocarla ---------- */
 .casilla:hover, .casilla:focus-visible { z-index: 4; transform: translateY(-3px) scale(1.04);
-  box-shadow: var(--dura); outline: 3px solid var(--rotulo-am); outline-offset: 2px; }
+  box-shadow: var(--dura); outline: 3px solid var(--seleccion); outline-offset: 2px; }
 .casilla:hover .lab, .casilla:focus-visible .lab { -webkit-line-clamp: 4; }
 .casilla:active { transform: translateY(1px) scale(.98); box-shadow: none; }
 /* Donde estas parado: aro amarillo fijo. */
-.casilla.resaltada { z-index: 3; transform: scale(1.04); outline: 4px solid var(--rotulo-am); outline-offset: 2px; }
+/* Violeta y no amarillo: el amarillo ya es el color de los comodines y el aro se perdia. */
+.casilla.resaltada { z-index: 3; transform: scale(1.04); outline: 4px solid var(--seleccion); outline-offset: 2px; }
 
 /* ---------- La 60: el jefe ---------- */
 .tablero > .meta { position: relative; z-index: 1; margin: 0; padding: 0 4%; overflow: hidden;
