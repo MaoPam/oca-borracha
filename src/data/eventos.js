@@ -1,5 +1,5 @@
-// Eventos de la carrera: se disparan la primera vez que cada jugador llega a una de
-// estas casillas o la rebasa (son las marcas 15, 30 y 45 de la tira de arriba).
+// Eventos de la carrera: se los lleva solo el primer jugador que llega a una de estas
+// casillas o la rebasa (son las marcas 15, 30 y 45 de la tira de arriba). Los demás ya no.
 //
 // tipo: 'premio' o 'castigo' (cambia el color de la etiqueta en la tarjeta).
 // Cambia los textos a tu gusto; accion: 'reto' haría que el botón saque un reto misterioso.

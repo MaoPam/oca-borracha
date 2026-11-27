@@ -36,6 +36,7 @@ const AVISO_TIRO = {
 const partidaVacia = () => ({
   fase: 'setup', jugadores: [], turno: 0, etapa: 'tirar', casilla: null, nota: '',
   numDados: 1, dados: [1], giros: 0, premios: [], bolsa: [], bitacora: [], lugares: 0, reto: null,
+  lineas: [],   // líneas de la carrera que ya se ganó alguien: cada evento es solo para el primero
 });
 
 // En un celular el espiral de 9x7 deja casillas de unos 40px: ilegibles.
@@ -117,7 +118,7 @@ export default function App() {
     e.preventDefault();
     const nom = nombre.trim();
     if (!nom || partida.jugadores.length >= MAX_JUGADORES) return;
-    actualizar(p => ({ ...p, jugadores: [...p.jugadores, { nombre: nom, premio: premio.trim(), ficha, pos: 1, tope: 1, lineas: [], pierde: 0, gano: 0, tiros: 0 }] }));
+    actualizar(p => ({ ...p, jugadores: [...p.jugadores, { nombre: nom, premio: premio.trim(), ficha, pos: 1, tope: 1, pierde: 0, gano: 0, tiros: 0 }] }));
     setFicha(fichaLibre([...pRef.current.jugadores, { ficha }]));
     setNombre(''); setPremio('');
   };
@@ -129,7 +130,7 @@ export default function App() {
     setTimeout(() => anunciaTurno(0), sinMovimiento ? 320 : 2900);
     actualizar(p => ({
       ...partidaVacia(), fase: 'jugando',
-      jugadores: p.jugadores.map(j => ({ ...j, pos: 1, tope: 1, lineas: [], pierde: 0, gano: 0, tiros: 0 })),
+      jugadores: p.jugadores.map(j => ({ ...j, pos: 1, tope: 1, pierde: 0, gano: 0, tiros: 0 })),
       premios: p.jugadores.map(j => j.premio).filter(Boolean),
       bolsa: barajar(RETOS.map((_, i) => i)), casilla: 1,
       nota: `Todas las fichas en el inicio. Empieza ${p.jugadores[0].nombre}.`,
@@ -139,7 +140,7 @@ export default function App() {
   const continuar = () => { const g = partida.guardada; pRef.current = g; setPartida(g); };
   const nuevaPartida = () => {
     borrarPartida();
-    const jugadores = pRef.current.jugadores.map(j => ({ ...j, pos: 1, tope: 1, lineas: [], pierde: 0, gano: 0, tiros: 0 }));
+    const jugadores = pRef.current.jugadores.map(j => ({ ...j, pos: 1, tope: 1, pierde: 0, gano: 0, tiros: 0 }));
     const p = { ...partidaVacia(), jugadores };
     pRef.current = p; setPartida(p); setConfirmarNueva(false); setVista(null);
   };
@@ -182,12 +183,13 @@ export default function App() {
     if (!AVISO_TIRO[pRef.current.etapa]) { setSeccion('turno'); setBurbuja(true); }
   };
 
-  // Eventos de la carrera: la primera vez que el jugador llega o rebasa una línea.
+  // Eventos de la carrera: se los lleva solo el primero que llega a la línea o la rebasa.
+  // Las líneas ganadas se guardan en la partida (no en cada jugador) y ya no salen para nadie más.
   const revisaLineas = (i) => {
-    const j = pRef.current.jugadores[i];
-    const nuevas = lineasCruzadas(j.tope || j.pos, j.lineas || [], EVENTOS.map(e => e.linea));
+    const j = pRef.current.jugadores[i], tomadas = pRef.current.lineas || [];
+    const nuevas = lineasCruzadas(j.tope || j.pos, tomadas, EVENTOS.map(e => e.linea));
     if (!nuevas.length) return;
-    cambiarJugador(i, { lineas: [...(j.lineas || []), ...nuevas] });
+    actualizar(p => ({ ...p, lineas: [...tomadas, ...nuevas] }));
     const evs = nuevas.map(l => ({ ...EVENTOS.find(e => e.linea === l), i, nombre: j.nombre }));
     evs.forEach(e => anotar(i, `${j.nombre} cruza la línea ${e.linea}: ${e.titulo}.`));
     setEventos(cola => [...cola, ...evs]);
@@ -679,7 +681,7 @@ export default function App() {
             {eventos[0].tipo && <span className={`evento-tipo ${eventos[0].tipo}`}>{eventos[0].tipo === 'castigo' ? 'Castigo' : 'Premio'}</span>}
             <strong>{eventos[0].titulo}</strong>
             <p>{eventos[0].texto}</p>
-            <small className="evento-quien">La cruzó {eventos[0].nombre}</small>
+            <small className="evento-quien">{eventos[0].nombre} llegó primero: es solo suyo</small>
             <button type="button" className="btn-rosa grande" onClick={() => cerrarEvento(eventos[0].accion)}>{eventos[0].accion === 'reto' ? 'Sacar el reto' : '¡Hecho!'}</button>
           </div>
         </div>

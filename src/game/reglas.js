@@ -47,9 +47,10 @@ export function efecto(n) {
   }
 }
 
-// Líneas de la carrera que un jugador acaba de cruzar: las que ya alcanzó (tope es la casilla
-// más lejana a la que ha llegado, así cuenta aunque luego retroceda) y que aún no le tocaban.
-export const lineasCruzadas = (tope, cruzadas, lineas) => lineas.filter(l => tope >= l && !cruzadas.includes(l));
+// Líneas de la carrera que un jugador acaba de ganar: las que ya alcanzó (tope es la casilla
+// más lejana a la que ha llegado, así cuenta aunque luego retroceda) y que nadie se ha llevado.
+// tomadas es la lista de la partida entera: cada línea es solo para el primero que llega.
+export const lineasCruzadas = (tope, tomadas, lineas) => lineas.filter(l => tope >= l && !tomadas.includes(l));
 
 // Siguiente jugador que sí tira: salta a quien ya ganó y a quien pierde turno.
 // Devuelve el índice y la lista de avisos ("X no tira este turno").

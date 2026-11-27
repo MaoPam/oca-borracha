@@ -70,12 +70,12 @@ test('turnos: salta a quien pierde turno y a quien ya ganó', () => {
   assert.equal(siguienteTurno(r.jugadores, 3).indice, 0);
 });
 
-test('líneas de la carrera: cada una se dispara una sola vez por jugador', () => {
+test('líneas de la carrera: cada una se la lleva solo el primero', () => {
   const L = [15, 30, 45];
   assert.deepEqual(lineasCruzadas(14, [], L), []);
   assert.deepEqual(lineasCruzadas(15, [], L), [15], 'llegar justo a la línea cuenta');
   assert.deepEqual(lineasCruzadas(33, [15], L), [30]);
-  assert.deepEqual(lineasCruzadas(33, [15, 30], L), [], 'una línea ya cruzada no se repite');
+  assert.deepEqual(lineasCruzadas(33, [15, 30], L), [], 'si otro ya la ganó, ya no sale');
   assert.deepEqual(lineasCruzadas(50, [], L), [15, 30, 45], 'si brinca varias, salen todas');
 });
 
