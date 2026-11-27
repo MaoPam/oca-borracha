@@ -185,12 +185,66 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 
 /* ---------- Letrero de la casilla ---------- */
 /* Aparece cuando el muñeco termina de caminar, antes de que vuelva la burbuja. */
-.letrero { position: fixed; z-index: 46; left: 50%; bottom: 7vh; transform: translateX(-50%) rotate(-1.1deg);
-  width: min(92vw, 540px); padding: 0; display: flex; gap: 0; text-align: left; cursor: pointer;
-  background: var(--papel); color: #000; border: 0;
+/* El contenedor centra; el grito va encima y la carta entra como lanzada a la mesa. */
+.aterrizaje { position: fixed; z-index: 46; left: 50%; bottom: 7vh; width: min(92vw, 540px); transform: translateX(-50%); }
+.letrero { position: relative; width: 100%; padding: 0; display: flex; gap: 0; text-align: left; cursor: pointer;
+  background: var(--papel); color: #000; border: 0; transform: rotate(-1.1deg);
   clip-path: polygon(1% 3%, 46% 0, 99% 2%, 98% 46%, 100% 97%, 51% 100%, 2% 98%, 0 48%);
-  filter: drop-shadow(8px 9px 0 #000); animation: entra-letrero .26s cubic-bezier(.2, .9, .25, 1); }
-@keyframes entra-letrero { from { opacity: 0; transform: translateX(-50%) translateY(22px) rotate(-1.1deg); } }
+  filter: drop-shadow(8px 9px 0 #000); animation: lanza-carta .46s cubic-bezier(.2, .9, .25, 1) .14s backwards; }
+@keyframes lanza-carta { 0% { transform: translateX(70vw) rotate(22deg); } 80% { transform: translateX(-6px) rotate(-3deg); } 100% { transform: rotate(-1.1deg); } }
+/* El grito va a la derecha, sobre el texto: el meme de la izquierda queda a la vista. */
+.grito { position: absolute; z-index: 2; right: -8px; top: -32px; padding: 8px 13px 7px; pointer-events: none;
+  background: var(--papel); color: #000; border: 3px solid #000; box-shadow: 0 0 0 4px var(--papel), 6px 6px 0 4px #000;
+  font: 400 clamp(20px, 5vw, 30px)/1 var(--rotulo); transform: rotate(-7deg); animation: grita .38s ease-out backwards; }
+.grito.g-tragos { background: var(--chicle); }
+.grito.g-atras { background: var(--laberinto); color: #fff; }
+.grito.g-avanza { background: var(--neon); }
+.grito.g-reto { background: var(--rotulo-am); }
+.grito.g-especial { background: var(--cromo); }
+@keyframes grita { 0% { opacity: 0; transform: rotate(-7deg) scale(2.3); } 60% { opacity: 1; transform: rotate(-11deg) scale(.88); } 100% { opacity: 1; transform: rotate(-7deg) scale(1); } }
+
+/* ---------- Cambio de turno ---------- */
+.franja-turno { position: fixed; z-index: 47; left: -6vw; right: -6vw; top: 38vh; height: clamp(84px, 14vh, 120px); pointer-events: none;
+  display: grid; place-items: center; background: var(--chicle); border-block: 4px solid #000; box-shadow: 0 7px 0 #000;
+  animation: cruza-franja 1.7s cubic-bezier(.2, .9, .3, 1) both; }
+@keyframes cruza-franja {
+  0% { transform: rotate(-5deg) translateX(-115%); }
+  18% { transform: rotate(-5deg) translateX(0); }
+  82% { transform: rotate(-5deg) translateX(0); animation-timing-function: ease-in; }
+  100% { transform: rotate(-5deg) translateX(115%); }
+}
+.franja-in { display: flex; align-items: center; gap: 14px; }
+.franja-ficha { flex: none; width: 52px; height: 73px; overflow: visible; filter: var(--troquel); }
+.franja-turno b { display: block; color: #000; font: 400 clamp(18px, 4.4vw, 34px)/1 var(--rotulo); text-transform: uppercase; }
+.franja-turno small { display: block; margin-top: 4px; color: #000; font: 400 clamp(14px, 3vw, 20px)/1 var(--marcador); }
+
+/* ---------- Portada del ganador ---------- */
+.portada-fondo { position: fixed; inset: 0; z-index: 55; display: grid; place-items: center; align-content: center; gap: 24px; padding: 20px;
+  background: rgba(11, 11, 11, .84); }
+.portada { position: relative; width: min(78vw, 340px); aspect-ratio: 1; overflow: hidden; container-type: inline-size;
+  background: radial-gradient(circle, rgba(0, 0, 0, .26) 1.6px, transparent 1.8px) 0 0 / 11px 11px, var(--chicle);
+  border: 4px solid #000; box-shadow: 10px 10px 0 #000; transform: rotate(-3deg); animation: cae-portada .6s cubic-bezier(.3, .8, .3, 1) both; }
+@keyframes cae-portada { 0% { transform: translateY(-110vh) rotate(-14deg) scale(1.2); } 80% { transform: translateY(8px) rotate(-1deg) scale(1); } 100% { transform: rotate(-3deg); } }
+.p-vol { position: absolute; z-index: 2; left: 4cqi; top: 4cqi; padding: 1.4cqi 2.4cqi 1cqi; background: var(--rotulo-am); color: #000;
+  border: 2px solid #000; font: 400 4cqi/1 var(--rotulo); transform: rotate(-6deg); }
+.p-aro { position: absolute; left: 22.5cqi; top: 7cqi; width: 55cqi; height: 55cqi; display: grid; place-items: center;
+  border-radius: 50%; background: var(--cromo); border: 3px solid #000; }
+.p-aro::before { content: ''; position: absolute; inset: 4.5cqi; border-radius: 50%; background: #121212; border: 3px solid #000; }
+.p-aro svg { position: relative; width: 26cqi; height: 36cqi; overflow: visible; filter: var(--troquel); }
+/* El nombre se encoge si es largo: nunca más de 13cqi, nunca más ancho que la portada. */
+.p-nom { position: absolute; left: 2cqi; right: 2cqi; top: 63cqi; overflow: hidden; color: #000; text-align: center; white-space: nowrap;
+  font: 400 min(13cqi, calc(105cqi / var(--largo))) / 1 var(--rotulo); text-transform: uppercase; text-shadow: 2px 2px 0 var(--papel); }
+.p-sub { position: absolute; left: 0; right: 0; top: 79cqi; color: #000; text-align: center; font: 400 7cqi/1 var(--marcador); }
+.p-lista { position: absolute; left: 0; right: 0; bottom: 0; padding: 2.4cqi 3cqi; background: #000; color: var(--rotulo-am);
+  text-align: center; font: 700 3.6cqi/1.25 var(--texto); letter-spacing: .04em; text-transform: uppercase; }
+.portada-acc { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; animation: aparece .3s .5s both; }
+.chispa-p { position: absolute; width: 26px; height: 26px; background: var(--rotulo-am);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  animation: chispea-p 1.1s steps(1, end) infinite; }
+.chispa-p.c1 { left: 14%; top: 16%; } .chispa-p.c2 { right: 16%; top: 22%; background: var(--papel); animation-delay: -.4s; }
+.chispa-p.c3 { left: 20%; bottom: 22%; background: var(--papel); animation-delay: -.7s; } .chispa-p.c4 { right: 12%; bottom: 30%; animation-delay: -.2s; }
+.chispa-p.c5 { left: 48%; top: 8%; animation-delay: -.9s; }
+@keyframes chispea-p { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(.4) rotate(45deg); } }
 .letrero-meme { flex: none; width: 34%; align-self: stretch; object-fit: cover; filter: contrast(1.12) saturate(1.14); }
 .letrero-caja { flex: 1; min-width: 0; display: grid; gap: 4px; padding: 14px 16px 15px; }
 .letrero-num { font: 400 clamp(26px, 5vw, 38px)/1 var(--gotica); }
@@ -675,6 +729,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   .tablero > .meta { animation: none !important; }
   .app.fiesta .tablero-caja::after, .ficha::after { display: none; }
   .burbuja.girando .aro, .cuna { animation: none !important; transition: none !important; }
+  .grito, .franja-turno, .portada, .portada-acc, .chispa-p { animation: none !important; }
   .burbuja.alerta, .burbuja-panel, .letrero, .dado-caja.girando .dado-vuelo, .dado-caja.girando .dado-sombra, .dados.tirando { animation: none !important; }
   .dado-pop { animation: none !important; transform: rotate(-8deg); }
   .ficha .menea, .ficha .ala, .ficha .llama { animation: none !important; }

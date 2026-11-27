@@ -15,6 +15,7 @@ import { CASILLAS, COMODINES, META, MOVIMIENTOS } from './data/casillas.js';
 import { RETOS } from './data/retos.js';
 import { pasos, efecto, siguienteTurno, tirarDado, barajar } from './game/reglas.js';
 import { guardarPartida, cargarPartida, borrarPartida, nuevaJugada } from './game/guardado.js';
+import { gritoDe } from './game/gritos.js';
 
 const sinMovimiento = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const T_DADO = sinMovimiento ? 150 : 1000;
@@ -24,6 +25,7 @@ const T_VER_DADO = sinMovimiento ? 100 : 560;
 const T_CIERRE = sinMovimiento ? 0 : 340;
 const T_LETRERO = sinMovimiento ? 700 : 3200;
 const T_CAMARA = 450;   // lo que tarda la cámara en acercarse o alejarse del tablero
+const T_FRANJA = 1700;  // lo que dura la franja de cambio de turno (igual que su animación)
 const esperar = (ms) => new Promise(r => setTimeout(r, ms));
 
 const partidaVacia = () => ({
@@ -78,6 +80,8 @@ export default function App() {
   const [tirando, setTirando] = useState(false);
   const [siguiendo, setSiguiendo] = useState(false);   // la cámara del tablero sigue a la ficha
   const [seccion, setSeccion] = useState('turno');       // qué parte del panel muestra la perilla
+  const [franja, setFranja] = useState(null);            // franja de cambio de turno: { i, k }
+  const [portadaVista, setPortadaVista] = useState(0);   // hasta qué lugar ya se cerró la portada del ganador
   const [ficha, setFicha] = useState(FICHAS[0].id);
   const [telon, setTelon] = useState(false);
   const esCelular = useEsCelular();
@@ -87,9 +91,16 @@ export default function App() {
   const [nombre, setNombre] = useState('');
   const [premio, setPremio] = useState('');
   const ruletaRef = useRef(null);
+  const franjaN = useRef(0);   // cuenta las franjas, para que cada una sepa si sigue siendo la última
 
   const actualizar = (fn) => { const sig = fn(pRef.current); pRef.current = sig; setPartida(sig); };
   const cambiarJugador = (i, cambios) => actualizar(p => ({ ...p, jugadores: p.jugadores.map((j, k) => (k === i ? { ...j, ...cambios } : j)) }));
+  // Franja de cambio de turno: se muestra un rato y se borra sola, salvo que ya haya otra encima.
+  const anunciaTurno = (i) => {
+    const k = ++franjaN.current;
+    setFranja({ i, k });
+    setTimeout(() => setFranja(f => (f?.k === k ? null : f)), sinMovimiento ? 900 : T_FRANJA);
+  };
   const anotar = (i, texto, datos) => actualizar(p => ({ ...p, bitacora: [nuevaJugada(p.jugadores[i]?.nombre ?? '', texto, { color: i, ...datos }), ...p.bitacora].slice(0, 200) }));
 
   useEffect(() => { if (partida.fase === 'jugando') guardarPartida(partida); }, [partida]);
@@ -108,6 +119,7 @@ export default function App() {
     if (partida.jugadores.length < 2) return;
     setTelon(true);
     setTimeout(() => setTelon(false), sinMovimiento ? 300 : 2250);
+    setTimeout(() => anunciaTurno(0), sinMovimiento ? 320 : 2300);
     actualizar(p => ({
       ...partidaVacia(), fase: 'jugando',
       jugadores: p.jugadores.map(j => ({ ...j, pos: 1, pierde: 0, gano: 0, tiros: 0 })),
@@ -247,6 +259,7 @@ export default function App() {
     actualizar(q => ({ ...q, jugadores, turno: indice, etapa: 'tirar', nota: `Ahora tira ${jugadores[indice].nombre}.` }));
     avisos.forEach(a => anotar(p.turno, a));
     setVista(null);
+    anunciaTurno(indice);
   };
 
   // ---------- Retos ----------
@@ -377,6 +390,8 @@ export default function App() {
     moviendo: 'Tirando…',
   }[etapa];
   const alTirar = () => (etapa === 'retroceder' ? retroceder() : tirar());
+  const grito = letrero ? gritoDe(letrero, CASILLAS[letrero]) : null;
+  const verPortada = ganadorActual && portadaVista !== partida.lugares;
 
   return (
     <>
@@ -488,15 +503,29 @@ export default function App() {
         />
 
         {letrero && (
-          <button type="button" className="letrero" onClick={() => { setLetrero(null); setBurbuja(true); }}>
-            <img className="letrero-meme" src={memeDe(letrero)} alt="" />
-            <span className="letrero-caja">
-              <span className="letrero-num">{letrero}</span>
-              <strong>{CASILLAS[letrero].corto}</strong>
-              <span className="letrero-txt">{CASILLAS[letrero].mensaje}</span>
-              {CASILLAS[letrero].aclara && <small>{CASILLAS[letrero].aclara}</small>}
-            </span>
-          </button>
+          <div className="aterrizaje">
+            <span className={`grito g-${grito.clase}`}>{grito.texto}</span>
+            <button type="button" className="letrero" onClick={() => { setLetrero(null); setBurbuja(true); }}>
+              <img className="letrero-meme" src={memeDe(letrero)} alt="" />
+              <span className="letrero-caja">
+                <span className="letrero-num">{letrero}</span>
+                <strong>{CASILLAS[letrero].corto}</strong>
+                <span className="letrero-txt">{CASILLAS[letrero].mensaje}</span>
+                {CASILLAS[letrero].aclara && <small>{CASILLAS[letrero].aclara}</small>}
+              </span>
+            </button>
+          </div>
+        )}
+
+        {franja && jugadores[franja.i] && (
+          <div className="franja-turno" key={franja.k} aria-live="polite">
+            <div className="franja-in">
+              <svg className="franja-ficha" viewBox="0 0 40 56" style={{ '--c': colorDe(franja.i).c }} aria-hidden="true">
+                <FichaDibujo tipo={jugadores[franja.i].ficha} inicial={(jugadores[franja.i].nombre || '?')[0].toUpperCase()} />
+              </svg>
+              <span><b>Turno de {jugadores[franja.i].nombre}</b><small>tira el dado</small></span>
+            </div>
+          </div>
         )}
 
         <section className="tarjeta-sticker ancho" ref={ruletaRef}>
@@ -538,6 +567,28 @@ export default function App() {
           </details>
         </section>
       </main>
+
+      {verPortada && (
+        <div className="portada-fondo" role="dialog" aria-modal="true" aria-label={`${ganadorActual.nombre} llegó a la 60`}>
+          <i className="chispa-p c1" /><i className="chispa-p c2" /><i className="chispa-p c3" /><i className="chispa-p c4" /><i className="chispa-p c5" />
+          <div className="portada">
+            <span className="p-vol">Hazifest Vol. 1</span>
+            <span className="p-aro" style={{ '--c': colorDe(turno).c }}>
+              <svg viewBox="0 0 40 56" aria-hidden="true"><FichaDibujo tipo={ganadorActual.ficha} inicial={(ganadorActual.nombre || '?')[0].toUpperCase()} /></svg>
+            </span>
+            <b className="p-nom" style={{ '--largo': Math.max(ganadorActual.nombre.length, 1) }}>{ganadorActual.nombre}</b>
+            <span className="p-sub">llegó a la 60</span>
+            <span className="p-lista">
+              Lugar {ganadorActual.gano} de {jugadores.length} · {ganadorActual.tiros} tiro{ganadorActual.tiros === 1 ? '' : 's'}
+              {ganadorActual.premio && <> · premio: {ganadorActual.premio}</>}
+            </span>
+          </div>
+          <div className="portada-acc">
+            <button type="button" className="btn-dorado" onClick={() => { setPortadaVista(partida.lugares); irARuleta(); }}>Girar la ruleta</button>
+            <button type="button" className="btn-cromo" onClick={() => { setPortadaVista(partida.lugares); pasarTurno(); }}>Seguir jugando</button>
+          </div>
+        </div>
+      )}
 
       {modalReto && (
         <div className={`modal-fondo${modalReto.desdeComodin ? ' barrera' : ''}`} role="dialog" aria-modal="true" aria-label="Reto misterioso">
