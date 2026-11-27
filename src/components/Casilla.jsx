@@ -14,6 +14,7 @@ function Ficha({ jugador, indice, activa }) {
       style={{ '--c': col.c, '--tc': col.tc }}
       title={jugador.nombre}
     >
+      {activa && <span className="gafete">{jugador.nombre}</span>}
       <svg viewBox="0 0 40 56" aria-hidden="true">
         <FichaDibujo tipo={jugador.ficha} inicial={(jugador.nombre || '?')[0].toUpperCase()} />
       </svg>
@@ -25,7 +26,7 @@ export function Fichas({ jugadores, turno, n }) {
   const aqui = jugadores.map((j, i) => ({ j, i })).filter(({ j }) => j.pos === n);
   if (!aqui.length) return null;
   return (
-    <span className={`fichas${aqui.length > 3 ? ' muchas' : ''}`}>
+    <span className={`fichas${aqui.length > 1 ? ' varias' : ''}${aqui.length > 3 ? ' muchas' : ''}`}>
       {aqui.map(({ j, i }) => <Ficha key={`${i}-${j.pos}`} jugador={j} indice={i} activa={i === turno} />)}
     </span>
   );

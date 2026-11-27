@@ -106,7 +106,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 /* ---------- Fichas de cada jugador ---------- */
 /* .pieza es la parte grande que lleva el color del jugador: asi dos personas
    con la misma ficha se siguen distinguiendo de lejos. */
-.ficha .pieza { fill: var(--c); stroke: #000; stroke-linejoin: miter; }
+.fd .pieza { fill: var(--c, var(--chicle)); stroke: #000; stroke-linejoin: miter; }
 .f-corcholata .pieza, .f-cheeto .pieza { stroke-linejoin: round; }
 /* Cada ficha se mueve a su manera cuando le toca caminar. */
 .app.rodando .ficha.activa .menea { animation: menea .4s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 85%; }
@@ -198,6 +198,21 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .letrero-txt { font: 400 15px/1.3 var(--texto); }
 .letrero small { margin-top: 4px; padding: 7px 9px; background: #000; color: var(--papel); font-size: 13px; line-height: 1.35; }
 
+/* ---------- La carrera, en el encabezado ---------- */
+.carrera { position: relative; flex: 1 1 260px; min-width: 200px; height: 58px; margin: 0 clamp(10px, 2.4vw, 34px); }
+.carrera-linea { position: absolute; left: 0; right: 0; bottom: 14px; height: 4px;
+  background: repeating-linear-gradient(90deg, var(--papel) 0 8px, transparent 8px 13px); opacity: .5; }
+.carrera-marca { position: absolute; bottom: 10px; width: 2px; height: 12px; margin-left: -1px; background: var(--papel); opacity: .65; }
+.carrera-marca b { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%); color: var(--papel); font: 400 9px/1 var(--rotulo); }
+.carrera-f { position: absolute; bottom: 15px; width: 20px; height: 28px; margin-left: -10px; filter: var(--troquel);
+  transition: left .22s ease-out, bottom .2s ease-out; }
+.carrera-f.arriba { bottom: 27px; }
+.carrera-f.ahora { z-index: 2; }
+.carrera-f svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.carrera-f.ahora svg { animation: latido 1s ease-in-out infinite; }
+.carrera-lider { position: absolute; left: 50%; bottom: 100%; margin-bottom: 2px; transform: translateX(-50%); padding: 1px 4px;
+  background: var(--cromo); color: #000; border: 1.5px solid #000; font: 400 8px/1.1 var(--rotulo); }
+
 /* ---------- Carril de celular ---------- */
 /* Las 60 casillas en una tira que se desliza sola hasta centrar al muñeco del turno. */
 .cambia-vista { justify-self: center; margin-bottom: 12px; }
@@ -216,9 +231,10 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .carril .casilla .num { font-size: 22px; }
 .carril .casilla .lab { font-size: 16px; }
 .carril .casilla .ico { width: 24px; height: 24px; }
-.carril .fichas { top: 24%; }
-.carril .ficha { width: 30px; }
-.carril .fichas.muchas .ficha { width: 21px; }
+.carril .ficha { width: 46px; }
+.carril .fichas.varias .ficha { width: 34px; margin: 0 -6px; }
+.carril .fichas.muchas .ficha { width: 26px; }
+.carril .ficha .gafete { font-size: 11px; }
 
 /* ---------- Burbuja flotante ---------- */
 .burbuja { position: fixed; z-index: 45; width: 62px; height: 62px; padding: 0;
@@ -344,25 +360,40 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .meta-letrero small { font: 400 .62em/1 var(--cartel); color: var(--amarillo); }
 
 /* Fichas de corazón */
-.fichas { position: absolute; left: 0; right: 0; top: 17%; display: flex; flex-wrap: wrap; justify-content: center; gap: 0 1px; pointer-events: none; z-index: 2; }
-.meta .fichas { top: auto; bottom: 5%; left: auto; right: 2%; width: 22%; }
-.ficha { position: relative; width: clamp(11px, 2.3cqi, 24px); aspect-ratio: 40 / 56; filter: drop-shadow(2px 2px 0 #000); animation: salto .22s cubic-bezier(.2, .9, .25, 1); }
-.fichas.muchas .ficha { width: clamp(8px, 1.6cqi, 17px); }
+/* Fichas grandes con base: se paran sobre un ovalo de su color, justo encima de la banda.
+   Una sola ocupa como 55% del alto de la casilla; varias se encogen y se abren en abanico. */
+.fichas { position: absolute; left: 0; right: 0; top: 14%; bottom: 24%; z-index: 2; display: flex; align-items: flex-end; justify-content: center; pointer-events: none; }
+.meta .fichas { top: auto; bottom: 8%; left: auto; right: 3%; width: 30%; height: 80%; }
+.ficha { position: relative; flex: none; width: clamp(16px, 3.9cqi, 48px); aspect-ratio: 40 / 56; filter: var(--troquel); animation: salto .22s cubic-bezier(.2, .9, .25, 1); }
+/* La base. z-index -1 la deja detras del dibujo pero dentro de la ficha (el filter crea su propio plano). */
+.ficha::before { content: ''; position: absolute; z-index: -1; left: 50%; bottom: -6%; width: 118%; height: 20%; transform: translateX(-50%);
+  border-radius: 50%; background: var(--c); border: 2px solid #000; }
+/* rotate y translate van aparte de transform: asi no los pisan las animaciones de salto y latido. */
+.fichas.varias .ficha { width: clamp(12px, 2.75cqi, 34px); margin: 0 clamp(-7px, -.55cqi, -2px); }
+.fichas.varias .ficha:nth-child(odd) { rotate: -9deg; }
+.fichas.varias .ficha:nth-child(even) { rotate: 8deg; translate: 0 -6%; }
+.fichas.muchas .ficha { width: clamp(9px, 2cqi, 24px); }
+.ficha.activa { z-index: 2; }
+/* Gafete con el nombre, solo para quien tiene el turno. */
+.ficha .gafete { position: absolute; z-index: 3; left: 50%; bottom: 102%; max-width: 9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  transform: translateX(-50%); padding: .3em .5em .22em; background: var(--papel); color: #000; border: 1.5px solid #000;
+  box-shadow: 1.5px 1.5px 0 #000; font: 400 clamp(6px, .85cqi, 11px)/1 var(--rotulo); }
 /* Las piezas de la marioneta: papel recortado con borde negro, el color del jugador en el torso. */
-.ficha .torso { fill: var(--c); }
-.ficha .craneo { fill: var(--papel); }
-.ficha .brazo path { fill: var(--papel); }
-.ficha .pierna path { fill: var(--c); }
-.ficha .pierna.d path { fill: var(--papel); }
-.ficha path { stroke: #000; stroke-width: 2.2; stroke-linejoin: miter; }
+.fd .torso { fill: var(--c, var(--chicle)); }
+.fd .craneo { fill: var(--papel); }
+.fd .brazo path { fill: var(--papel); }
+.fd .pierna path { fill: var(--c, var(--chicle)); }
+.fd .pierna.d path { fill: var(--papel); }
+.fd path { stroke: #000; stroke-width: 2.2; stroke-linejoin: miter; }
 /* transform-box: fill-box hace que el origen se mida dentro de la pieza, no del dibujo entero:
    asi cada pieza gira sobre SU articulacion (la cadera, el hombro, el cuello). */
-.ficha .pierna, .ficha .brazo, .ficha .cabeza { transform-box: fill-box; }
-.ficha .pierna { transform-origin: 50% 6%; }
-.ficha .brazo { transform-origin: 50% 8%; }
-.ficha .cabeza { transform-origin: 50% 96%; }
+.fd .pierna, .fd .brazo, .fd .cabeza { transform-box: fill-box; }
+.fd .pierna { transform-origin: 50% 6%; }
+.fd .brazo { transform-origin: 50% 8%; }
+.fd .cabeza { transform-origin: 50% 96%; }
 .ficha svg { width: 100%; height: 100%; overflow: visible; }
-.ficha text { font: 400 13px var(--cartel); fill: #000; text-anchor: middle; }
+/* La inicial lleva halo claro: se lee igual sobre un color oscuro que sobre papel. */
+.fd text { font: 400 13px var(--cartel); fill: #000; stroke: var(--papel); stroke-width: 3px; paint-order: stroke; text-anchor: middle; }
 .ficha.activa { animation: salto .22s cubic-bezier(.2, .9, .25, 1), latido 1s ease-in-out .3s infinite; }
 /* Camina solo mientras le toca y el tablero esta en movimiento. Quieta el resto del tiempo. */
 .app.rodando .ficha.activa .pierna { animation: zancada .42s ease-in-out infinite alternate; }
@@ -557,7 +588,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 @media (prefers-reduced-motion: reduce) {
   .dado, .rueda, .barra i, .casilla { transition: none !important; }
   .ficha, .ficha.activa, .invocando .dado, .modal { animation: none !important; }
-  .ficha .pierna, .ficha .brazo, .ficha .cabeza { animation: none !important; }
+  .fd .pierna, .fd .brazo, .fd .cabeza { animation: none !important; }
   .modal-fondo.barrera { animation: none !important; }
   .app.rodando .tablero, .app.fiesta .tablero, .casilla.resaltada { animation: none !important; }
   .tablero > .meta { animation: none !important; }

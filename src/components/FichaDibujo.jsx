@@ -79,5 +79,7 @@ const MAPA = {
 
 export default function FichaDibujo({ tipo, inicial }) {
   const Dibujo = MAPA[tipo] || Corcholata;
-  return <Dibujo inicial={inicial} />;
+  // .fd lleva los colores y contornos, para que la ficha se pinte igual en el tablero,
+  // la burbuja, el registro o la carrera.
+  return <g className="fd"><Dibujo inicial={inicial} /></g>;
 }

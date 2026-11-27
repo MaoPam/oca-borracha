@@ -5,6 +5,7 @@ import Tablero from './components/Tablero.jsx';
 import Dado3D from './components/Dado3D.jsx';
 import Burbuja from './components/Burbuja.jsx';
 import Carril from './components/Carril.jsx';
+import Carrera from './components/Carrera.jsx';
 import { memeDe } from './components/lona.js';
 import FichaDibujo from './components/FichaDibujo.jsx';
 import { FICHAS, fichaLibre } from './components/fichas.js';
@@ -280,6 +281,7 @@ export default function App() {
         <h1>Oca Borracha</h1>
         <p className="lema"><span className="cinta">Hazifest Vol. 1</span>El juego más culero del momento</p>
       </div>
+      {partida.fase === 'jugando' && <Carrera jugadores={partida.jugadores} turno={partida.turno} />}
       {partida.fase === 'jugando' && (
         <div className="ctl">
           <div className="dados-sel" role="group" aria-label="Cuántos dados">
