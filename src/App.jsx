@@ -77,6 +77,7 @@ export default function App() {
   const [letrero, setLetrero] = useState(null);
   const [tirando, setTirando] = useState(false);
   const [siguiendo, setSiguiendo] = useState(false);   // la cámara del tablero sigue a la ficha
+  const [seccion, setSeccion] = useState('turno');       // qué parte del panel muestra la perilla
   const [ficha, setFicha] = useState(FICHAS[0].id);
   const [telon, setTelon] = useState(false);
   const esCelular = useEsCelular();
@@ -133,7 +134,7 @@ export default function App() {
 
   const rodar = async (cuantos) => {
     const dados = Array.from({ length: cuantos }, () => tirarDado());
-    setBurbuja(true); setTirando(true);
+    setBurbuja(true); setSeccion('turno'); setTirando(true);
     actualizar(p => ({ ...p, dados, giros: p.giros + 1 }));
     await esperar(T_DADO);
     setTirando(false);
@@ -156,6 +157,7 @@ export default function App() {
     setLetrero(pRef.current.jugadores[pRef.current.turno].pos);
     await esperar(T_LETRERO);
     setLetrero(null);
+    setSeccion('turno');
     setBurbuja(true);
   };
 
@@ -406,9 +408,17 @@ export default function App() {
           ficha={actual.ficha}
           aviso={etapa === 'fin' ? 'Se acabó la partida' : `Turno de ${actual.nombre}`}
           alerta={etapa === 'tirar' || etapa === 'otraVez' || etapa === 'retroceder' || etapa === 'comodin'}
+          girando={tirando}
           abierta={burbuja}
           onAbrir={setBurbuja}
-        >
+          seccion={seccion}
+          onSeccion={setSeccion}
+          acciones={{
+            reto: () => abrirReto(false),
+            dados: () => setModalDados({ cuantos: 1, vals: [1], giros: 0, girando: false, res: null }),
+          }}
+          secciones={{
+            turno: (
           <section className="tarjeta-sticker turno" aria-label="Turno">
             <div className={`dados${tirando ? ' tirando' : ''}`}>{partida.dados.map((v, k) => <Dado3D key={k} valor={v} giros={partida.giros} girando={tirando} tam={partida.dados.length > 1 ? 66 : 84} />)}</div>
             {textoAccion && <button type="button" className={`btn-tirar${etapa === 'retroceder' ? ' trampa' : ''}`} onClick={alTirar} disabled={etapa === 'moviendo' || ocupado}>{textoAccion}</button>}
@@ -446,7 +456,8 @@ export default function App() {
               </div>
             )}
           </section>
-
+            ),
+            lugares: (
           <section className="tarjeta-sticker">
             <h2>Posiciones</h2>
             <ul className="jugadores">
@@ -461,16 +472,8 @@ export default function App() {
               ))}
             </ul>
           </section>
-
-          <section className="herramientas">
-            <button type="button" className="tarjeta-sticker herramienta" onClick={() => abrirReto(false)}>
-              <strong>Reto manual</strong><span>¿Alguien rompió una regla?</span>
-            </button>
-            <button type="button" className="tarjeta-sticker herramienta" onClick={() => setModalDados({ cuantos: 1, vals: [1], giros: 0, girando: false, res: null })}>
-              <strong>Dados extra</strong><span>Para retos con dados</span>
-            </button>
-          </section>
-
+            ),
+            lista: (
           <section className="tarjeta-sticker">
             <details open><summary>Lo que va pasando</summary>
               <ul className="bitacora">
@@ -480,7 +483,9 @@ export default function App() {
               </ul>
             </details>
           </section>
-        </Burbuja>
+            ),
+          }}
+        />
 
         {letrero && (
           <button type="button" className="letrero" onClick={() => { setLetrero(null); setBurbuja(true); }}>
@@ -545,7 +550,7 @@ export default function App() {
                 <span className="pill">{modalReto.desdeComodin ? 'Tu destino' : 'Reto manual'}</span>
                 <h2>{modalReto.reto.titulo}</h2>
                 <p>{modalReto.reto.desc}</p>
-                {modalReto.reto.requiereDados && <p className="aviso-dados">Este reto usa dados: abre la herramienta "Dados extra".</p>}
+                {modalReto.reto.requiereDados && <p className="aviso-dados">Este reto usa dados: toca la perilla y elige "Dados".</p>}
                 <button type="button" className="btn-rosa grande" onClick={cerrarReto}>¡Aceptar destino!</button>
               </>
             )}

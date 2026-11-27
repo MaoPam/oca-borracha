@@ -237,18 +237,36 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .carril .ficha .gafete { font-size: 11px; }
 
 /* ---------- Burbuja flotante ---------- */
-.burbuja { position: fixed; z-index: 45; width: 62px; height: 62px; padding: 0;
+/* La perilla: aro de muescas, centro del color del jugador y su ficha encima. */
+.burbuja { position: fixed; z-index: 45; width: 74px; height: 74px; padding: 0;
   display: grid; place-items: center; border: 3px solid #000; border-radius: 50%;
-  background: var(--c); color: #000; cursor: grab; box-shadow: 4px 5px 0 #000;
+  background: #111; color: #000; cursor: grab; box-shadow: 4px 5px 0 #000;
   /* touch-action: none es lo que deja arrastrarla con el dedo sin que la pagina se mueva. */
   touch-action: none; transition: transform .1s, box-shadow .1s; }
 .burbuja:active { cursor: grabbing; transform: scale(.94); box-shadow: 2px 2px 0 #000; }
-.burbuja.activa { background: var(--papel); }
-.burbuja { width: 70px; height: 70px; }
-.burbuja-ficha { width: 42px; height: 58px; pointer-events: none; filter: var(--troquel); }
-.burbuja.activa .burbuja-ficha { filter: drop-shadow(2px 2px 0 #000); }
+.burbuja:focus-visible { outline: 3px solid var(--seleccion); outline-offset: 3px; }
+.burbuja .aro { position: absolute; inset: 3px; z-index: 0; border-radius: 50%;
+  background: repeating-conic-gradient(var(--papel) 0 5deg, transparent 5deg 30deg); }
+.burbuja::after { content: ''; position: absolute; inset: 12px; z-index: 1; border-radius: 50%; background: var(--c); border: 3px solid #000; }
+.burbuja.activa::after { background: var(--papel); }
+.burbuja-ficha { position: relative; z-index: 2; width: 27px; height: 38px; pointer-events: none; filter: var(--troquel); }
 .burbuja.alerta { animation: tocame 1.15s ease-in-out infinite; }
 @keyframes tocame { 50% { transform: scale(1.11); } }
+/* Mientras rueda el dado, el aro de muescas da vueltas. */
+.burbuja.girando .aro { animation: gira-aro .55s linear infinite; }
+@keyframes gira-aro { to { transform: rotate(360deg); } }
+
+/* Las cuñas del abanico: salen del centro de la perilla hacia --dx/--dy, una tras otra. */
+.cunas { position: fixed; z-index: 46; width: 0; height: 0; pointer-events: none; }
+.cuna { position: absolute; left: -27px; top: -27px; width: 54px; height: 54px; display: grid; place-items: center; padding: 0;
+  border-radius: 50%; background: var(--papel); color: #000; border: 3px solid #000; box-shadow: 3px 3px 0 #000;
+  font: 400 8.5px/1 var(--rotulo); text-transform: uppercase; cursor: pointer; pointer-events: none;
+  opacity: 0; transform: translate(0, 0) scale(.2) rotate(-90deg);
+  transition: transform .32s cubic-bezier(.3, 1.35, .5, 1) calc(var(--i) * 40ms), opacity .2s calc(var(--i) * 40ms); }
+.cunas.abierto .cuna { opacity: 1; transform: translate(var(--dx), var(--dy)) scale(1) rotate(0deg); pointer-events: auto; }
+.cuna.c-turno { background: var(--chicle); }
+.cuna.urge, .cuna:focus-visible { outline: 3px solid var(--seleccion); outline-offset: 2px; }
+.cunas-velo { position: fixed; inset: 0; z-index: 43; padding: 0; background: transparent; border: 0; cursor: default; }
 
 /* El panel es un flyer: hoja de papel con grano, pegada chueca y con cinta canela arriba. */
 .burbuja-panel { position: fixed; z-index: 44;
@@ -269,6 +287,12 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   text-shadow: 2px 2px 0 var(--chicle); }
 .burbuja-tope .cerrar { flex: none; width: 32px; height: 32px; padding: 0; background: var(--papel);
   color: #000; border: 2px solid var(--papel); font: 400 22px/1 var(--cartel); cursor: pointer; }
+/* Pestañas: cambian de sección sin cerrar el panel. */
+.pestanas { flex: none; display: flex; gap: 6px; padding: 8px 12px 0; background: #000; }
+.pestana { flex: 1; padding: 7px 4px 6px; background: #2a2a2a; color: var(--papel); border: 2px solid #000; border-bottom: 0;
+  font: 400 11px/1 var(--rotulo); cursor: pointer; }
+.pestana.puesta { background: var(--papel); color: #000; }
+.pestana:focus-visible { outline: 3px solid var(--seleccion); outline-offset: -3px; }
 .burbuja-cuerpo { flex: 1; min-height: 0; overflow: auto; display: grid; gap: 18px; padding: 14px; align-content: start; }
 .burbuja-cuerpo > .tarjeta-sticker { border-radius: 0; box-shadow: var(--dura); }
 .burbuja-cuerpo > .tarjeta-sticker:nth-child(odd) { transform: rotate(-.5deg); }
@@ -489,13 +513,6 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .barra i { display: block; height: 100%; background: var(--c); border-right: 2px solid #000; transition: width .3s; }
 
 /* ---------- Herramientas y bitácora ---------- */
-.herramientas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.herramienta { display: grid; justify-items: start; gap: 2px; text-align: left; padding: 18px 12px 12px; }
-.herramienta:first-child { transform: rotate(-1.2deg); }
-.herramienta:last-child { transform: rotate(1deg); }
-.herramienta:active { transform: translate(2px, 2px); }
-.herramienta strong { font: 400 26px/1 var(--cartel); text-transform: uppercase; color: #000; }
-.herramienta span { font-size: 14px; color: #4a4336; }
 .bitacora { list-style: none; margin: 10px 0 0; padding: 0; max-height: 240px; overflow: auto; font-size: 14px; display: grid; gap: 6px; }
 .bitacora li { display: flex; gap: 8px; align-items: baseline; padding-bottom: 6px; border-bottom: 1px dashed #b9ad94; }
 
@@ -657,6 +674,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
   .app.rodando .tablero, .app.fiesta .tablero, .casilla.resaltada { animation: none !important; }
   .tablero > .meta { animation: none !important; }
   .app.fiesta .tablero-caja::after, .ficha::after { display: none; }
+  .burbuja.girando .aro, .cuna { animation: none !important; transition: none !important; }
   .burbuja.alerta, .burbuja-panel, .letrero, .dado-caja.girando .dado-vuelo, .dado-caja.girando .dado-sombra, .dados.tirando { animation: none !important; }
   .dado-pop { animation: none !important; transform: rotate(-8deg); }
   .ficha .menea, .ficha .ala, .ficha .llama { animation: none !important; }
