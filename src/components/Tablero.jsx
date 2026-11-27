@@ -5,19 +5,37 @@ import { memeDe } from './lona.js';
 
 const { camino, meta } = trazarEspiral();
 
-const Gema = ({ className }) => <svg className={`gema ${className}`} aria-hidden="true"><use href="#i-gema" /></svg>;
+// El camino se dibuja en un lienzo con la misma proporción que la zona de
+// casillas (9 columnas x 7 filas), así cada punto cae en el centro de su casilla.
+const AN = 900, AL = 571, CW = AN / 9, CH = AL / 7;
+const centro = ([f, c]) => [(c + 0.5) * CW, (f + 0.5) * CH];
+const PUNTOS = [
+  ...camino.map(centro),
+  [((meta.cols[0] + meta.cols[1] + 1) / 2) * CW, (meta.filas[0] + 0.5) * CH],
+];
+const LINEA = PUNTOS.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ');
+
+// Una flecha en el hueco justo después de cada vuelta del espiral. Va en el
+// hueco y no en la esquina porque en la esquina la taparía la casilla.
+const FLECHAS = PUNTOS.slice(1, -1).flatMap((b, k) => {
+  const a = PUNTOS[k], c = PUNTOS[k + 2];
+  const gira = Math.sign(b[0] - a[0]) !== Math.sign(c[0] - b[0]) || Math.sign(b[1] - a[1]) !== Math.sign(c[1] - b[1]);
+  if (!gira) return [];
+  const ang = (Math.atan2(c[1] - b[1], c[0] - b[0]) * 180) / Math.PI;
+  return [{ x: (b[0] + c[0]) / 2, y: (b[1] + c[1]) / 2, ang }];
+});
 
 export default function Tablero({ jugadores, turno, resaltada, onVer }) {
   return (
     <div className="tablero-caja">
-      {/* El proscenio: cenefa arriba y dos cortinas a los lados. Ademas de ser el teatro,
-          se comen el espacio negro que sobraba a izquierda y derecha. */}
-      <span className="cenefa" aria-hidden="true" />
-      <span className="cortina izq" aria-hidden="true" />
-      <span className="cortina der" aria-hidden="true" />
-      <svg className="ojo-teatro" viewBox="0 0 40 40" aria-hidden="true"><use href="#i-ojo" /></svg>
       <div className="tablero" aria-label="Tablero de 60 casillas">
-        <Gema className="g1" /><Gema className="g2" /><Gema className="g3" /><Gema className="g4" />
+        <span className="cinta-esq e1" aria-hidden="true" /><span className="cinta-esq e2" aria-hidden="true" />
+        <span className="cinta-esq e3" aria-hidden="true" /><span className="cinta-esq e4" aria-hidden="true" />
+
+        <svg className="camino" viewBox={`0 0 ${AN} ${AL}`} preserveAspectRatio="none" aria-hidden="true">
+          <polyline points={LINEA} />
+        </svg>
+
         {camino.map(([fila, col], k) => (
           <Casilla
             key={k + 1}
@@ -29,6 +47,7 @@ export default function Tablero({ jugadores, turno, resaltada, onVer }) {
             estilo={{ gridRow: fila + 1, gridColumn: col + 1 }}
           />
         ))}
+
         <button
           type="button"
           className="meta"
@@ -40,6 +59,12 @@ export default function Tablero({ jugadores, turno, resaltada, onVer }) {
           <span className="meta-letrero"><small>60</small>Ruleta de la Victoria</span>
           <Fichas jugadores={jugadores} turno={turno} n={META} />
         </button>
+
+        <svg className="flechas" viewBox={`0 0 ${AN} ${AL}`} preserveAspectRatio="none" aria-hidden="true">
+          {FLECHAS.map((f, i) => (
+            <path key={i} d="M-9 -7 L9 0 L-9 7 Z" transform={`translate(${f.x.toFixed(1)} ${f.y.toFixed(1)}) rotate(${f.ang.toFixed(0)})`} />
+          ))}
+        </svg>
       </div>
     </div>
   );

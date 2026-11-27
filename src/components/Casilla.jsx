@@ -1,9 +1,9 @@
-import { CASILLAS, COMODINES } from '../data/casillas.js';
+import { CASILLAS } from '../data/casillas.js';
 import { colorDe } from './colores.js';
 import { chueco, memeDe } from './lona.js';
 import FichaDibujo from './FichaDibujo.jsx';
-import Marco from './Marco.jsx';
-import { barrioDe, tipoDe } from '../game/barrios.js';
+import IconoTipo from './IconoTipo.jsx';
+import { tipoDe } from '../game/tipos.js';
 
 // Una ficha en el tablero. El dibujo depende de lo que haya escogido el jugador.
 function Ficha({ jugador, indice, activa }) {
@@ -31,27 +31,31 @@ export function Fichas({ jugadores, turno, n }) {
   );
 }
 
-// Una casilla. La usan el tablero en espiral y el carril de celular,
-// para que las dos vistas sean literalmente la misma pieza.
+const NOMBRE_TIPO = { avanza: 'avanzar', atras: 'retroceder', reto: 'comodín', especial: 'especial' };
+
+// Una casilla: la foto de la lona a sangre, el número en sticker y el título
+// en una banda negra abajo. Las normales son todas iguales y van derechas;
+// solo las especiales cambian el color del borde y del número, llevan un icono
+// y se pegan un poco chuecas. La usan el espiral y el carril de celular.
 export default function Casilla({ n, jugadores, turno, resaltada, onVer, estilo }) {
   const cas = CASILLAS[n];
-  const comodin = COMODINES.includes(n);
-  const barrio = barrioDe(n);
-  const tipo = tipoDe(cas, comodin);
+  const tipo = tipoDe(n, cas);
+  const especial = tipo !== 'normal';
   return (
     <button
       type="button"
       data-n={n}
-      className={`casilla b-${barrio} t-${tipo} ${cas.tipo || ''}${comodin ? ' comodin' : ''}${n === resaltada ? ' resaltada' : ''}`}
-      style={{ ...estilo, '--r': `${chueco(n)}deg` }}
-      aria-label={`${n}. ${cas.mensaje}${comodin ? ' (comodín)' : ''}`}
+      className={`casilla t-${tipo}${n === resaltada ? ' resaltada' : ''}`}
+      style={{ ...estilo, '--r': especial ? `${chueco(n)}deg` : '0deg' }}
+      aria-label={`${n}. ${cas.mensaje}${especial ? ` (${NOMBRE_TIPO[tipo]})` : ''}`}
       onClick={() => onVer(n)}
     >
       <img className="meme" src={memeDe(n)} alt="" loading="lazy" draggable="false" />
-      <b>{n}</b>
-      {cas.sello && <span className="sello">{cas.sello}</span>}
-      <Marco tipo={tipo} />
-      <span className="lab">{cas.corto}</span>
+      <span className="num">{n}</span>
+      <span className="banda">
+        {especial && <IconoTipo tipo={tipo} />}
+        <span className="lab">{cas.corto}</span>
+      </span>
       <Fichas jugadores={jugadores} turno={turno} n={n} />
     </button>
   );
