@@ -221,6 +221,14 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .evento p { margin: 0; font: 400 16px/1.4 var(--texto); }
 .evento-quien { color: #4a4336; font: 400 13px/1 var(--rotulo); text-transform: uppercase; }
 
+/* ---------- Ventana de la sala para cels ---------- */
+.modal.sala { display: grid; justify-items: center; gap: 12px; }
+.sala-txt { margin: 0 !important; font-size: 15px !important; }
+.sala-codigo { padding: 6px 16px 4px; color: var(--rotulo-am); background: #000; font: 400 clamp(40px, 12vw, 64px)/1 var(--rotulo); letter-spacing: .12em; box-shadow: 4px 4px 0 var(--chicle); }
+.sala-qr { width: min(240px, 70vw); height: auto; image-rendering: pixelated; border: 3px solid #000; }
+.sala-link { max-width: 100%; overflow-wrap: anywhere; padding: 6px 8px; background: #fff; border: 2px dashed #000; font-size: 13px; user-select: all; }
+.sala-aviso { margin: 0 !important; padding: 8px 10px; background: var(--rotulo-am); border: 2px solid #000; font-size: 13.5px !important; line-height: 1.35 !important; text-align: left; }
+
 /* ---------- Ideas de premios bajo la ruleta ---------- */
 .ideas-premio { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .ideas-premio > span { font: 400 13px/1 var(--rotulo); text-transform: uppercase; }

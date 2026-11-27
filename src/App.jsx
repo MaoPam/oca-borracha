@@ -44,6 +44,20 @@ const nuevaBolsa = () => armarBolsa(RETOS.length, CARTAS.map(c => c.id), PROPORC
 // Con lo que arranca cada quien: posición inicial y el comodín Divide dolor.
 const alInicio = (j) => ({ ...j, pos: 1, tope: 1, pierde: 0, gano: 0, tiros: 0, comodines: ['divide-dolor'], stats: { ...STATS_INICIO } });
 
+// ---------- Sala para cels (extra opcional con Firebase) ----------
+// Solo hay botón de sala si existe la configuración en .env.local.
+const hayNube = Boolean(import.meta.env.VITE_FB_API_KEY);
+const CLAVE_SALA = 'oca-borracha:sala';
+const leerSala = () => { try { return JSON.parse(localStorage.getItem(CLAVE_SALA) || 'null'); } catch { return null; } };
+const guardarSala = (s) => { try { if (s) localStorage.setItem(CLAVE_SALA, JSON.stringify(s)); else localStorage.removeItem(CLAVE_SALA); } catch { /* modo privado */ } };
+const linkSala = (codigo) => `${window.location.origin}${window.location.pathname}?sala=${codigo}`;
+// Lo que ven los cels: la partida sin lo que solo le sirve al aparato principal (bolsa de retos, etc.).
+const estadoPublico = (p) => ({
+  jugadores: p.jugadores.map(({ nombre, ficha, pos, gano, pierde, comodines, stats, pareja }) => ({ nombre, ficha, pos, gano, pierde, comodines, stats, pareja })),
+  turno: p.turno, etapa: p.etapa, casilla: p.casilla, nota: p.nota, dados: p.dados, giros: p.giros,
+  lugares: p.lugares, premios: p.premios, bitacora: p.bitacora.slice(0, 30),
+});
+
 const partidaVacia = () => ({
   fase: 'setup', jugadores: [], turno: 0, etapa: 'tirar', casilla: null, nota: '',
   numDados: 1, dados: [1], giros: 0, premios: [], bolsa: [], bitacora: [], lugares: 0, reto: null,
@@ -128,6 +142,10 @@ export default function App() {
   const esCelular = useEsCelular();
   const [modalReto, setModalReto] = useState(null);
   const [usado, setUsado] = useState(null);              // aviso del comodín que alguien acaba de usar
+  const [sala, setSala] = useState(leerSala);             // { codigo } de la sala abierta, o null
+  const [verSala, setVerSala] = useState(false);          // ventana con el código y el QR
+  const [qr, setQr] = useState(null);                     // imagen del QR (data URL)
+  const [salaMsg, setSalaMsg] = useState('');             // "Abriendo…" o el error, si lo hubo
   const [porUsar, setPorUsar] = useState(null);          // comodín al que ya se le dio "Usar" una vez: falta confirmar
   const [modalDados, setModalDados] = useState(null);
   const [confirmarNueva, setConfirmarNueva] = useState(false);
@@ -150,6 +168,41 @@ export default function App() {
   const anotar = (i, texto, datos) => actualizar(p => ({ ...p, bitacora: [nuevaJugada(p.jugadores[i]?.nombre ?? '', texto, { color: i, ...datos }), ...p.bitacora].slice(0, 200) }));
 
   useEffect(() => { if (partida.fase === 'jugando') guardarPartida(partida); }, [partida]);
+
+  // Con sala abierta, cada cambio de la partida se manda a Firebase. El import es dinámico:
+  // Firebase solo se descarga si hay sala.
+  useEffect(() => {
+    if (!sala || partida.fase !== 'jugando') return;
+    const t = setTimeout(() => {
+      import('./nube/firebase.js').then(n => n.publicar(sala.codigo, estadoPublico(partida))).catch(() => { /* sin internet: se reintenta en el siguiente cambio */ });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [sala, partida]);
+
+  // El QR se arma cuando se abre la ventana de la sala.
+  useEffect(() => {
+    if (!verSala || !sala) return;
+    let vivo = true;
+    import('qrcode').then(Q => Q.toDataURL(linkSala(sala.codigo), { margin: 1, width: 260 })).then(url => { if (vivo) setQr(url); }).catch(() => {});
+    return () => { vivo = false; };
+  }, [verSala, sala]);
+
+  const abrirSala = async () => {
+    setSalaMsg('Abriendo la sala…');
+    try {
+      const n = await import('./nube/firebase.js');
+      const codigo = await n.abrirSala(estadoPublico(pRef.current));
+      const s = { codigo };
+      setSala(s); guardarSala(s); setSalaMsg(''); setVerSala(true);
+    } catch (e) {
+      setSalaMsg(`No se pudo abrir la sala: ${e?.code === 'permission-denied' ? 'faltan las reglas de Firebase' : 'revisa tu internet'}.`);
+    }
+  };
+  const cerrarSala = async () => {
+    const s = sala;
+    setSala(null); guardarSala(null); setVerSala(false); setQr(null);
+    if (s) import('./nube/firebase.js').then(n => n.cerrarSala(s.codigo)).catch(() => {});
+  };
 
   // ---------- Preparación ----------
   const agregarJugador = (e) => {
@@ -732,6 +785,16 @@ export default function App() {
             <button type="button" className="btn-cromo extra" onClick={() => setModalDados({ cuantos: 1, vals: [1], giros: 0, girando: false, res: null })}>
               <strong>Dados extra</strong><span>Para los retos que usan dados</span>
             </button>
+            {hayNube && (sala ? (
+              <button type="button" className="btn-cromo extra" onClick={() => setVerSala(true)}>
+                <strong>Sala {sala.codigo} abierta</strong><span>Ver el código y el QR para los cels</span>
+              </button>
+            ) : (
+              <button type="button" className="btn-cromo extra" onClick={abrirSala} disabled={salaMsg === 'Abriendo la sala…'}>
+                <strong>Sala para cels</strong><span>Extra: cada quien ve sus stats y comodines en su cel. El juego sigue aquí.</span>
+              </button>
+            ))}
+            {salaMsg && <p className="ayuda">{salaMsg}</p>}
           </section>
             ),
           }}
@@ -906,6 +969,25 @@ export default function App() {
                 )}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {verSala && sala && (
+        <div className="modal-fondo" role="dialog" aria-modal="true" aria-label={`Sala ${sala.codigo}`} onClick={() => setVerSala(false)}>
+          <div className="modal sala" onClick={e => e.stopPropagation()}>
+            <div className="modal-tope"><span className="pill">Sala para cels</span><button type="button" className="cerrar" onClick={() => setVerSala(false)} aria-label="Cerrar">×</button></div>
+            <p className="sala-txt">Escanea con la cámara del cel o entra al link y pon el código:</p>
+            <b className="sala-codigo">{sala.codigo}</b>
+            {qr ? <img className="sala-qr" src={qr} alt={`Código QR de la sala ${sala.codigo}`} /> : <p>Armando el QR…</p>}
+            <code className="sala-link">{linkSala(sala.codigo)}</code>
+            {window.location.hostname === 'localhost' && (
+              <p className="sala-aviso">Ojo: mientras el juego corra en tu compu (localhost), los cels no pueden abrir este link. Va a funcionar cuando lo subamos a internet.</p>
+            )}
+            <div className="eleccion">
+              <button type="button" className="btn-rosa" onClick={() => setVerSala(false)}>Listo</button>
+              <button type="button" className="btn-cromo" onClick={cerrarSala}>Cerrar sala</button>
+            </div>
           </div>
         </div>
       )}

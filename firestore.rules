@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// Reglas de seguridad de la Oca Borracha (Firestore).
+// Cópialas en la consola: Firestore Database → Reglas → pegar → Publicar.
+//
+// salas/{codigo}            la partida que publica el aparato principal (el anfitrión)
+// salas/{codigo}/asientos   qué cel tomó qué ficha (cada cel escribe solo el suyo)
+// salas/{codigo}/pedidos    lo que piden los cels (tirar, usar comodín…); solo el anfitrión los lee
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function entro() { return request.auth != null; }
+    function anfitrionDe(codigo) { return get(/databases/$(database)/documents/salas/$(codigo)).data.anfitrion; }
+
+    match /salas/{codigo} {
+      allow read: if entro();
+      allow create: if entro() && request.resource.data.anfitrion == request.auth.uid;
+      allow update: if entro() && resource.data.anfitrion == request.auth.uid
+                    && request.resource.data.anfitrion == request.auth.uid;
+      allow delete: if entro() && resource.data.anfitrion == request.auth.uid;
+
+      match /asientos/{uid} {
+        allow read: if entro();
+        allow write: if entro() && request.auth.uid == uid;
+      }
+
+      match /pedidos/{pedido} {
+        allow create: if entro() && request.resource.data.uid == request.auth.uid;
+        allow read, delete: if entro() && anfitrionDe(codigo) == request.auth.uid;
+      }
+    }
+  }
+}
