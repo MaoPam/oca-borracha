@@ -10,6 +10,8 @@ import { memeDe } from './components/lona.js';
 import FichaDibujo from './components/FichaDibujo.jsx';
 import { FICHAS, fichaLibre } from './components/fichas.js';
 import Ruleta from './components/Ruleta.jsx';
+import Pirinola from './components/Pirinola.jsx';
+import { CARAS_PIRINOLA, CARA_COMODIN, caraAlAzar } from './data/pirinola.js';
 import { colorDe, MAX_JUGADORES } from './components/colores.js';
 import { CASILLAS, COMODINES, META, MOVIMIENTOS } from './data/casillas.js';
 import { RETOS } from './data/retos.js';
@@ -339,11 +341,16 @@ export default function App() {
     const carta = typeof x === 'string' && cartaDe(x);
     return carta ? { comodin: carta } : { reto: RETOS[x] ?? RETOS[0] };
   };
+  // El papelito se saca antes de girar: así la pirinola ya sabe dónde caer
+  // (en un castigo si es reto, en "★ Comodín" si es comodín).
   const abrirReto = (desdeComodin) => {
-    setModalReto({ girando: true, desdeComodin });
-    setTimeout(() => setModalReto({ girando: false, desdeComodin, ...sacarPapelito() }), sinMovimiento ? 200 : 1200);
+    const papel = sacarPapelito();
+    const cara = papel.comodin ? CARA_COMODIN : caraAlAzar();
+    setModalReto({ girando: true, desdeComodin, cara, ...papel });
   };
-  const cerrarReto = () => {
+  const alCaerPirinola = () => setModalReto(m => (m ? { ...m, girando: false } : m));
+  // seRaja: no hizo el reto y se toma lo que marcó la pirinola.
+  const cerrarReto = (seRaja = false) => {
     const m = modalReto;
     setModalReto(null);
     if (m?.comodin) {
@@ -351,8 +358,12 @@ export default function App() {
       if (m.desdeComodin && pRef.current.etapa === 'comodin') terminarEn('listo', `Sacaste el comodín ${m.comodin.titulo}: te salvas de la casilla.`);
       return;
     }
-    if (m?.reto) anotar(pRef.current.turno, `${m.desdeComodin ? 'Cambia la casilla por el reto' : 'Reto manual'}: ${m.reto.titulo}.`);
-    if (m?.desdeComodin && pRef.current.etapa === 'comodin') terminarEn('listo', `Reto misterioso: ${m.reto.titulo}.`, { reto: m.reto });
+    if (!m?.reto) return;
+    const raja = seRaja ? ` Se raja y toma: ${m.cara}.` : '';
+    anotar(pRef.current.turno, `${m.desdeComodin ? 'Cambia la casilla por el reto' : 'Reto manual'}: ${m.reto.titulo}.${raja}`);
+    if (m.desdeComodin && pRef.current.etapa === 'comodin') {
+      terminarEn('listo', seRaja ? `Te rajaste del reto ${m.reto.titulo}: te toca ${m.cara}.` : `Reto misterioso: ${m.reto.titulo}.`, { reto: seRaja ? null : m.reto });
+    }
   };
   const hacerLona = () => terminarEn('listo', 'Haces lo que dice la lona.');
   const tirarParaReto = async () => {
@@ -765,9 +776,12 @@ export default function App() {
           <div className={`modal${modalReto.desdeComodin ? ' recorte' : ''}`}>
             {modalReto.desdeComodin && <svg className="ojo" aria-hidden="true"><use href="#i-ojo" /></svg>}
             {modalReto.girando ? (
-              <div className="invocando"><Dado3D valor={1} giros={3} tam={72} conResultado={false} /><p>Invocando el caos…</p></div>
+              <div className="invocando">
+                <Pirinola caras={CARAS_PIRINOLA} final={modalReto.cara} onFin={alCaerPirinola} />
+                <p>Girando la pirinola…</p>
+              </div>
             ) : (
-              <>
+              <div className="reto-sale">
                 <span className="pill">{modalReto.comodin ? '¡Comodín!' : modalReto.desdeComodin ? 'Tu destino' : 'Reto manual'}</span>
                 <h2>{(modalReto.comodin || modalReto.reto).titulo}</h2>
                 <p>{(modalReto.comodin || modalReto.reto).desc}</p>
@@ -783,8 +797,18 @@ export default function App() {
                     {modalReto.tirando ? 'Tirando…' : `Tirar ${modalReto.reto.dados} dado${modalReto.reto.dados > 1 ? 's' : ''} para el reto`}
                   </button>
                 ))}
-                <button type="button" className="btn-rosa grande" onClick={cerrarReto}>{modalReto.comodin ? '¡Guardarlo!' : '¡Aceptar destino!'}</button>
-              </>
+                {modalReto.comodin ? (
+                  <button type="button" className="btn-rosa grande" onClick={() => cerrarReto()}>¡Guardarlo!</button>
+                ) : (
+                  <>
+                    <span className="piri-cara"><span className="piri-mini" aria-hidden="true" />Si te rajas: <b>{modalReto.cara}</b></span>
+                    <div className="reto-botones">
+                      <button type="button" className="btn-rosa grande" onClick={() => cerrarReto()}>¡Lo hago!</button>
+                      <button type="button" className="btn-cromo" onClick={() => cerrarReto(true)}>Me rajo · {modalReto.cara}</button>
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>
         </div>

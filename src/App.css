@@ -815,6 +815,27 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .invocando { display: grid; justify-items: center; gap: 12px; padding: 20px 0; font: 400 20px var(--cartel); text-transform: uppercase; }
 .invocando .dado { animation: girar .5s linear infinite; }
 
+/* ---------- Pirinola de los retos ---------- */
+.piri-escena { position: relative; width: 100%; max-width: 320px; height: 210px; margin: 0 auto; overflow: hidden; }
+.piri-mesa { position: absolute; left: -12px; right: -12px; bottom: 6px; height: 92px; border-radius: 50%; background: #3b2618; border: 3px solid #000;
+  background-image: repeating-linear-gradient(176deg, transparent 0 14px, rgba(0, 0, 0, .18) 14px 16px); }
+.piri-carril { position: absolute; left: 14px; right: 86px; bottom: 44px; height: 132px; }
+.piri-mueve { position: absolute; inset: 0; }
+.piri-gira { position: absolute; left: 0; bottom: 0; width: 72px; height: 132px; transform-origin: 50% 100%; }
+.piri-tallo { position: absolute; left: 30px; top: 0; width: 12px; height: 32px; background: #c9a46a; border: 3px solid #000; border-bottom: 0; }
+.piri-cuerpo { position: absolute; left: 0; top: 28px; width: 72px; height: 62px; display: grid; place-items: center; padding: 0 5px; text-align: center;
+  background: var(--rotulo-am); border: 3px solid #000; color: #000; font: 400 11px/1.05 var(--rotulo); text-transform: uppercase;
+  box-shadow: inset 9px 0 0 rgba(0, 0, 0, .16), inset -9px 0 0 rgba(0, 0, 0, .28); }
+.piri-punta { position: absolute; left: 8px; top: 88px; width: 56px; height: 44px; background: var(--chicle); border: 3px solid #000; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.piri-sombra { position: absolute; left: 14px; bottom: -6px; width: 44px; height: 9px; border-radius: 50%; background: rgba(0, 0, 0, .55); }
+.reto-sale { animation: entra-reto .46s cubic-bezier(.2, .9, .3, 1) both; }
+@keyframes entra-reto { from { opacity: 0; transform: translateX(120px) rotate(14deg); } }
+.piri-cara { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 6px 10px 5px; background: #000; color: var(--papel);
+  font: 400 13px/1 var(--rotulo); text-transform: uppercase; transform: rotate(2deg); }
+.piri-cara b { color: var(--rotulo-am); font-weight: 400; }
+.piri-mini { width: 12px; height: 18px; background: linear-gradient(var(--rotulo-am) 0 55%, var(--chicle) 55%); clip-path: polygon(0 0, 100% 0, 100% 55%, 50% 100%, 0 55%); }
+.reto-botones { display: grid; gap: 10px; }
+
 .res-dados { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin-bottom: 16px; font: 400 18px var(--cartel); text-transform: uppercase; }
 .res-dados strong { width: 100%; font: 400 40px/1 var(--gotica); }
 .res-dados .par { background: #3ddc6a; padding: 0 6px; }
@@ -847,7 +868,7 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 @media (prefers-reduced-motion: reduce) {
   .dado, .vinil, .brazo-td, .barra i, .casilla { transition: none !important; }
   .pista-ganadora { animation: none !important; }
-  .ficha, .ficha.activa, .invocando .dado, .modal { animation: none !important; }
+  .ficha, .ficha.activa, .invocando .dado, .modal, .reto-sale { animation: none !important; }
   .fd .pierna, .fd .brazo, .fd .cabeza { animation: none !important; }
   .modal-fondo.barrera { animation: none !important; }
   .app.rodando .tablero, .app.fiesta .tablero, .casilla.resaltada { animation: none !important; }
