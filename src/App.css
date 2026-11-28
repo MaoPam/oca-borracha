@@ -41,6 +41,15 @@ button:disabled { cursor: default; }
 .lema { margin: 10px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font: 400 18px/1.1 var(--cartel); text-transform: uppercase; color: var(--papel); }
 .cinta { display: inline-block; padding: 4px 12px 5px; background: var(--amarillo); color: #000; transform: rotate(-2.5deg); box-shadow: 2px 2px 0 #000; }
 .ctl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+/* Botón de la sala para cels en la barra de arriba. Abierta: negro con el código en amarillo y un foquito que parpadea. */
+.btn-sala { padding: 8px 12px 7px; color: #000; background: var(--papel); border: 3px solid #000; box-shadow: 3px 3px 0 var(--chicle); font: 400 14px/1 var(--rotulo); text-transform: uppercase; cursor: pointer; }
+.btn-sala.abierta { color: var(--papel); background: #000; }
+.btn-sala.abierta b { color: var(--rotulo-am); font-weight: 400; letter-spacing: .08em; }
+.btn-sala.abierta::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: #14b85a; vertical-align: middle; animation: foquito 1.2s steps(2, end) infinite; }
+@keyframes foquito { 50% { opacity: .2; } }
+.sala-msg { max-width: 260px; font: 600 13px/1.3 var(--texto); color: var(--papel); }
+.btn-sala:focus-visible { outline: 3px solid var(--seleccion); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .btn-sala.abierta::before { animation: none; } }
 .dados-sel { display: flex; gap: 6px; }
 .dados-sel.centro { justify-content: center; margin-bottom: 18px; }
 .confirma { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font: 400 16px var(--cartel); text-transform: uppercase; }

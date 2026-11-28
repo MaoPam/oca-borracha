@@ -561,6 +561,15 @@ export default function App() {
       {partida.fase === 'jugando' && <Carrera jugadores={partida.jugadores} turno={partida.turno} />}
       {partida.fase === 'jugando' && (
         <div className="ctl">
+          {/* Sala para cels: a la vista. Con sala abierta enseña el código y cuántos cels hay. */}
+          {hayNube && (sala ? (
+            <button type="button" className="btn-sala abierta" onClick={() => setVerSala(true)} title="Ver el QR de la sala">
+              📱 Sala <b>{sala.codigo}</b> · {new Set(Object.values(asientos)).size} cel{new Set(Object.values(asientos)).size === 1 ? '' : 's'}
+            </button>
+          ) : (
+            <button type="button" className="btn-sala" onClick={abrirSala} disabled={salaMsg === 'Abriendo la sala…'}>📱 Jugar con cels</button>
+          ))}
+          {hayNube && !sala && salaMsg && <span className="sala-msg" role="status">{salaMsg}</span>}
           <div className="dados-sel" role="group" aria-label="Cuántos dados">
             {[1, 2].map(n => (
               <button key={n} type="button" className="btn-cromo" aria-pressed={partida.numDados === n} onClick={() => actualizar(p => ({ ...p, numDados: n }))}>{n} dado{n > 1 ? 's' : ''}</button>
