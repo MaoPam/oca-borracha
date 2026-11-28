@@ -49,7 +49,7 @@ button:disabled { cursor: default; }
 @keyframes foquito { 50% { opacity: .2; } }
 .sala-msg { max-width: 260px; font: 600 13px/1.3 var(--texto); color: var(--papel); }
 .btn-sala:focus-visible { outline: 3px solid var(--seleccion); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .btn-sala.abierta::before { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .btn-sala.abierta::before, .palanca-foco, .top.compacto .ctl { animation: none; } .palanca i { transition: none; } }
 .dados-sel { display: flex; gap: 6px; }
 .dados-sel.centro { justify-content: center; margin-bottom: 18px; }
 .confirma { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font: 400 16px var(--cartel); text-transform: uppercase; }
@@ -60,10 +60,31 @@ button:disabled { cursor: default; }
 .top .btn-cromo { box-shadow: 3px 3px 0 var(--fluor); }
 /* Jugando, el encabezado se encoge: el titulo gigante se come ~100px de tablero. */
 .top.compacto { max-width: 1760px; padding: 7px max(10px, 1.4vw); align-items: center; }
-.top.compacto > div { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.top.compacto > div { display: flex; align-items: baseline; gap: 2px 12px; flex-wrap: wrap; }
+.top.compacto .salto { flex-basis: 100%; height: 0; }   /* manda la palanquita al renglón de abajo */
 .top.compacto h1 { font-size: clamp(24px, 3.1vw, 40px); text-shadow: 2px 2px 0 var(--fluor); }
 .top.compacto .lema { margin: 0; font-size: 13px; }
 .top.compacto .cinta { padding: 2px 8px 3px; }
+/* Jugando, los controles van en una sola tira: misma altura y letra para todos.
+   Los dados son un interruptor de dos posiciones; "Nueva partida" va discreto (casi no se usa). */
+.top.compacto .ctl { gap: 8px; animation: sale-ctl .18s steps(3, end); }
+@keyframes sale-ctl { from { opacity: 0; transform: translateY(-6px); } }
+/* La palanquita: un triangulito que gira al abrir. */
+.palanca { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px 2px 4px; background: none; color: var(--papel); border: 0; font: 400 13px/1 var(--cartel); text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
+.palanca i { display: inline-grid; place-items: center; width: 18px; height: 18px; font-size: 9px; font-style: normal; color: #000; background: var(--amarillo); border: 2px solid #000; box-shadow: 2px 2px 0 var(--fluor); transition: transform .15s; }
+.palanca.abierta i { transform: rotate(90deg); }
+.palanca:hover { color: var(--amarillo); }
+.palanca:focus-visible { outline: 3px solid var(--seleccion); outline-offset: 2px; }
+.palanca-foco { width: 8px; height: 8px; border-radius: 50%; background: #14b85a; animation: foquito 1.2s steps(2, end) infinite; }
+.top.compacto .ctl .btn-cromo, .top.compacto .btn-sala { min-height: 36px; padding: 0 12px; font: 400 15px/1 var(--cartel); }
+.top.compacto .btn-sala { display: inline-flex; align-items: center; border-radius: 6px; box-shadow: 3px 3px 0 var(--fluor); }
+.top.compacto .btn-sala.abierta b { margin: 0 .3em; }
+.top.compacto .dados-sel { gap: 0; border-radius: 6px; box-shadow: 3px 3px 0 var(--fluor); }
+.top.compacto .dados-sel .btn-cromo { box-shadow: none; border-radius: 0; }
+.top.compacto .dados-sel .btn-cromo:first-child { border-radius: 6px 0 0 6px; }
+.top.compacto .dados-sel .btn-cromo + .btn-cromo { margin-left: -3px; border-radius: 0 6px 6px 0; }
+.top.compacto .ctl > .btn-cromo:last-child { color: var(--papel); background: transparent; border: 2px dashed rgba(244, 238, 226, .6); box-shadow: none; }
+.top.compacto .ctl > .btn-cromo:last-child:hover { border-color: var(--papel); }
 .btn-cromo[aria-pressed="true"] { background: var(--amarillo); }
 .btn-rosa, .btn-tirar { background: var(--fluor); }
 .btn-dorado { background: var(--amarillo); }

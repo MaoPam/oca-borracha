@@ -148,6 +148,7 @@ export default function App() {
   const [qr, setQr] = useState(null);                     // imagen del QR (data URL)
   const [salaMsg, setSalaMsg] = useState('');             // "Abriendo…" o el error, si lo hubo
   const [asientos, setAsientos] = useState({});           // { uid del cel: número de jugador }
+  const [verCtl, setVerCtl] = useState(false);            // la palanquita de arriba: enseña u oculta los botones
   const [porUsar, setPorUsar] = useState(null);          // comodín al que ya se le dio "Usar" una vez: falta confirmar
   const [modalDados, setModalDados] = useState(null);
   const [confirmarNueva, setConfirmarNueva] = useState(false);
@@ -557,10 +558,18 @@ export default function App() {
       <div>
         <h1>Oca Borracha</h1>
         <p className="lema"><span className="cinta">PejeFest</span>El juego más culero del momento</p>
+        {/* Palanquita: los botones de arriba quedan ocultos hasta que la picas. El foquito avisa si hay sala abierta. */}
+        {partida.fase === 'jugando' && <span className="salto" aria-hidden="true" />}
+        {partida.fase === 'jugando' && (
+          <button type="button" className={`palanca${verCtl ? ' abierta' : ''}`} aria-expanded={verCtl} aria-controls="controles"
+            onClick={() => { setVerCtl(v => !v); setConfirmarNueva(false); }}>
+            <i aria-hidden="true">▶</i> Opciones{sala && <span className="palanca-foco" title={`Sala ${sala.codigo} abierta`} />}
+          </button>
+        )}
       </div>
       {partida.fase === 'jugando' && <Carrera jugadores={partida.jugadores} turno={partida.turno} />}
-      {partida.fase === 'jugando' && (
-        <div className="ctl">
+      {partida.fase === 'jugando' && verCtl && (
+        <div className="ctl" id="controles">
           {/* Sala para cels: a la vista. Con sala abierta enseña el código y cuántos cels hay. */}
           {hayNube && (sala ? (
             <button type="button" className="btn-sala abierta" onClick={() => setVerSala(true)} title="Ver el QR de la sala">
