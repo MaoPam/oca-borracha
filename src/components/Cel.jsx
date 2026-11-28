@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '../App.css';
 import Simbolos from './Simbolos.jsx';
 import FichaDibujo from './FichaDibujo.jsx';
@@ -62,6 +62,16 @@ export default function Cel({ codigo: inicial }) {
       .catch(() => { if (vivo) setError('No me pude conectar. Revisa tu internet.'); });
     return () => { vivo = false; quitar?.(); };
   }, [codigo]);
+
+  // Cuando te toca tirar, el cel vibra (Android; los iPhone no dejan vibrar desde una página)
+  // y el título de la pestaña cambia, por si tienes otra app abierta encima.
+  const tocaTirar = Boolean(estado && yo !== null && estado.turno === yo && TIROS[estado.etapa]);
+  const yaAviso = useRef(false);
+  useEffect(() => {
+    if (tocaTirar && !yaAviso.current) navigator.vibrate?.([180, 90, 180]);
+    yaAviso.current = tocaTirar;
+    document.title = tocaTirar ? '¡Te toca! · Oca Borracha' : 'Oca Borracha';
+  }, [tocaTirar]);
 
   const entrar = (c) => {
     setCodigo(c); setEstado(undefined); setError(''); setYo(leerYo(c));
