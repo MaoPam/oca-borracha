@@ -117,7 +117,6 @@ export default function Cel({ codigo: inicial }) {
   const caida = enCasilla && CASILLAS[enCasilla];
   const momento = etapa === 'moviendo' ? (mio ? 'Tu ficha va caminando…' : `${jugadores[turno]?.nombre} va caminando…`)
     : etapa === 'comodin' ? (mio ? 'Escoge en la pantalla qué hacer con tu casilla.' : null)
-    : reto ? 'Hay un reto en la pantalla.'
     : null;
   const grupos = agruparComodines(j.comodines);
 
@@ -140,11 +139,12 @@ export default function Cel({ codigo: inicial }) {
         )}
         {nota && <p className="cel-nota">{nota}</p>}
         {momento && <p className="cel-nota"><i>{momento}</i></p>}
+        {reto && etapa === 'listo' && <p className="cel-caida"><b>Reto: {reto.titulo}</b> · {reto.desc}</p>}
         {tiro && (
           <button type="button" className={`btn-tirar${etapa === 'retroceder' ? ' trampa' : ''}`} disabled={aviso === 'Enviando…'}
             onClick={() => mandar('tirar', {}, 'Tirando en la pantalla…')}>{tiro}</button>
         )}
-        {mio && etapa === 'listo' && !reto && (
+        {mio && etapa === 'listo' && (
           <button type="button" className="btn-rosa" disabled={aviso === 'Enviando…'}
             onClick={() => mandar('siguiente', {}, 'Turno pasado ✓')}>Ya quedó · Siguiente turno</button>
         )}

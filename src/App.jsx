@@ -56,7 +56,7 @@ const estadoPublico = (p) => ({
   jugadores: p.jugadores.map(({ nombre, ficha, pos, gano, pierde, comodines, stats, pareja }) => ({ nombre, ficha, pos, gano, pierde, comodines, stats, pareja })),
   turno: p.turno, etapa: p.etapa, casilla: p.casilla, nota: p.nota, dados: p.dados, giros: p.giros,
   lugares: p.lugares, premios: p.premios, bitacora: p.bitacora.slice(0, 30),
-  reto: Boolean(p.reto),   // el cel solo necesita saber si hay un reto abierto en la pantalla
+  reto: p.reto ? { titulo: p.reto.titulo, desc: p.reto.desc } : null,   // el reto misterioso que se está jugando
 });
 
 const partidaVacia = () => ({
@@ -455,7 +455,8 @@ export default function App() {
     const { indice, avisos } = sig;
     // Si el turno dio la vuelta (vuelve a alguien de antes en la lista), terminó una ronda: baja el mareo de todos.
     const jugadores = indice <= p.turno ? sig.jugadores.map(j => ({ ...j, stats: aplicarStat(j.stats, 'ronda') })) : sig.jugadores;
-    actualizar(q => ({ ...q, jugadores, turno: indice, etapa: 'tirar', nota: `Ahora tira ${jugadores[indice].nombre}.` }));
+    // reto: null: el reto misterioso de este turno ya se jugó, no debe seguir saliendo en los siguientes.
+    actualizar(q => ({ ...q, jugadores, turno: indice, etapa: 'tirar', reto: null, nota: `Ahora tira ${jugadores[indice].nombre}.` }));
     avisos.forEach(a => anotar(p.turno, a));
     setVista(null);
     anunciaTurno(indice);
@@ -538,13 +539,13 @@ export default function App() {
       return;
     }
     if (i == null || !p.jugadores[i]) return;
-    if (pd.tipo === 'tirar' && i === p.turno && !p.reto) {
+    if (pd.tipo === 'tirar' && i === p.turno && !modalReto) {
       if (p.etapa === 'retroceder') retroceder();
       else if (p.etapa === 'reparte') tirarReparte();
       else tirar();   // tirar() ya revisa que sea el momento de tirar
     }
-    // Pasar el turno desde el cel: solo quien tiene el turno, ya resuelta la casilla y sin reto abierto.
-    if (pd.tipo === 'siguiente' && i === p.turno && p.etapa === 'listo' && !p.reto && !ocupado) pasarTurno();
+    // Pasar el turno desde el cel: solo quien tiene el turno, ya resuelta la casilla y sin la ventana del reto abierta.
+    if (pd.tipo === 'siguiente' && i === p.turno && p.etapa === 'listo' && !modalReto && !ocupado) pasarTurno();
     if (pd.tipo === 'comodin') gastarComodin(i, pd.id);
     if (pd.tipo === 'pareja') cambiarJugador(i, { pareja: !!pd.valor });
   };
