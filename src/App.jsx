@@ -149,6 +149,7 @@ export default function App() {
   const [salaMsg, setSalaMsg] = useState('');             // "Abriendo…" o el error, si lo hubo
   const [asientos, setAsientos] = useState({});           // { uid del cel: número de jugador }
   const [verCtl, setVerCtl] = useState(false);            // la palanquita de arriba: enseña u oculta los botones
+  const [historial, setHistorial] = useState([]);               // fotos de la partida antes de cada jugada, para "Deshacer"
   const [porUsar, setPorUsar] = useState(null);          // comodín al que ya se le dio "Usar" una vez: falta confirmar
   const [modalDados, setModalDados] = useState(null);
   const [confirmarNueva, setConfirmarNueva] = useState(false);
@@ -169,6 +170,21 @@ export default function App() {
     setFranja({ i, k });
     setTimeout(() => setFranja(f => (f?.k === k ? null : f)), sinMovimiento ? 900 : T_FRANJA);
   };
+  // ---------- Deshacer ----------
+  // Antes de cada tiro o cambio de turno se guarda cómo estaba la partida (las 10 últimas).
+  // Se puede guardar tal cual porque la partida nunca se modifica: cada cambio crea una nueva.
+  // Ojo: la foto se toma AQUÍ, no dentro de setHistorial(h => ...): React corre esa función después,
+  // cuando la partida ya avanzó, y guardaría el momento equivocado.
+  const guardarPaso = (que) => { const foto = pRef.current; setHistorial(h => [...h.slice(-9), { partida: foto, que }]); };
+  const deshacer = () => {
+    const ult = historial[historial.length - 1];
+    if (!ult || ocupado || modalReto) return;
+    setHistorial(h => h.slice(0, -1));
+    pRef.current = ult.partida; setPartida(ult.partida);
+    setVista(null); setLetrero(null); setTiro(null); setPorUsar(null); setConfirmarNueva(false);
+    anotar(ult.partida.turno, `Se deshizo ${ult.que}.`);
+  };
+
   const anotar = (i, texto, datos) => actualizar(p => ({ ...p, bitacora: [nuevaJugada(p.jugadores[i]?.nombre ?? '', texto, { color: i, ...datos }), ...p.bitacora].slice(0, 200) }));
 
   useEffect(() => { if (partida.fase === 'jugando') guardarPartida(partida); }, [partida]);
@@ -246,12 +262,12 @@ export default function App() {
       bitacora: [nuevaJugada('', '¡Empieza la peda!')],
     }));
   };
-  const continuar = () => { const g = partida.guardada; pRef.current = g; setPartida(g); };
+  const continuar = () => { const g = partida.guardada; pRef.current = g; setPartida(g); setHistorial([]); };
   const nuevaPartida = () => {
     borrarPartida();
     const jugadores = pRef.current.jugadores.map(alInicio);
     const p = { ...partidaVacia(), jugadores };
-    pRef.current = p; setPartida(p); setConfirmarNueva(false); setVista(null);
+    pRef.current = p; setPartida(p); setConfirmarNueva(false); setVista(null); setHistorial([]);
   };
 
   // ---------- Movimiento ----------
@@ -407,6 +423,7 @@ export default function App() {
   const tirar = async () => {
     const p = pRef.current;
     if (ocupado || !['tirar', 'otraVez'].includes(p.etapa)) return;
+    guardarPaso(`el tiro de ${p.jugadores[p.turno].nombre}`);
     setOcupado(true); setVista(null);
     const i = p.turno;
     actualizar(q => ({ ...q, etapa: 'moviendo', nota: '' }));
@@ -425,6 +442,7 @@ export default function App() {
   // El tiro de la casilla 3: lo pide el letrero y se hace en la mesa de tiro.
   const tirarReparte = async () => {
     if (ocupado || pRef.current.etapa !== 'reparte') return;
+    guardarPaso('el tiro para repartir');
     setOcupado(true);
     const i = pRef.current.turno, j = pRef.current.jugadores[i];
     const [w] = await rodar(1);
@@ -435,6 +453,7 @@ export default function App() {
 
   const retroceder = async () => {
     if (ocupado || pRef.current.etapa !== 'retroceder') return;
+    guardarPaso('el tiro para retroceder');
     setOcupado(true);
     const i = pRef.current.turno;
     actualizar(q => ({ ...q, etapa: 'moviendo' }));
@@ -449,6 +468,7 @@ export default function App() {
 
   const pasarTurno = () => {
     const p = pRef.current;
+    guardarPaso(`el cambio de turno de ${p.jugadores[p.turno].nombre}`);
     const quedan = p.jugadores.filter(j => !j.gano).length;
     if (quedan <= 1) { actualizar(q => ({ ...q, etapa: 'fin' })); return; }
     const sig = siguienteTurno(p.jugadores, p.turno);
@@ -590,7 +610,13 @@ export default function App() {
               <button type="button" className="btn-rosa chico" onClick={nuevaPartida}>Sí, nueva</button>
               <button type="button" className="btn-cromo" onClick={() => setConfirmarNueva(false)}>No</button>
             </span>
-          ) : <button type="button" className="btn-cromo" onClick={() => setConfirmarNueva(true)}>Nueva partida</button>}
+          ) : (
+            <>
+              <button type="button" className="btn-cromo" onClick={deshacer} disabled={!historial.length || ocupado}
+                title={historial.length ? `Regresa ${historial[historial.length - 1].que}` : 'Todavía no hay nada que deshacer'}>↶ Deshacer</button>
+              <button type="button" className="btn-cromo" onClick={() => setConfirmarNueva(true)}>Nueva partida</button>
+            </>
+          )}
         </div>
       )}
     </header>
