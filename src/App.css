@@ -251,6 +251,41 @@ details summary { cursor: pointer; margin: 0; font-size: 28px; }
 .evento p { margin: 0; font: 400 16px/1.4 var(--texto); }
 .evento-quien { color: #4a4336; font: 400 13px/1 var(--rotulo); text-transform: uppercase; }
 
+/* ---------- Resumen de la peda ---------- */
+.modal.resumen { width: min(100%, 520px); max-height: calc(100dvh - 32px); overflow: auto; transform: none; padding: 20px 18px 20px; }
+.res-tarjeta { display: grid; gap: 14px; padding: 18px 14px 16px; background: var(--papel); border: 3px solid #000; box-shadow: 6px 6px 0 var(--chicle); }
+.res-titulo { margin: 0; font: 400 clamp(30px, 8vw, 42px)/.95 var(--gotica); color: #000; text-shadow: 3px 3px 0 var(--chicle); }
+.res-fecha { margin: -6px 0 0 !important; font: 400 12px/1 var(--cartel) !important; text-transform: uppercase; letter-spacing: .05em; }
+.res-podio { display: flex; justify-content: center; align-items: flex-end; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }
+.escalon { flex: 1; max-width: 140px; display: grid; justify-items: center; gap: 4px; }
+.escalon b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 15px/1.1 var(--rotulo); text-transform: uppercase; }
+.res-ficha { width: 46px; height: 64px; overflow: visible; }
+.escalon.l1 .res-ficha { width: 62px; height: 86px; animation: brinca-ganador 1s steps(2, end) infinite; }
+@keyframes brinca-ganador { 50% { transform: translateY(-5px); } }
+.res-base { width: 100%; display: grid; justify-items: center; align-content: start; padding-top: 6px; color: #000; background: var(--c); border: 3px solid #000; font: 400 28px/1 var(--rotulo); }
+.res-base i { font-style: normal; font-size: 22px; }
+.escalon.l1 .res-base { height: 96px; background: var(--rotulo-am); }
+.escalon.l2 .res-base { height: 74px; }
+.escalon.l3 .res-base { height: 62px; }
+.res-resto { margin: 0 !important; font: 600 13px/1.35 var(--texto) !important; }
+.res-premios { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; text-align: left; }
+.res-premios li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: #fff; border: 2px solid #000; border-left: 8px solid var(--c); box-shadow: 3px 3px 0 #000; }
+.res-ico { font-size: 28px; line-height: 1; }
+.res-premios span:last-child { display: grid; gap: 2px; min-width: 0; }
+.res-premios small { font: 400 11px/1.1 var(--cartel); text-transform: uppercase; letter-spacing: .03em; }
+.res-premios b { font: 400 17px/1 var(--rotulo); text-transform: uppercase; overflow-wrap: anywhere; }
+.res-premios em { font: 600 12.5px/1.2 var(--texto); font-style: normal; }
+.res-total { margin: 0 !important; padding: 7px 10px 6px; background: #000; color: var(--papel); font: 600 14px/1.35 var(--texto) !important; }
+.res-total b { color: var(--rotulo-am); }
+.res-estado { margin: 12px 0 0 !important; font: 600 14px/1.3 var(--texto) !important; }
+.modal.resumen .eleccion { margin-top: 14px; }
+.res-lista { margin-top: 14px; }
+.res-img { display: block; margin: 0 auto; width: min(100%, 220px); height: auto; border: 3px solid #000; box-shadow: 4px 4px 0 #000; transform: rotate(-2deg); }
+.res-descargar { display: inline-flex; align-items: center; text-decoration: none; }
+.st-resumen { width: 100%; margin-top: 4px; padding: 10px 8px 9px; color: #5a1846; background: #fff; border: 2px dashed #5a1846; font: 400 8px/1.4 var(--pixel); text-transform: uppercase; cursor: pointer; }
+.st-resumen:hover { border-style: solid; }
+@media (prefers-reduced-motion: reduce) { .escalon.l1 .res-ficha { animation: none; } }
+
 /* ---------- Ventana de la sala para cels ---------- */
 .modal.sala { display: grid; justify-items: center; gap: 12px; }
 .sala-txt { margin: 0 !important; font-size: 15px !important; }

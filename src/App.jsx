@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
 import Simbolos from './components/Simbolos.jsx';
+import Resumen from './components/Resumen.jsx';
 import Tablero from './components/Tablero.jsx';
 import Dado3D from './components/Dado3D.jsx';
 import Burbuja from './components/Burbuja.jsx';
@@ -149,6 +150,7 @@ export default function App() {
   const [salaMsg, setSalaMsg] = useState('');             // "Abriendo…" o el error, si lo hubo
   const [asientos, setAsientos] = useState({});           // { uid del cel: número de jugador }
   const [verCtl, setVerCtl] = useState(false);            // la palanquita de arriba: enseña u oculta los botones
+  const [verResumen, setVerResumen] = useState(false);    // la tarjeta "Resumen de la peda"
   const [historial, setHistorial] = useState([]);               // fotos de la partida antes de cada jugada, para "Deshacer"
   const [porUsar, setPorUsar] = useState(null);          // comodín al que ya se le dio "Usar" una vez: falta confirmar
   const [modalDados, setModalDados] = useState(null);
@@ -363,7 +365,7 @@ export default function App() {
   const gastarComodin = (i, id) => {
     const j = pRef.current.jugadores[i], carta = cartaDe(id), k = (j?.comodines || []).indexOf(id);
     if (k < 0) return;
-    cambiarJugador(i, { comodines: j.comodines.filter((_, x) => x !== k) });
+    cambiarJugador(i, { comodines: j.comodines.filter((_, x) => x !== k), usados: (j.usados || 0) + 1 });
     anotar(i, `${j.nombre} usa ${carta?.titulo ?? 'un comodín'}: ${carta?.desc ?? ''}`);
     avisar(i, carta);
   };
@@ -373,6 +375,7 @@ export default function App() {
     anotar(i, `${j.nombre} usa ${SALIDAS[tipo].titulo} en "${desde}": ${SALIDAS[tipo].desc.toLowerCase()}`);
     avisar(i, SALIDAS[tipo]);
     if (tipo === 'ofrenda') beber(i, 'shot');   // la ofrenda es 1 shot
+    cambiarJugador(i, { rajadas: (pRef.current.jugadores[i].rajadas || 0) + 1 });   // cuenta para "Corazón de pollo"
   };
 
   const terminarEn = (etapa, nota, cambios = {}) => actualizar(p => ({ ...p, etapa, nota, casilla: p.jugadores[p.turno].pos, ...cambios }));
@@ -470,7 +473,7 @@ export default function App() {
     const p = pRef.current;
     guardarPaso(`el cambio de turno de ${p.jugadores[p.turno].nombre}`);
     const quedan = p.jugadores.filter(j => !j.gano).length;
-    if (quedan <= 1) { actualizar(q => ({ ...q, etapa: 'fin' })); return; }
+    if (quedan <= 1) { actualizar(q => ({ ...q, etapa: 'fin' })); setVerResumen(true); return; }
     const sig = siguienteTurno(p.jugadores, p.turno);
     const { indice, avisos } = sig;
     // Si el turno dio la vuelta (vuelve a alguien de antes en la lista), terminó una ronda: baja el mareo de todos.
@@ -513,6 +516,7 @@ export default function App() {
     if (!m?.reto) return;
     const raja = salida === 'raja' ? ` Se raja y toma: ${m.cara}.` : '';
     if (salida === 'raja' && CASTIGO_CARA[m.cara]) beber(pRef.current.turno, ...CASTIGO_CARA[m.cara]);
+    if (salida === 'raja') { const t = pRef.current.turno; cambiarJugador(t, { rajadas: (pRef.current.jugadores[t].rajadas || 0) + 1 }); }
     anotar(pRef.current.turno, `${m.desdeComodin ? 'Cambia la casilla por el reto' : 'Reto manual'}: ${m.reto.titulo}.${raja}`);
     if (salida?.tipo) usarSalida(salida.tipo, salida.i, m.reto.titulo);
     if (m.desdeComodin && pRef.current.etapa === 'comodin') {
@@ -782,6 +786,7 @@ export default function App() {
             )}
             {textoAccion && <button type="button" className={`btn-tirar${etapa === 'retroceder' ? ' trampa' : ''}`} onClick={alTirar} disabled={etapa === 'moviendo' || ocupado}>{textoAccion}</button>}
             {(etapa === 'listo') && <button type="button" className="btn-tirar" onClick={pasarTurno}>Siguiente turno</button>}
+            {etapa === 'fin' && <button type="button" className="btn-dorado" onClick={() => setVerResumen(true)}>Resumen de la peda</button>}
             {etapa === 'fin' && <button type="button" className="btn-tirar" onClick={nuevaPartida}>Jugar otra</button>}
             {ganadorActual && (
               <div className="ganador">
@@ -829,7 +834,12 @@ export default function App() {
             </ul>
           </section>
             ),
-            stats: <Stats jugadores={jugadores} turno={turno} onRegistrar={registrar} />,
+            stats: (
+              <>
+                <Stats jugadores={jugadores} turno={turno} onRegistrar={registrar} />
+                <button type="button" className="st-resumen" onClick={() => setVerResumen(true)}>★ ¿Cómo va la peda? Ver resumen</button>
+              </>
+            ),
             comodines: (
           <section className="lcd-sec comodines">
             <h2>Comodines</h2>
@@ -1060,6 +1070,8 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {verResumen && <Resumen jugadores={jugadores} onCerrar={() => setVerResumen(false)} />}
 
       {verSala && sala && (
         <div className="modal-fondo" role="dialog" aria-modal="true" aria-label={`Sala ${sala.codigo}`} onClick={() => setVerSala(false)}>
