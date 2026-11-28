@@ -3,7 +3,7 @@
 // si nadie abre sala, el juego nunca toca internet ni descarga Firebase.
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, doc, collection, getDoc, setDoc, addDoc, deleteDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 
 // Los datos salen de .env.local (ver .env.example). Sin ellos no hay sala.
 const config = {
@@ -61,7 +61,43 @@ export async function cerrarSala(codigo) {
 }
 
 // Los cels escuchan la sala: cada cambio llama a alCambiar con el estado (o null si se cerró).
-export async function escucharSala(codigo, alCambiar) {
+export async function escucharSala(codigo, alCambiar, alError) {
   const { db } = await conectar();
-  return onSnapshot(doc(db, 'salas', codigo), (s) => alCambiar(s.exists() ? s.data().estado : null));
+  return onSnapshot(doc(db, 'salas', codigo), (s) => alCambiar(s.exists() ? s.data().estado : null), (e) => alError?.(e));
+}
+
+// ---------- Asientos: qué cel es qué jugador ----------
+// Cada cel escribe solo su propio asiento (salas/CODIGO/asientos/SU_UID).
+export async function tomarAsiento(codigo, jugador, nombre) {
+  const { db, uid } = await conectar();
+  await setDoc(doc(db, 'salas', codigo, 'asientos', uid), { jugador, nombre, hora: serverTimestamp() });
+}
+
+// El anfitrión escucha los asientos: alCambiar recibe { uid: número de jugador }.
+export async function escucharAsientos(codigo, alCambiar) {
+  const { db } = await conectar();
+  return onSnapshot(collection(db, 'salas', codigo, 'asientos'), (q) => {
+    const mapa = {};
+    q.forEach(d => { mapa[d.id] = d.data().jugador; });
+    alCambiar(mapa);
+  });
+}
+
+// ---------- Pedidos: lo que el cel le pide a la pantalla principal ----------
+// El cel no cambia la partida: deja un pedido ("tirar", "usar comodín"...) y el anfitrión decide.
+export async function pedir(codigo, tipo, datos = {}) {
+  const { db, uid } = await conectar();
+  await addDoc(collection(db, 'salas', codigo, 'pedidos'), { ...limpio(datos), tipo, uid, hora: serverTimestamp() });
+}
+
+// El anfitrión recibe cada pedido nuevo una sola vez y lo borra para que no se repita.
+export async function escucharPedidos(codigo, alPedido) {
+  const { db } = await conectar();
+  return onSnapshot(collection(db, 'salas', codigo, 'pedidos'), (q) => {
+    q.docChanges().forEach(c => {
+      if (c.type !== 'added') return;
+      alPedido(c.doc.data());
+      deleteDoc(c.doc.ref).catch(() => {});
+    });
+  });
 }

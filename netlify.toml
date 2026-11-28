@@ -1,0 +1,9 @@
+# Cómo arma Netlify la Oca Borracha.
+# Las llaves de Firebase NO van aquí: se ponen en Netlify → Site configuration → Environment variables
+# (las mismas VITE_FB_* de .env.local). Sin ellas el juego funciona igual, solo sin "Sala para cels".
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"

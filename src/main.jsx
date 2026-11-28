@@ -10,10 +10,10 @@ import '@fontsource/permanent-marker/400.css'
 import '@fontsource/press-start-2p/400.css'
 import './estilos/tokens.css'
 import './index.css'
-import App from './App.jsx'
+import Raiz from './Raiz.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
+    <Raiz />
+  </StrictMode>
 )

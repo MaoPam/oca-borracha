@@ -56,6 +56,7 @@ const estadoPublico = (p) => ({
   jugadores: p.jugadores.map(({ nombre, ficha, pos, gano, pierde, comodines, stats, pareja }) => ({ nombre, ficha, pos, gano, pierde, comodines, stats, pareja })),
   turno: p.turno, etapa: p.etapa, casilla: p.casilla, nota: p.nota, dados: p.dados, giros: p.giros,
   lugares: p.lugares, premios: p.premios, bitacora: p.bitacora.slice(0, 30),
+  reto: Boolean(p.reto),   // el cel solo necesita saber si hay un reto abierto en la pantalla
 });
 
 const partidaVacia = () => ({
@@ -146,6 +147,7 @@ export default function App() {
   const [verSala, setVerSala] = useState(false);          // ventana con el código y el QR
   const [qr, setQr] = useState(null);                     // imagen del QR (data URL)
   const [salaMsg, setSalaMsg] = useState('');             // "Abriendo…" o el error, si lo hubo
+  const [asientos, setAsientos] = useState({});           // { uid del cel: número de jugador }
   const [porUsar, setPorUsar] = useState(null);          // comodín al que ya se le dio "Usar" una vez: falta confirmar
   const [modalDados, setModalDados] = useState(null);
   const [confirmarNueva, setConfirmarNueva] = useState(false);
@@ -156,6 +158,7 @@ export default function App() {
   const franjaN = useRef(0);   // cuenta las franjas, para que cada una sepa si sigue siendo la última
   const tiroN = useRef(0);     // lo mismo, para la mesa de tiro
   const usadoN = useRef(0);    // y para el aviso de comodín usado
+  const alPedidoRef = useRef(null);  // la versión más nueva de atenderPedido (ver abajo)
 
   const actualizar = (fn) => { const sig = fn(pRef.current); pRef.current = sig; setPartida(sig); };
   const cambiarJugador = (i, cambios) => actualizar(p => ({ ...p, jugadores: p.jugadores.map((j, k) => (k === i ? { ...j, ...cambios } : j)) }));
@@ -179,6 +182,19 @@ export default function App() {
     return () => clearTimeout(t);
   }, [sala, partida]);
 
+  // Mientras haya sala, la pantalla principal escucha quién es quién (asientos) y lo que piden los cels.
+  // El pedido pasa por alPedidoRef para usar siempre la versión más nueva de atenderPedido.
+  useEffect(() => {
+    if (!sala) return;
+    let vivo = true;
+    const quitar = [];
+    import('./nube/firebase.js').then(n => Promise.all([
+      n.escucharAsientos(sala.codigo, m => { if (vivo) setAsientos(m); }),
+      n.escucharPedidos(sala.codigo, pd => { if (vivo) alPedidoRef.current?.(pd); }),
+    ])).then(qs => { if (vivo) quitar.push(...qs); else qs.forEach(q => q()); }).catch(() => {});
+    return () => { vivo = false; quitar.forEach(q => q()); };
+  }, [sala]);
+
   // El QR se arma cuando se abre la ventana de la sala.
   useEffect(() => {
     if (!verSala || !sala) return;
@@ -200,7 +216,7 @@ export default function App() {
   };
   const cerrarSala = async () => {
     const s = sala;
-    setSala(null); guardarSala(null); setVerSala(false); setQr(null);
+    setSala(null); guardarSala(null); setVerSala(false); setQr(null); setAsientos({});
     if (s) import('./nube/firebase.js').then(n => n.cerrarSala(s.codigo)).catch(() => {});
   };
 
@@ -325,7 +341,10 @@ export default function App() {
     const clave = `${i}-${id}`;
     if (porUsar !== clave) { setPorUsar(clave); return; }
     setPorUsar(null);
-    const j = pRef.current.jugadores[i], carta = cartaDe(id), k = (j.comodines || []).indexOf(id);
+    gastarComodin(i, id);
+  };
+  const gastarComodin = (i, id) => {
+    const j = pRef.current.jugadores[i], carta = cartaDe(id), k = (j?.comodines || []).indexOf(id);
     if (k < 0) return;
     cambiarJugador(i, { comodines: j.comodines.filter((_, x) => x !== k) });
     anotar(i, `${j.nombre} usa ${carta?.titulo ?? 'un comodín'}: ${carta?.desc ?? ''}`);
@@ -505,6 +524,30 @@ export default function App() {
       setModalDados(m => ({ ...m, girando: false, res: { suma, mult: vals.length > 1 ? mult : null, par: suma % 2 === 0 } }));
     }, T_DADO);
   };
+
+  // ---------- Pedidos de los cels ----------
+  // El cel solo pide; aquí se decide. Quién pide sale del asiento (no de lo que diga el pedido),
+  // así un cel no puede tirar por otro. Las stats sí pueden ser de cualquiera (anotar el trago de un amigo).
+  const atenderPedido = (pd) => {
+    const p = pRef.current, i = asientos[pd.uid];
+    if (p.fase !== 'jugando') return;
+    if (pd.tipo === 'stat') {
+      const k = Number.isInteger(pd.jugador) ? pd.jugador : i;
+      if (p.jugadores[k] && NOMBRE_ACCION[pd.accion]) registrar(k, pd.accion);
+      return;
+    }
+    if (i == null || !p.jugadores[i]) return;
+    if (pd.tipo === 'tirar' && i === p.turno && !p.reto) {
+      if (p.etapa === 'retroceder') retroceder();
+      else if (p.etapa === 'reparte') tirarReparte();
+      else tirar();   // tirar() ya revisa que sea el momento de tirar
+    }
+    // Pasar el turno desde el cel: solo quien tiene el turno, ya resuelta la casilla y sin reto abierto.
+    if (pd.tipo === 'siguiente' && i === p.turno && p.etapa === 'listo' && !p.reto && !ocupado) pasarTurno();
+    if (pd.tipo === 'comodin') gastarComodin(i, pd.id);
+    if (pd.tipo === 'pareja') cambiarJugador(i, { pareja: !!pd.valor });
+  };
+  useEffect(() => { alPedidoRef.current = atenderPedido; });
 
   const irARuleta = () => ruletaRef.current?.scrollIntoView({ behavior: sinMovimiento ? 'auto' : 'smooth', block: 'start' });
 
@@ -981,6 +1024,11 @@ export default function App() {
             <b className="sala-codigo">{sala.codigo}</b>
             {qr ? <img className="sala-qr" src={qr} alt={`Código QR de la sala ${sala.codigo}`} /> : <p>Armando el QR…</p>}
             <code className="sala-link">{linkSala(sala.codigo)}</code>
+            <p className="sala-txt">
+              {Object.keys(asientos).length
+                ? <>En su cel: <b>{[...new Set(Object.values(asientos))].map(k => jugadores[k]?.nombre).filter(Boolean).join(', ')}</b></>
+                : 'Todavía no se une ningún cel.'}
+            </p>
             {window.location.hostname === 'localhost' && (
               <p className="sala-aviso">Ojo: mientras el juego corra en tu compu (localhost), los cels no pueden abrir este link. Va a funcionar cuando lo subamos a internet.</p>
             )}
