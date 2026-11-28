@@ -3,7 +3,7 @@
 // si nadie abre sala, el juego nunca toca internet ni descarga Firebase.
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
-import { getFirestore, doc, collection, getDoc, setDoc, addDoc, deleteDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, doc, collection, getDoc, getDocs, setDoc, addDoc, deleteDoc, onSnapshot, serverTimestamp, query, where, limit, Timestamp } from 'firebase/firestore';
 
 // Los datos salen de .env.local (ver .env.example). Sin ellos no hay sala.
 const config = {
@@ -36,9 +36,30 @@ const limpio = (x) => JSON.parse(JSON.stringify(x));
 const LETRAS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 const codigoNuevo = () => Array.from({ length: 4 }, () => LETRAS[Math.floor(Math.random() * LETRAS.length)]).join('');
 
+// Borra una sala con todo lo de adentro (asientos y pedidos). Firestore no borra lo de adentro solo.
+// Si algo de adentro no se deja borrar, la sala se borra de todos modos.
+async function borrarTodo(ref) {
+  for (const sub of ['asientos', 'pedidos']) {
+    try {
+      const docs = await getDocs(collection(ref, sub));
+      await Promise.allSettled(docs.docs.map(d => deleteDoc(d.ref)));
+    } catch { /* sin permiso para leerlos: se quedan */ }
+  }
+  await deleteDoc(ref);
+}
+
+// Limpieza: las salas que llevan más de un día sin moverse (alguien cerró la pestaña sin "Cerrar sala").
+// Las reglas dejan borrarlas a cualquiera. Se busca con 25 horas por si el reloj del aparato va adelantado.
+const HORA = 60 * 60 * 1000;
+async function limpiarViejas(db) {
+  const viejas = await getDocs(query(collection(db, 'salas'), where('actualizada', '<', Timestamp.fromMillis(Date.now() - 25 * HORA)), limit(10)));
+  for (const s of viejas.docs) await borrarTodo(s.ref).catch(() => {});
+}
+
 // Abre una sala con un código libre y publica el estado inicial. Devuelve el código.
 export async function abrirSala(estado) {
   const { db, uid } = await conectar();
+  limpiarViejas(db).catch(() => {});   // de paso barre salas abandonadas (sin esperar)
   for (let intento = 0; intento < 5; intento++) {
     const codigo = codigoNuevo();
     const ref = doc(db, 'salas', codigo);
@@ -57,7 +78,7 @@ export async function publicar(codigo, estado) {
 
 export async function cerrarSala(codigo) {
   const { db } = await conectar();
-  await deleteDoc(doc(db, 'salas', codigo));
+  await borrarTodo(doc(db, 'salas', codigo));
 }
 
 // Los cels escuchan la sala: cada cambio llama a alCambiar con el estado (o null si se cerró).

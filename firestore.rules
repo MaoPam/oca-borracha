@@ -6,26 +6,31 @@ rules_version = '2';
 // salas/{codigo}            la partida que publica el aparato principal (el anfitrión)
 // salas/{codigo}/asientos   qué cel tomó qué ficha (cada cel escribe solo el suyo)
 // salas/{codigo}/pedidos    lo que piden los cels (tirar, usar comodín…); solo el anfitrión los lee
+// Limpieza: una sala con más de un día sin moverse (y lo de adentro) la puede borrar cualquiera.
 service cloud.firestore {
   match /databases/{database}/documents {
     function entro() { return request.auth != null; }
-    function anfitrionDe(codigo) { return get(/databases/$(database)/documents/salas/$(codigo)).data.anfitrion; }
+    function sala(codigo) { return get(/databases/$(database)/documents/salas/$(codigo)).data; }
+    // Una sala "vieja" lleva más de un día sin moverse: cualquiera la puede borrar (limpieza).
+    function vieja(datos) { return datos.actualizada < request.time - duration.value(1, 'd'); }
+    function mandaOVieja(codigo) { return sala(codigo).anfitrion == request.auth.uid || vieja(sala(codigo)); }
 
     match /salas/{codigo} {
       allow read: if entro();
       allow create: if entro() && request.resource.data.anfitrion == request.auth.uid;
       allow update: if entro() && resource.data.anfitrion == request.auth.uid
                     && request.resource.data.anfitrion == request.auth.uid;
-      allow delete: if entro() && resource.data.anfitrion == request.auth.uid;
+      allow delete: if entro() && (resource.data.anfitrion == request.auth.uid || vieja(resource.data));
 
       match /asientos/{uid} {
         allow read: if entro();
-        allow write: if entro() && request.auth.uid == uid;
+        allow create, update: if entro() && request.auth.uid == uid;
+        allow delete: if entro() && (request.auth.uid == uid || mandaOVieja(codigo));
       }
 
       match /pedidos/{pedido} {
         allow create: if entro() && request.resource.data.uid == request.auth.uid;
-        allow read, delete: if entro() && anfitrionDe(codigo) == request.auth.uid;
+        allow read, delete: if entro() && mandaOVieja(codigo);
       }
     }
   }
